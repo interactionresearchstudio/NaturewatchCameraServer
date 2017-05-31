@@ -37,7 +37,7 @@ class CamHandler(BaseHTTPRequestHandler):
 			self.send_header('Content-type','text/html')
 			self.end_headers()
 			self.wfile.write('<html><head></head><body>')
-			self.wfile.write('<img src="http://127.0.0.1:9090/cam.mjpg"/>')
+			self.wfile.write('<img src="http://naturewatch-cam.local:9090/cam.mjpg"/>')
 			self.wfile.write('</body></html>')
 			return
 
