@@ -21,8 +21,7 @@ class CamHandler(BaseHTTPRequestHandler):
 				
 				for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
 					img = frame.array
-					imgRGB = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
-					r, buf = cv2.imencode(".jpg",imgRGB)
+					r, buf = cv2.imencode(".jpg",img)
 					self.wfile.write("--jpgboundary\r\n")
 					self.send_header('Content-type','image/jpeg')
 					self.send_header('Content-length',str(len(buf)))
