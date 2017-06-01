@@ -17,7 +17,7 @@ class CamHandler(BaseHTTPRequestHandler):
 			self.send_header('Content-type','multipart/x-mixed-replace; boundary=--jpgboundary')
 			self.end_headers()
 			try:
-				#print("Opening camera...")
+				print("Serving mjpg...")
 				#camera = PiCamera()
 				#camera.resolution = (640, 480)
 				#camera.framerate = 32
@@ -26,7 +26,7 @@ class CamHandler(BaseHTTPRequestHandler):
 				
 				#for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
                 while True:
-					img = vs.read()
+                    img = vs.read()
 					r, buf = cv2.imencode(".jpg",img)
 					self.wfile.write("--jpgboundary\r\n")
 					self.send_header('Content-type','image/jpeg')
