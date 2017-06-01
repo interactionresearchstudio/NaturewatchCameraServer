@@ -1,9 +1,13 @@
 import cv2
+from imutils.video.pivideostream import PiVideoStream
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 from SocketServer import ThreadingMixIn
 import time
+
+vs = PiVideoStream().start()
+time.sleep(2.0)
 
 class CamHandler(BaseHTTPRequestHandler):
 	def do_GET(self):
@@ -13,15 +17,16 @@ class CamHandler(BaseHTTPRequestHandler):
 			self.send_header('Content-type','multipart/x-mixed-replace; boundary=--jpgboundary')
 			self.end_headers()
 			try:
-				print("Opening camera...")
-				camera = PiCamera()
-				camera.resolution = (640, 480)
-				camera.framerate = 32
-				rawCapture = PiRGBArray(camera, size=(640,480))
-				time.sleep(0.1)
+				#print("Opening camera...")
+				#camera = PiCamera()
+				#camera.resolution = (640, 480)
+				#camera.framerate = 32
+				#rawCapture = PiRGBArray(camera, size=(640,480))
+				#time.sleep(0.1)
 				
-				for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-					img = frame.array
+				#for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+                while True:
+					img = vs.read()
 					r, buf = cv2.imencode(".jpg",img)
 					self.wfile.write("--jpgboundary\r\n")
 					self.send_header('Content-type','image/jpeg')
@@ -30,7 +35,7 @@ class CamHandler(BaseHTTPRequestHandler):
 					self.wfile.write(bytearray(buf))
 					self.wfile.write('\r\n')
 					#time.sleep(0.5)
-					rawCapture.truncate(0)
+					#rawCapture.truncate(0)
 			except KeyboardInterrupt:
 				print("keyboard interrupt")
 		if self.path.endswith('.html') or self.path=="/":
@@ -55,3 +60,5 @@ def main():
 
 if __name__ == '__main__':
 	main()
+
+vs.stop()
