@@ -16,28 +16,17 @@ class CamHandler(BaseHTTPRequestHandler):
 			self.send_response(200)
 			self.send_header('Content-type','multipart/x-mixed-replace; boundary=--jpgboundary')
 			self.end_headers()
-			try:
-				print("Serving mjpg...")
-				#camera = PiCamera()
-				#camera.resolution = (640, 480)
-				#camera.framerate = 32
-				#rawCapture = PiRGBArray(camera, size=(640,480))
-				#time.sleep(0.1)
-				
-				#for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-                while True:
-                    img = vs.read()
-					r, buf = cv2.imencode(".jpg",img)
-					self.wfile.write("--jpgboundary\r\n")
-					self.send_header('Content-type','image/jpeg')
-					self.send_header('Content-length',str(len(buf)))
-					self.end_headers()
-					self.wfile.write(bytearray(buf))
-					self.wfile.write('\r\n')
-					#time.sleep(0.5)
-					#rawCapture.truncate(0)
-			except KeyboardInterrupt:
-				print("keyboard interrupt")
+			print("Serving mjpg...")
+            while True:
+                img = vs.read()
+                r, buf = cv2.imencode(".jpg",img)
+				self.wfile.write("--jpgboundary\r\n")
+				self.send_header('Content-type','image/jpeg')
+				self.send_header('Content-length',str(len(buf)))
+				self.end_headers()
+				self.wfile.write(bytearray(buf))
+				self.wfile.write('\r\n')
+
 		if self.path.endswith('.html') or self.path=="/":
 			self.send_response(200)
 			self.send_header('Content-type','text/html')
