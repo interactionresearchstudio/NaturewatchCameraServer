@@ -2,6 +2,7 @@ import cv2
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
+from SocketServer import ThreadingMixIn
 import time
 
 class CamHandler(BaseHTTPRequestHandler):
@@ -41,9 +42,12 @@ class CamHandler(BaseHTTPRequestHandler):
 			self.wfile.write('</body></html>')
 			return
 
+class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
+    """Handle requests in separate thread"""
+
 def main():
 	try:
-		server = HTTPServer(('',9090),CamHandler)
+		server = ThreadedHTTPServer(('',9090),CamHandler)
 		print "server started"
 		server.serve_forever()
 	except KeyboardInterrupt:
