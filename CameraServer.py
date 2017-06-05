@@ -180,13 +180,12 @@ class NatureCam(Thread):
         mode = 0
 
     def update(self):
-        global currentImage
-        currentImage = vs.read()
+        self.currentImage = vs.read()
 
-        if mode == 0:
-            currentImage = displayMinMax(currentImage)
-        elif mode == 1:
-            currentImage = detectChangeContours(currentImage)
+        if self.mode == 0:
+            self.currentImage = displayMinMax(self.currentImage)
+        elif self.mode == 1:
+            self.currentImage = detectChangeContours(self.currentImage)
 
     def getCurrentImage(self):
         return currentImage
