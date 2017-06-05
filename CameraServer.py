@@ -19,7 +19,7 @@ class NatureCam(Thread):
 
     def __init__(self):
         super(NatureCam, self).__init__()
-        self.daemon = True
+        self.daemon = False
         self.cancelled = False
         self.minWidth = config["min_width"]
         self.maxWidth = config["max_width"]
