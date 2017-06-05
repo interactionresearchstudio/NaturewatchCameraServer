@@ -123,12 +123,12 @@ class NatureCam(Thread):
             return contours[maxIndex]
 
     def displayMinMax(self, img):
-        if isMinActive is True:
-            minColour = activeColour
-            maxColour = inactiveColour
+        if self.isMinActive is True:
+            minColour = self.activeColour
+            maxColour = self.inactiveColour
         else:
-            minColour = inactiveColour
-            maxColour = activeColour
+            minColour = self.inactiveColour
+            maxColour = self.activeColour
 
         cv2.rectangle(img, (320/2-self.minWidth/2,240/2-self.minHeight/2), (320/2+self.minWidth/2,240/2+self.minHeight/2), minColour, 2)
         cv2.rectangle(img, (320/2-self.maxWidth/2,240/2-self.maxHeight/2), (320/2+self.maxWidth/2,240/2+self.maxHeight/2), maxColour, 2)
