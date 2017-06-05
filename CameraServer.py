@@ -1,7 +1,7 @@
 import json
 import cv2
 import numpy as np
-from imutils.video.pivideostream import PiVideoStream
+import imutils
 from threading import Thread
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from SocketServer import ThreadingMixIn
@@ -15,7 +15,6 @@ time.sleep(2.0)
 
 # NatureCam implementation
 class NatureCam(Thread):
-
 
     def __init__(self):
         super(NatureCam, self).__init__()
