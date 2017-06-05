@@ -43,13 +43,13 @@ class NatureCam(Thread):
     def cancel(self):
         self.cancelled = True
 
-    def takePhoto(image):
+    def takePhoto(self, image):
         timestamp = datetime.datetime.now()
         filename = timestamp.strftime('%Y-%m-%d-%H-%M-%S')
         filename = filename + ".jpg"
         cv2.imwrite(filename, image)
 
-    def rotateImage(img):
+    def rotateImage(self, img):
         (h,w) = img.shape[:2]
         center = (w/2, h/2)
         M = cv2.getRotationMatrix2D(center, 180, 1.0)
@@ -114,7 +114,7 @@ class NatureCam(Thread):
 
         return img
 
-    def getLargestContour(contours):
+    def getLargestContour(self, contours):
         if not contours:
             return None
         else:
