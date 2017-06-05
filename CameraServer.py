@@ -202,7 +202,8 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.end_headers()
             print("Serving mjpg...")
-            while True:
+            running = True
+            while running:
                 try:
                     img = natureCamInstance.getCurrentImage()
                     r, buf = cv2.imencode(".jpg", img)
@@ -215,7 +216,7 @@ class CamHandler(BaseHTTPRequestHandler):
                 except KeyboardInterrupt:
                     vs.stop()
                     server.socket.close()
-                    return
+                    running = False
 
         if self.path.endswith('.html') or self.path == "/":
             self.send_response(200)
