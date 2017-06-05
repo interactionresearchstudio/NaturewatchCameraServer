@@ -190,9 +190,6 @@ class NatureCam(Thread):
     def getCurrentImage(self):
         return self.currentImage
 
-natureCamInstance = NatureCam()
-natureCamInstance.start()
-
 # Handle HTTP requests.
 class CamHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -235,6 +232,8 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 def main():
     try:
+        natureCamInstance = NatureCam()
+        natureCamInstance.start()
         server = ThreadedHTTPServer(('', 9090), CamHandler)
         print "server started"
         server.serve_forever()
