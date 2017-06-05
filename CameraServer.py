@@ -2,6 +2,7 @@ import json
 import cv2
 import numpy as np
 import imutils
+from imutils.video.pivideostream import PiVideoStream
 from threading import Thread
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from SocketServer import ThreadingMixIn
