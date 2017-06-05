@@ -188,7 +188,7 @@ class NatureCam(Thread):
             self.currentImage = self.detectChangeContours(self.currentImage)
 
     def getCurrentImage(self):
-        return currentImage
+        return self.currentImage
 
 natureCamInstance = NatureCam()
 natureCamInstance.start()
