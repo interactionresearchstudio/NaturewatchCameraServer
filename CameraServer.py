@@ -214,6 +214,7 @@ class CamHandler(BaseHTTPRequestHandler):
                     self.wfile.write(bytearray(buf))
                     self.wfile.write('\r\n')
                 except KeyboardInterrupt:
+                    print "Keyboard interrupt!"
                     vs.stop()
                     server.socket.close()
                     running = False
