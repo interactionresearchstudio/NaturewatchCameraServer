@@ -198,12 +198,12 @@ class CamHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         print self.path
         if self.path.endswith('.mjpg'):
-            try:
-                self.send_response(200)
-                self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
-                self.end_headers()
-                print("Serving mjpg...")
-                while True:
+            self.send_response(200)
+            self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
+            self.end_headers()
+            print("Serving mjpg...")
+            while True:
+                try:
                     img = natureCamInstance.getCurrentImage()
                     r, buf = cv2.imencode(".jpg", img)
                     self.wfile.write("--jpgboundary\r\n")
@@ -212,10 +212,10 @@ class CamHandler(BaseHTTPRequestHandler):
                     self.end_headers()
                     self.wfile.write(bytearray(buf))
                     self.wfile.write('\r\n')
-            except KeyboardInterrupt:
-                vs.stop()
-                server.socket.close()
-                return
+                except KeyboardInterrupt:
+                    vs.stop()
+                    server.socket.close()
+                    return
 
         if self.path.endswith('.html') or self.path == "/":
             self.send_response(200)
