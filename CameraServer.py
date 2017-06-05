@@ -15,26 +15,26 @@ time.sleep(2.0)
 
 # NatureCam implementation
 class NatureCam(Thread):
-    minWidth = config["min_width"]
-    maxWidth = config["max_width"]
-    minHeight = config["min_height"]
-    maxHeight = config["max_height"]
 
-    mode = 0
-    avg = None
-    lastPhotoTime = 0
-    numOfPhotos = 0
-
-    activeColour = (255,255,0)
-    inactiveColour = (100,100,100)
-    isMinActive = False
-
-    currentImage = None
 
     def __init__(self):
         super(NatureCam, self).__init__()
         self.daemon = True
         self.cancelled = False
+        self.minWidth = config["min_width"]
+        self.maxWidth = config["max_width"]
+        self.minHeight = config["min_height"]
+        self.maxHeight = config["max_height"]
+
+        self.mode = 0
+        self.avg = None
+        self.lastPhotoTime = 0
+        self.numOfPhotos = 0
+
+        self.activeColour = (255,255,0)
+        self.inactiveColour = (100,100,100)
+        self.isMinActive = False
+        self.currentImage = None
 
     def run(self):
         while not self.cancelled:
@@ -55,17 +55,13 @@ class NatureCam(Thread):
         M = cv2.getRotationMatrix2D(center, 180, 1.0)
         return cv2.warpAffine(img, M, (w,h))
 
-    def detectChangeContours(img):
-        global avg
-        global lastPhotoTime
-        global numOfPhotos
-
+    def detectChangeContours(self, img):
         # convert to gray
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21,21), 0)
 
-        if avg is None:
-            avg = gray.copy().astype("float")
+        if self.avg is None:
+            self.avg = gray.copy().astype("float")
             # remember to truncate capture for Pi
             rawCapture.truncate(0)
             if config["rotate_display"] == 1:
@@ -74,8 +70,8 @@ class NatureCam(Thread):
                 return img
 
         # add to accumulation model and find the change
-        cv2.accumulateWeighted(gray, avg, 0.5)
-        frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(avg))
+        cv2.accumulateWeighted(gray, self.avg, 0.5)
+        frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(self.avg))
 
         # threshold, dilate and find contours
         thresh = cv2.threshold(frameDelta, config["delta_threshold"], 255, cv2.THRESH_BINARY)[1]
@@ -94,27 +90,27 @@ class NatureCam(Thread):
         (x, y, w, h) = cv2.boundingRect(largestContour)
 
         # if the contour is too small, just return the image.
-        if w > maxWidth or w < minWidth or h > maxHeight or h < minHeight:
+        if w > self.maxWidth or w < self.minWidth or h > self.maxHeight or h < self.minHeight:
             if config["rotate_display"] == 1:
                 return rotateImage(img)
             else:
                 return img
 
         # otherwise, draw the rectangle
-        if time.time() - lastPhotoTime > config['min_photo_interval_s']:
+        if time.time() - self.lastPhotoTime > config['min_photo_interval_s']:
             if config["rotate_saved"] == 1:
                 takePhoto(rotateImage(img))
             else:
                 takePhoto(img)
-            numOfPhotos = numOfPhotos + 1
-            lastPhotoTime = time.time()
+            self.numOfPhotos = self.numOfPhotos + 1
+            self.lastPhotoTime = time.time()
 
         cv2.rectangle(img, (x,y), (x+w, y+h), (0,0,255), 2)
 
         if config["rotate_display"] == 1:
             img = rotateImage(img)
 
-        cv2.putText(img, "%d" % numOfPhotos, (10,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
+        cv2.putText(img, "%d" % self.numOfPhotos, (10,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
 
         return img
 
@@ -126,7 +122,7 @@ class NatureCam(Thread):
             maxIndex = np.argmax(areas)
             return contours[maxIndex]
 
-    def displayMinMax(img):
+    def displayMinMax(self, img):
         if isMinActive is True:
             minColour = activeColour
             maxColour = inactiveColour
@@ -134,56 +130,46 @@ class NatureCam(Thread):
             minColour = inactiveColour
             maxColour = activeColour
 
-        cv2.rectangle(img, (320/2-minWidth/2,240/2-minHeight/2), (320/2+minWidth/2,240/2+minHeight/2), minColour, 2)
-        cv2.rectangle(img, (320/2-maxWidth/2,240/2-maxHeight/2), (320/2+maxWidth/2,240/2+maxHeight/2), maxColour, 2)
+        cv2.rectangle(img, (320/2-self.minWidth/2,240/2-self.minHeight/2), (320/2+self.minWidth/2,240/2+self.minHeight/2), minColour, 2)
+        cv2.rectangle(img, (320/2-self.maxWidth/2,240/2-self.maxHeight/2), (320/2+self.maxWidth/2,240/2+self.maxHeight/2), maxColour, 2)
         if config["rotate_display"] == 1:
             return rotateImage(img)
         else:
             return img
 
-    def increaseMinMax(increment):
-        global minWidth
-        global minHeight
-        global maxWidth
-        global maxHeight
-
+    def increaseMinMax(self, increment):
         if isMinActive is True:
-            minWidth = minWidth + increment
-            minHeight = minHeight + increment
-            if minWidth > maxWidth:
-                minWidth = maxWidth
-                minHeight = maxHeight
+            self.minWidth = self.minWidth + increment
+            self.minHeight = self.minHeight + increment
+            if self.minWidth > self.maxWidth:
+                self.minWidth = self.maxWidth
+                self.minHeight = self.maxHeight
         else:
-            maxWidth = maxWidth + increment
-            maxHeight = maxHeight + increment
-            if maxWidth > 320:
-                maxWidth = 320
-                maxHeight = 320
-            if maxHeight >= 240:
-                maxHeight = 240
+            self.maxWidth = self.maxWidth + increment
+            self.maxHeight = self.maxHeight + increment
+            if self.maxWidth > 320:
+                self.maxWidth = 320
+                self.maxHeight = 320
+            if self.maxHeight >= 240:
+                self.maxHeight = 240
 
-    def decreaseMinMax(increment):
-        global minWidth
-        global minHeight
-        global maxWidth
-        global maxHeight
-
+    def decreaseMinMax(self, increment):
         if isMinActive is True:
-            minWidth = minWidth - increment
-            minHeight = minHeight - increment
-            if minWidth < 0:
-                minWidth = 0
-                minHeight = 0
+            self.minWidth = self.minWidth - increment
+            self.minHeight = self.minHeight - increment
+            if self.minWidth < 0:
+                self.minWidth = 0
+                self.minHeight = 0
         else:
-            maxWidth = maxWidth - increment
-            maxHeight = maxHeight - increment
-            if maxWidth < minWidth:
-                maxWidth = minWidth
-                maxHeight = minHeight
-            if maxWidth < 240:
-                maxHeight = maxWidth
-            elif maxWidth >= 240:
-                maxHeight = 240
+            self.maxWidth = self.maxWidth - increment
+            self.maxHeight = self.maxHeight - increment
+            if self.maxWidth < self.minWidth:
+                self.maxWidth = self.minWidth
+                self.maxHeight = self.minHeight
+            if self.maxWidth < 240:
+                self.maxHeight = self.maxWidth
+            elif self.maxWidth >= 240:
+                self.maxHeight = 240
 
     def arm(self):
         global mode
