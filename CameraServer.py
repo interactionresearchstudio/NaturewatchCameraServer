@@ -132,10 +132,7 @@ class NatureCam(Thread):
 
         cv2.rectangle(img, (320/2-self.minWidth/2,240/2-self.minHeight/2), (320/2+self.minWidth/2,240/2+self.minHeight/2), minColour, 2)
         cv2.rectangle(img, (320/2-self.maxWidth/2,240/2-self.maxHeight/2), (320/2+self.maxWidth/2,240/2+self.maxHeight/2), maxColour, 2)
-        if config["rotate_display"] == 1:
-            return self.rotateImage(img)
-        else:
-            return img
+        return img
 
     def increaseMinMax(self, increment):
         if isMinActive is True:
@@ -204,6 +201,7 @@ class CamHandler(BaseHTTPRequestHandler):
             print("Serving mjpg...")
             while True:
                 img = natureCamInstance.getCurrentImage()
+                img = imutils.rotate(img, angle=180)
                 r, buf = cv2.imencode(".jpg", img)
                 self.wfile.write("--jpgboundary\r\n")
                 self.send_header('Content-type', 'image/jpeg')
