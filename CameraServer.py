@@ -202,22 +202,15 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.end_headers()
             print("Serving mjpg...")
-            running = True
-            while running:
-                try:
-                    img = natureCamInstance.getCurrentImage()
-                    r, buf = cv2.imencode(".jpg", img)
-                    self.wfile.write("--jpgboundary\r\n")
-                    self.send_header('Content-type', 'image/jpeg')
-                    self.send_header('Content-length', str(len(buf)))
-                    self.end_headers()
-                    self.wfile.write(bytearray(buf))
-                    self.wfile.write('\r\n')
-                except KeyboardInterrupt:
-                    print "Keyboard interrupt!"
-                    vs.stop()
-                    server.socket.close()
-                    running = False
+            while True:
+                img = natureCamInstance.getCurrentImage()
+                r, buf = cv2.imencode(".jpg", img)
+                self.wfile.write("--jpgboundary\r\n")
+                self.send_header('Content-type', 'image/jpeg')
+                self.send_header('Content-length', str(len(buf)))
+                self.end_headers()
+                self.wfile.write(bytearray(buf))
+                self.wfile.write('\r\n')
 
         if self.path.endswith('.html') or self.path == "/":
             self.send_response(200)
@@ -230,6 +223,9 @@ class CamHandler(BaseHTTPRequestHandler):
 
         if self.path.endswith('changeActiveSquare'):
             self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write('success')
             natureCamInstance.isMinActive = not natureCamInstance.isMinActive
             return
 
@@ -242,7 +238,8 @@ def main():
         server = ThreadedHTTPServer(('', 9090), CamHandler)
         print "server started"
         server.serve_forever()
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, SystemExit):
+        natureCamInstance.cancel()
         vs.stop()
         server.socket.close()
 
