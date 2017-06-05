@@ -221,7 +221,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.wfile.write('</body></html>')
             return
 
-        if self.path.contains('changeActiveSquare'):
+        if self.path.endswith('changeActiveSquare'):
             self.send_response(200)
             natureCamInstance.isMinActive = not natureCamInstance.isMinActive
             return
