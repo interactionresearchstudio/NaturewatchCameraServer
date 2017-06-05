@@ -133,7 +133,7 @@ class NatureCam(Thread):
         cv2.rectangle(img, (320/2-self.minWidth/2,240/2-self.minHeight/2), (320/2+self.minWidth/2,240/2+self.minHeight/2), minColour, 2)
         cv2.rectangle(img, (320/2-self.maxWidth/2,240/2-self.maxHeight/2), (320/2+self.maxWidth/2,240/2+self.maxHeight/2), maxColour, 2)
         if config["rotate_display"] == 1:
-            return rotateImage(img)
+            return self.rotateImage(img)
         else:
             return img
 
@@ -183,9 +183,9 @@ class NatureCam(Thread):
         self.currentImage = vs.read()
 
         if self.mode == 0:
-            self.currentImage = displayMinMax(self.currentImage)
+            self.currentImage = self.displayMinMax(self.currentImage)
         elif self.mode == 1:
-            self.currentImage = detectChangeContours(self.currentImage)
+            self.currentImage = self.detectChangeContours(self.currentImage)
 
     def getCurrentImage(self):
         return currentImage
