@@ -7,6 +7,7 @@ from threading import Thread
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from SocketServer import ThreadingMixIn
 import time
+import datetime
 
 config = json.load(open("config.json"))
 
@@ -62,12 +63,7 @@ class NatureCam(Thread):
 
         if self.avg is None:
             self.avg = gray.copy().astype("float")
-            # remember to truncate capture for Pi
-            rawCapture.truncate(0)
-            if config["rotate_display"] == 1:
-                return rotateImage(img)
-            else:
-                return img
+            return img
 
         # add to accumulation model and find the change
         cv2.accumulateWeighted(gray, self.avg, 0.5)
@@ -79,37 +75,24 @@ class NatureCam(Thread):
         _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         # find largest contour
-        largestContour = getLargestContour(cnts)
+        largestContour = self.getLargestContour(cnts)
 
         if largestContour is None:
-            if config["rotate_display"] == 1:
-                return rotateImage(img)
-            else:
-                return img
+            return img
 
         (x, y, w, h) = cv2.boundingRect(largestContour)
 
         # if the contour is too small, just return the image.
         if w > self.maxWidth or w < self.minWidth or h > self.maxHeight or h < self.minHeight:
-            if config["rotate_display"] == 1:
-                return rotateImage(img)
-            else:
-                return img
+            return img
 
         # otherwise, draw the rectangle
         if time.time() - self.lastPhotoTime > config['min_photo_interval_s']:
-            if config["rotate_saved"] == 1:
-                takePhoto(rotateImage(img))
-            else:
-                takePhoto(img)
+            self.takePhoto(img)
             self.numOfPhotos = self.numOfPhotos + 1
             self.lastPhotoTime = time.time()
 
         cv2.rectangle(img, (x,y), (x+w, y+h), (0,0,255), 2)
-
-        if config["rotate_display"] == 1:
-            img = rotateImage(img)
-
         cv2.putText(img, "%d" % self.numOfPhotos, (10,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 2)
 
         return img
