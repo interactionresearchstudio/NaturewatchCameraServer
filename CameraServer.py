@@ -135,7 +135,7 @@ class NatureCam(Thread):
         return img
 
     def increaseMinMax(self, increment):
-        if isMinActive is True:
+        if self.isMinActive is True:
             self.minWidth = self.minWidth + increment
             self.minHeight = self.minHeight + increment
             if self.minWidth > self.maxWidth:
@@ -151,7 +151,7 @@ class NatureCam(Thread):
                 self.maxHeight = 240
 
     def decreaseMinMax(self, increment):
-        if isMinActive is True:
+        if self.isMinActive is True:
             self.minWidth = self.minWidth - increment
             self.minHeight = self.minHeight - increment
             if self.minWidth < 0:
