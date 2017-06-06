@@ -152,12 +152,10 @@ class NatureCam(Thread):
                 self.maxHeight = 240
 
     def arm(self):
-        global mode
-        mode = 1
+        self.mode = 1
 
     def disarm(self):
-        global mode
-        mode = 0
+        self.mode = 0
 
     def update(self):
         self.currentImage = vs.read()
@@ -231,7 +229,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('success')
-            natureCamInstance.mode = 1
+            natureCamInstance.arm()
             return
 
         if self.path.endswith('disarm'):
@@ -239,7 +237,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('success')
-            natureCamInstance.mode = 0
+            natureCamInstance.disarm()
             return
 
 # Threaded server
