@@ -227,6 +227,38 @@ class CamHandler(BaseHTTPRequestHandler):
             natureCamInstance.isMinActive = not natureCamInstance.isMinActive
             return
 
+        if self.path.endswith('increaseMinMax'):
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write('success')
+            natureCamInstance.increaseMinMax(5)
+            return
+
+        if self.path.endswith('decreaseMinMax'):
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write('success')
+            natureCamInstance.decreaseMinMax(5)
+            return
+
+        if self.path.endswith('arm'):
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write('success')
+            natureCamInstance.mode = 1
+            return
+
+        if self.path.endswith('disarm'):
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write('success')
+            natureCamInstance.mode = 0
+            return
+
 # Threaded server
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in separate threads"""
