@@ -224,7 +224,7 @@ class CamHandler(BaseHTTPRequestHandler):
             natureCamInstance.decreaseMinMax(5)
             return
 
-        if self.path.endswith('arm'):
+        if self.path.endswith('start'):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
@@ -232,7 +232,7 @@ class CamHandler(BaseHTTPRequestHandler):
             natureCamInstance.arm()
             return
 
-        if self.path.endswith('disarm'):
+        if self.path.endswith('stop'):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
