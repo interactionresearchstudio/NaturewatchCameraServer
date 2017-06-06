@@ -25,7 +25,7 @@ Be sure to replace `localhost.local` with whatever hostname the Pi has.
 ## ToDo
 
 - ~~Run multiple GET requests on separate threads~~
-- Send messages to CV
-- Integrate the NatureCam program
-- Start / stop NatureCam
+- ~~Send messages to CV~~
+- ~~Integrate the NatureCam program~~
+- ~~Start / stop NatureCam~~
 - Use raspi-still and raspi-vid to capture images and video at full resolution.
