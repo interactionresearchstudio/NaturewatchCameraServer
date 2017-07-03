@@ -1,5 +1,7 @@
+#!/usr/bin/env python
 import json
 import cv2
+import os
 import numpy as np
 import imutils
 from imutils.video.pivideostream import PiVideoStream
@@ -9,7 +11,9 @@ from SocketServer import ThreadingMixIn
 import time
 import datetime
 
+os.chdir("/home/pi/CameraServer")
 config = json.load(open("config.json"))
+os.chdir("/var/www/html/photos")
 
 # Open video stream from Pi camera.
 vs = PiVideoStream().start()
