@@ -24,7 +24,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.end_headers()
             print("Serving mjpg...")
             while True:
-                img = natureCamInstance.getCurrentImage()
+                img = changeDetectorInstance.getCurrentImage()
                 img = imutils.rotate(img, angle=180)
                 r, buf = cv2.imencode(".jpg", img)
                 self.wfile.write("--jpgboundary\r\n")
@@ -48,7 +48,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('success')
-            natureCamInstance.isMinActive = not natureCamInstance.isMinActive
+            changeDetectorInstance.isMinActive = not changeDetectorInstance.isMinActive
             return
 
         if self.path.endswith('increaseMinMax'):
@@ -56,7 +56,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('success')
-            natureCamInstance.increaseMinMax(5)
+            changeDetectorInstance.increaseMinMax(5)
             return
 
         if self.path.endswith('decreaseMinMax'):
@@ -64,7 +64,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('success')
-            natureCamInstance.decreaseMinMax(5)
+            changeDetectorInstance.decreaseMinMax(5)
             return
 
         if self.path.endswith('start'):
@@ -72,7 +72,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('success')
-            natureCamInstance.arm()
+            changeDetectorInstance.arm()
             return
 
         if self.path.endswith('stop'):
@@ -80,7 +80,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('success')
-            natureCamInstance.disarm()
+            changeDetectorInstance.disarm()
             return
 
 # Threaded server
@@ -89,12 +89,12 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 def main():
     try:
-        natureCamInstance.start()
+        changeDetectorInstance.start()
         server = ThreadedHTTPServer(('', 9090), CamHandler)
         print "server started"
         server.serve_forever()
     except (KeyboardInterrupt, SystemExit):
-        natureCamInstance.cancel()
+        changeDetectorInstance.cancel()
         vs.stop()
         server.socket.close()
 
