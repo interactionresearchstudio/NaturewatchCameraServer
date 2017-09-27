@@ -12,7 +12,7 @@ config = json.load(open("config.json"))
 os.chdir("/var/www/html/photos")
 
 # NatureCam implementation
-changeDetectorInstance = ChangeDetector()
+changeDetectorInstance = ChangeDetector(config)
 
 # Handle HTTP requests.
 class CamHandler(BaseHTTPRequestHandler):

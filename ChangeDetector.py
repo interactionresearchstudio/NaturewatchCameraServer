@@ -8,19 +8,15 @@ import time
 import json
 import os
 
-os.chdir("/home/pi/CameraServer")
-config = json.load(open("config.json"))
-os.chdir("/var/www/html/photos")
-
 
 class ChangeDetector(Thread):
 
-    def __init__(self):
+    def __init__(self, configuration):
         super(ChangeDetector, self).__init__()
         self.daemon = True
         self.cancelled = False
 
-        self.config = json.load(open("config.json"))
+        self.config = configuration
 
         self.camera = PiCamera()
         self.camera.resolution = (1024, 768)
@@ -30,10 +26,10 @@ class ChangeDetector(Thread):
         self.hiResStream = self.camera.capture_continuous(self.hiResCapture, format="bgr", use_video_port=True)
         self.lowResStream = self.camera.capture_continuous(self.lowResCapture, format="bgr", use_video_port=True, splitter_port=2, resize=(320,240))
 
-        self.minWidth = config["min_width"]
-        self.maxWidth = config["max_width"]
-        self.minHeight = config["min_height"]
-        self.maxHeight = config["max_height"]
+        self.minWidth = self.config["min_width"]
+        self.maxWidth = self.config["max_width"]
+        self.minHeight = self.config["min_height"]
+        self.maxHeight = self.config["max_height"]
 
         self.mode = 0
         self.avg = None
@@ -80,7 +76,7 @@ class ChangeDetector(Thread):
         frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(self.avg))
 
         # threshold, dilate and find contours
-        thresh = cv2.threshold(frameDelta, config["delta_threshold"], 255, cv2.THRESH_BINARY)[1]
+        thresh = cv2.threshold(frameDelta, self.config["delta_threshold"], 255, cv2.THRESH_BINARY)[1]
         thresh = cv2.dilate(thresh, None, iterations=2)
         _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
@@ -97,7 +93,7 @@ class ChangeDetector(Thread):
             return img
 
         # otherwise, draw the rectangle
-        if time.time() - self.lastPhotoTime > config['min_photo_interval_s']:
+        if time.time() - self.lastPhotoTime > self.config['min_photo_interval_s']:
             hrs = self.hiResStream.next()
             hiresImage = hrs.array
             self.hiResCapture.truncate(0)
