@@ -7,7 +7,7 @@ from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 from SocketServer import ThreadingMixIn
 from ChangeDetector import ChangeDetector
 
-os.chdir("/home/pi/CameraServer")
+os.chdir("/home/pi/NaturewatchCameraServer")
 config = json.load(open("config.json"))
 os.chdir("/var/www/html/photos")
 
