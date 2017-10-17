@@ -91,7 +91,7 @@ def main():
     try:
         changeDetectorInstance.start()
         server = ThreadedHTTPServer(('', 9090), CamHandler)
-        print "server started"
+        print("server started")
         server.serve_forever()
     except (KeyboardInterrupt, SystemExit):
         changeDetectorInstance.cancel()
