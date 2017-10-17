@@ -17,7 +17,7 @@ changeDetectorInstance = ChangeDetector(config)
 # Handle HTTP requests.
 class CamHandler(BaseHTTPRequestHandler):
     def do_GET(self):
-        print self.path
+        print(self.path)
         if self.path.endswith('.mjpg'):
             self.send_response(200)
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
