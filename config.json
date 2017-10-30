@@ -3,9 +3,11 @@
     "rotate_display": 1,
     "rotate_saved": 1,
     "delta_threshold": 5,
-    "min_width": 20,
+    "min_width": 100,
+    "min_height": 100,
     "max_width": 200,
-    "min_height": 20,
     "max_height": 200,
+    "less_sensitivity": 150,
+    "more_sensitivity": 20,
     "min_photo_interval_s": 1
 }

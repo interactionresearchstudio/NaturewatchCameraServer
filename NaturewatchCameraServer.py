@@ -14,6 +14,7 @@ os.chdir("/var/www/html/photos")
 # NatureCam implementation
 changeDetectorInstance = ChangeDetector(config)
 
+
 # Handle HTTP requests.
 class CamHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -34,37 +35,31 @@ class CamHandler(BaseHTTPRequestHandler):
                 self.wfile.write(bytearray(buf))
                 self.wfile.write('\r\n')
 
-        if self.path.endswith('.html') or self.path == "/":
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            self.wfile.write('<html><head></head><body>')
-            self.wfile.write('<img src="http://naturewatch-cam.local:9090/cam.mjpg"/>')
-            self.wfile.write('</body></html>')
-            return
-
-        if self.path.endswith('changeActiveSquare'):
+        if self.path.endswith('less'):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('success')
-            changeDetectorInstance.isMinActive = not changeDetectorInstance.isMinActive
+            changeDetectorInstance.minWidth = config["less_sensitivity"]
+            changeDetectorInstance.minHeight = config["less_sensitivity"]
             return
 
-        if self.path.endswith('increaseMinMax'):
+        if self.path.endswith('more'):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('success')
-            changeDetectorInstance.increaseMinMax(5)
+            changeDetectorInstance.minWidth = config["more_sensitivity"]
+            changeDetectorInstance.minHeight = config["more_sensitivity"]
             return
 
-        if self.path.endswith('decreaseMinMax'):
+        if self.path.endswith('default'):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('success')
-            changeDetectorInstance.decreaseMinMax(5)
+            changeDetectorInstance.minWidth = config["min_width"]
+            changeDetectorInstance.minHeight = config["min_width"]
             return
 
         if self.path.endswith('start'):
@@ -83,9 +78,20 @@ class CamHandler(BaseHTTPRequestHandler):
             changeDetectorInstance.disarm()
             return
 
+        if self.path.endswith('delete-final'):
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write('success')
+            os.system('rm /var/www/html/photos/*')
+            return
+
+
+
 # Threaded server
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in separate threads"""
+
 
 def main():
     try:
@@ -95,7 +101,7 @@ def main():
         server.serve_forever()
     except (KeyboardInterrupt, SystemExit):
         changeDetectorInstance.cancel()
-        vs.stop()
+        #vs.stop()
         server.socket.close()
 
 
