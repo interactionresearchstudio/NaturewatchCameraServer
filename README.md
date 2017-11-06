@@ -1,6 +1,6 @@
-# CameraServer
+# NaturewatchCameraServer
 
-This is a Python server script that captures a video stream from a Pi Camera and serves it an an mjpg through a website to another device. Part of the Citizen Naturewatch project in collaboration with the RCA.
+This is a Python server script that captures a video stream from a Pi Camera and serves it as a .mjpg through a website to another device. The ChangeDetector class looks for change, saving the image if motion is detected. Part of the Citizen Naturewatch project in collaboration with the RCA.
 
 ## Requirements
 
@@ -14,18 +14,12 @@ This is a Python server script that captures a video stream from a Pi Camera and
 
 Simply run the script with Python. 
 
-	python CameraServer.py
+	python NaturewatchCameraServer.py
 	
 You can then access the OpenCV stream at
 
-	localhost.local:9090/index.mjpg
+	localhost.local:9090/feed.mjpg
 	
 Be sure to replace `localhost.local` with whatever hostname the Pi has.
 
-## ToDo
-
-- ~~Run multiple GET requests on separate threads~~
-- ~~Send messages to CV~~
-- ~~Integrate the NatureCam program~~
-- ~~Start / stop NatureCam~~
-- Use raspi-still and raspi-vid to capture images and video at full resolution.
+All camera commands are received as GET requests. 
