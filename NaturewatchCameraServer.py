@@ -25,7 +25,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.end_headers()
             print("Serving mjpg...")
             while True:
-                img = changeDetectorInstance.getCurrentImage()
+                img = changeDetectorInstance.get_current_image()
                 img = imutils.rotate(img, angle=180)
                 r, buf = cv2.imencode(".jpg", img)
                 self.wfile.write("--jpgboundary\r\n")
@@ -87,7 +87,6 @@ class CamHandler(BaseHTTPRequestHandler):
             return
 
 
-
 # Threaded server
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in separate threads"""
@@ -101,7 +100,6 @@ def main():
         server.serve_forever()
     except (KeyboardInterrupt, SystemExit):
         changeDetectorInstance.cancel()
-        #vs.stop()
         server.socket.close()
 
 
