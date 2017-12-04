@@ -34,7 +34,7 @@ class ChangeDetector(Thread):
 
         self.mode = 0
         self.avg = None
-        self.lastPhotoTime = 0
+        self.lastPhotoTime = time.time()
         self.numOfPhotos = 0
 
         self.activeColour = (255, 255, 0)
@@ -90,7 +90,7 @@ class ChangeDetector(Thread):
             return img
 
         # otherwise, draw the rectangle
-        if time.time() - self.lastPhotoTime > self.config['min_photo_interval_s']:
+        if time.time() - self.lastPhotoTime >= self.config['min_photo_interval_s']:
             hrs = self.hiResStream.next()
             if self.config["rotate_camera"] is 1:
                 hi_res_image = imutils.rotate(hrs.array, angle=180)
