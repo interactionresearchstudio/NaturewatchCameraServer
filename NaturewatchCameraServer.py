@@ -26,7 +26,6 @@ class CamHandler(BaseHTTPRequestHandler):
             print("Serving mjpg...")
             while True:
                 img = changeDetectorInstance.get_current_image()
-                img = imutils.rotate(img, angle=180)
                 r, buf = cv2.imencode(".jpg", img)
                 self.wfile.write("--jpgboundary\r\n")
                 self.send_header('Content-type', 'image/jpeg')
