@@ -1,7 +1,10 @@
 {
+    "cv_width": 384,
+    "cv_height": 216,
+    "img_width": 1920,
+    "img_height": 1080,
     "camera_warmup": 2.5,
-    "rotate_display": 1,
-    "rotate_saved": 1,
+    "rotate_camera": 0,
     "delta_threshold": 5,
     "min_width": 100,
     "min_height": 100,

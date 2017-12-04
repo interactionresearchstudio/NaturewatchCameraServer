@@ -3,6 +3,7 @@ import numpy as np
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 from threading import Thread
+import imutils
 import datetime
 import time
 
@@ -17,13 +18,14 @@ class ChangeDetector(Thread):
         self.config = configuration
 
         self.camera = PiCamera()
-        self.camera.resolution = (1024, 768)
+        self.camera.resolution = (self.config["img_width"], self.config["img_height"])
         self.framerate = 30
         self.hiResCapture = PiRGBArray(self.camera)
-        self.lowResCapture = PiRGBArray(self.camera, size=(320, 240))
+        self.lowResCapture = PiRGBArray(self.camera, size=(self.config["cv_width"], self.config["cv_height"]))
         self.hiResStream = self.camera.capture_continuous(self.hiResCapture, format="bgr", use_video_port=True)
         self.lowResStream = self.camera.capture_continuous(self.lowResCapture, format="bgr", use_video_port=True,
-                                                           splitter_port=2, resize=(320, 240))
+                                                           splitter_port=2, resize=(self.config["cv_width"],
+                                                                                    self.config["cv_height"]))
 
         self.minWidth = self.config["min_width"]
         self.maxWidth = self.config["max_width"]
@@ -90,7 +92,10 @@ class ChangeDetector(Thread):
         # otherwise, draw the rectangle
         if time.time() - self.lastPhotoTime > self.config['min_photo_interval_s']:
             hrs = self.hiResStream.next()
-            hi_res_image = hrs.array
+            if self.config["rotate_camera"] is 1:
+                hi_res_image = imutils.rotate(hrs.array, angle=180)
+            else:
+                hi_res_image = hrs.array
             self.hiResCapture.truncate(0)
             self.hiResCapture.seek(0)
             self.take_photo(hi_res_image)
@@ -119,10 +124,12 @@ class ChangeDetector(Thread):
             minColour = self.inactiveColour
             maxColour = self.activeColour
 
-        cv2.rectangle(img, (320/2-self.minWidth/2, 240/2-self.minHeight/2), (320/2+self.minWidth/2,
-                                                                             240/2+self.minHeight/2), minColour, 2)
-        cv2.rectangle(img, (320/2-self.maxWidth/2, 240/2-self.maxHeight/2), (320/2+self.maxWidth/2,
-                                                                             240/2+self.maxHeight/2), maxColour, 2)
+        cv2.rectangle(img, (self.config["cv_width"]/2-self.minWidth/2, self.config["cv_height"]/2-self.minHeight/2),
+                      (self.config["cv_width"]/2+self.minWidth/2, self.config["cv_height"]/2+self.minHeight/2),
+                      minColour, 2)
+        cv2.rectangle(img, (self.config["cv_width"]/2-self.maxWidth/2, self.config["cv_height"]/2-self.maxHeight/2),
+                      (self.config["cv_width"]/2+self.maxWidth/2, self.config["cv_height"]/2+self.maxHeight/2),
+                      maxColour, 2)
         return img
 
     def increase_min_max(self, increment):
@@ -135,11 +142,11 @@ class ChangeDetector(Thread):
         else:
             self.maxWidth = self.maxWidth + increment
             self.maxHeight = self.maxHeight + increment
-            if self.maxWidth > 320:
-                self.maxWidth = 320
-                self.maxHeight = 320
-            if self.maxHeight >= 240:
-                self.maxHeight = 240
+            if self.maxWidth > self.config["cv_width"]:
+                self.maxWidth = self.config["cv_width"]
+                self.maxHeight = self.config["cv_width"]
+            if self.maxHeight >= self.config["cv_height"]:
+                self.maxHeight = self.config["cv_height"]
 
     def decrease_min_max(self, increment):
         if self.isMinActive is True:
@@ -154,10 +161,10 @@ class ChangeDetector(Thread):
             if self.maxWidth < self.minWidth:
                 self.maxWidth = self.minWidth
                 self.maxHeight = self.minHeight
-            if self.maxWidth < 240:
+            if self.maxWidth < self.config["cv_height"]:
                 self.maxHeight = self.maxWidth
-            elif self.maxWidth >= 240:
-                self.maxHeight = 240
+            elif self.maxWidth >= self.config["cv_height"]:
+                self.maxHeight = self.config["cv_height"]
 
     def arm(self):
         self.mode = 1
@@ -167,7 +174,10 @@ class ChangeDetector(Thread):
 
     def update(self):
         lrs = self.lowResStream.next()
-        self.currentImage = lrs.array
+        if self.config["rotate_camera"] is 1:
+            self.currentImage = imutils.rotate(lrs.array, angle=180)
+        else:
+            self.currentImage = lrs.array
         self.lowResCapture.truncate(0)
         self.lowResCapture.seek(0)
 
