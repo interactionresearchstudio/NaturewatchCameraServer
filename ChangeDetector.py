@@ -20,6 +20,16 @@ class ChangeDetector(Thread):
         self.camera = PiCamera()
         self.camera.resolution = (self.config["img_width"], self.config["img_height"])
         self.framerate = 30
+
+        if self.config["fix_camera_settings"] is 1:
+            self.camera.iso = self.config["iso"]
+            time.sleep(0.2)
+            self.camera.shutter_speed = self.config["shutter_speed"]
+            self.camera.exposure_mode = 'off'
+            g = self.camera.awb_gains
+            self.camera.awb_mode = 'off'
+            self.camera.awb_gains = g
+
         self.hiResCapture = PiRGBArray(self.camera)
         self.lowResCapture = PiRGBArray(self.camera, size=(self.config["cv_width"], self.config["cv_height"]))
         self.hiResStream = self.camera.capture_continuous(self.hiResCapture, format="bgr", use_video_port=True)
@@ -98,7 +108,8 @@ class ChangeDetector(Thread):
                 hi_res_image = hrs.array
             self.hiResCapture.truncate(0)
             self.hiResCapture.seek(0)
-            self.take_photo(hi_res_image)
+            saving_thread = Thread(target=self.take_photo, args=[hi_res_image])
+            saving_thread.start()
             self.numOfPhotos = self.numOfPhotos + 1
             self.lastPhotoTime = time.time()
 

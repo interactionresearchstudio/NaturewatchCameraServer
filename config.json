@@ -12,5 +12,8 @@
     "max_height": 200,
     "less_sensitivity": 150,
     "more_sensitivity": 20,
-    "min_photo_interval_s": 1
+    "min_photo_interval_s": 1,
+    "fix_camera_settings": 0,
+    "iso": 800,
+    "shutter_speed": 8333
 }

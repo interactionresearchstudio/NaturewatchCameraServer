@@ -85,6 +85,25 @@ class CamHandler(BaseHTTPRequestHandler):
             os.system('rm /var/www/html/photos/*')
             return
 
+        if self.path.endswith('get-status'):
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            sensitivity = "unknown"
+            if changeDetectorInstance.minWidth == config["less_sensitivity"]:
+                sensitivity = "less"
+            elif changeDetectorInstance.minWidth == config["min_width"]:
+                sensitivity = "default"
+            elif changeDetectorInstance.minWidth == config["more_sensitivity"]:
+                sensitivity = "more"
+            send_data = {
+                "mode": changeDetectorInstance.mode,
+                "sensitivity": sensitivity
+            }
+            json_data = json.dumps(send_data)
+            self.wfile.write(json_data)
+            return
+
 
 # Threaded server
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
