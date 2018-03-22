@@ -14,6 +14,8 @@ os.chdir("/var/www/html/photos")
 # NatureCam implementation
 changeDetectorInstance = ChangeDetector(config)
 
+isTimeSet = False
+
 
 # Handle HTTP requests.
 class CamHandler(BaseHTTPRequestHandler):
@@ -103,6 +105,29 @@ class CamHandler(BaseHTTPRequestHandler):
             json_data = json.dumps(send_data)
             self.wfile.write(json_data)
             return
+
+    def do_POST(self):
+        print(self.path)
+        if self.path.endswith('set-time'):
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+
+            data_string = self.rfile.read(int(self.headers['Content-Length']))
+            data = json.loads(data_string)
+
+            print("Time: " + data["timeString"])
+
+            global isTimeSet
+            if isTimeSet is True:
+                print("Time has already been set during this powerup.")
+            else:
+                os.system('date -s "' + data["timeString"] + '"')
+                isTimeSet = True
+                print("Time updated.")
+
+            self.wfile.write('success')
+
 
 
 # Threaded server
