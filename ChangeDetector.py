@@ -101,7 +101,7 @@ class ChangeDetector(Thread):
 
         # otherwise, draw the rectangle
         if time.time() - self.lastPhotoTime >= self.config['min_photo_interval_s']:
-            hrs = self.hiResStream.next()
+            hrs = self.hiResStream.__next__()
             if self.config["rotate_camera"] is 1:
                 hi_res_image = imutils.rotate(hrs.array, angle=180)
             else:
@@ -135,11 +135,11 @@ class ChangeDetector(Thread):
             minColour = self.inactiveColour
             maxColour = self.activeColour
 
-        cv2.rectangle(img, (self.config["cv_width"]/2-self.minWidth/2, self.config["cv_height"]/2-self.minHeight/2),
-                      (self.config["cv_width"]/2+self.minWidth/2, self.config["cv_height"]/2+self.minHeight/2),
+        cv2.rectangle(img, (int(self.config["cv_width"]/2-self.minWidth/2), int(self.config["cv_height"]/2-self.minHeight/2)),
+                      (int(self.config["cv_width"]/2+self.minWidth/2), int(self.config["cv_height"]/2+self.minHeight/2)),
                       minColour, 2)
-        cv2.rectangle(img, (self.config["cv_width"]/2-self.maxWidth/2, self.config["cv_height"]/2-self.maxHeight/2),
-                      (self.config["cv_width"]/2+self.maxWidth/2, self.config["cv_height"]/2+self.maxHeight/2),
+        cv2.rectangle(img, (int(self.config["cv_width"]/2-self.maxWidth/2), int(self.config["cv_height"]/2-self.maxHeight/2)),
+                      (int(self.config["cv_width"]/2+self.maxWidth/2), int(self.config["cv_height"]/2+self.maxHeight/2)),
                       maxColour, 2)
         return img
 
@@ -184,7 +184,7 @@ class ChangeDetector(Thread):
         self.mode = 0
 
     def update(self):
-        lrs = self.lowResStream.next()
+        lrs = self.lowResStream.__next__()
         if self.config["rotate_camera"] is 1:
             self.currentImage = imutils.rotate(lrs.array, angle=180)
         else:

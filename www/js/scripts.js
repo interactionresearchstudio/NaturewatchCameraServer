@@ -1,4 +1,5 @@
 var controllingMin = 1;
+var baseURL = "/";
 $(document).ready(function() {
 
     // Hide controls
@@ -19,7 +20,7 @@ $(document).ready(function() {
         }
         else if (dataDest == "less" || dataDest == "more" || dataDest == "default") {
             $.ajax({
-                url: "python/" + dataDest,
+                url: baseURL + dataDest,
                 error: function() {
                     console.log("Failed to change sensitivity.");
                 },
@@ -32,7 +33,7 @@ $(document).ready(function() {
         }
         else if (dataDest == "start") {
             $.ajax({
-                url: "python/" + dataDest,
+                url: baseURL + dataDest,
                 error: function() {
                     console.log("Failed to start capture.");
                 },
@@ -48,7 +49,7 @@ $(document).ready(function() {
         }
         else if (dataDest == "stop") {
             $.ajax({
-                url: "python/" + dataDest,
+                url: baseURL + dataDest,
                 error: function() {
                     console.log("Failed to start capture.");
                 },
@@ -74,7 +75,7 @@ $(document).ready(function() {
         }
         else if (dataDest == "delete-final") {
             $.ajax({
-                url: "python/" + dataDest,
+                url: baseURL + dataDest,
                 error: function() {
                     console.log("Failed to delete photos.");
                 },
@@ -90,7 +91,7 @@ $(document).ready(function() {
 });
 
 function getCameraStatus() {
-    $.getJSON("python/get-status", function(data) {
+    $.getJSON(baseURL + "get-status", function(data) {
         console.log("Mode: " + data.mode);
         console.log("Sensitivity: " + data.sensitivity);
         if (data.mode == 1) {
@@ -111,7 +112,7 @@ function getCameraStatus() {
 }
 
 function sendGetRequest(r) {
-    $.get("python/" + r)
+    $.get(baseURL + r)
         .done(function() {
             console.log("Sent get request to " + r);
             return true;
@@ -147,7 +148,7 @@ function sendTime(t) {
 
     $.ajax({
         type: "POST",
-        url: 'python/set-time',
+        url: baseURL + 'set-time',
         dataType: 'json',
         contentType: 'application/json',
         data: postData,

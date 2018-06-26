@@ -3,13 +3,13 @@ import json
 import cv2
 import os
 import imutils
-from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-from SocketServer import ThreadingMixIn
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from socketserver import ThreadingMixIn
 from ChangeDetector import ChangeDetector
 
 os.chdir("/home/pi/NaturewatchCameraServer")
 config = json.load(open("config.json"))
-os.chdir("/var/www/html/photos")
+os.chdir("/home/pi/NaturewatchCameraServer/www")
 
 # NatureCam implementation
 changeDetectorInstance = ChangeDetector(config)
@@ -19,6 +19,7 @@ isTimeSet = False
 
 # Handle HTTP requests.
 class CamHandler(BaseHTTPRequestHandler):
+    # Options
     def do_OPTIONS(self):
         self.send_response(200, "ok")
         self.send_header('Access-Control-Allow-Origin', '*')
@@ -26,76 +27,120 @@ class CamHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "X-Requested-With")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
+        print("Sent options.")
 
     def do_GET(self):
         print(self.path)
-        if self.path.endswith('.mjpg'):
+        # Serve root website
+        if self.path == '/':
+            with open('index.html', 'rb') as file:
+                print("Served website.")
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+                self.wfile.write(file.read())
+
+        # Serve web files
+        elif self.path.endswith('.js') or self.path.endswith('.css') or self.path.endswith('.html'):
+            with open(self.path[1:], 'rb') as file:
+                print("Served file " + self.path[1:])
+
+                self.send_response(200)
+                if self.path.endswith('.js'):
+                    self.send_header('Content-type', 'text/javascript')
+                elif self.path.endswith('.css'):
+                    self.send_header('Content-type', 'text/css')
+                elif self.path.endswith('.html'):
+                    self.send_header('Content-type', 'text/html')
+
+                self.end_headers()
+                self.wfile.write(file.read())
+
+        # Serve camera stream
+        elif self.path.endswith('.mjpg'):
             self.send_response(200)
             self.send_header('Content-type', 'multipart/x-mixed-replace; boundary=--jpgboundary')
             self.end_headers()
             print("Serving mjpg...")
             while True:
-                img = changeDetectorInstance.get_current_image()
-                r, buf = cv2.imencode(".jpg", img)
-                self.wfile.write("--jpgboundary\r\n")
-                self.send_header('Content-type', 'image/jpeg')
-                self.send_header('Content-length', str(len(buf)))
-                self.end_headers()
-                self.wfile.write(bytearray(buf))
-                self.wfile.write('\r\n')
+                    try:
+                        img = changeDetectorInstance.get_current_image()
+                        r, buf = cv2.imencode(".jpg", img)
+                        self.wfile.write(b'--jpgboundary\r\n')
+                        self.send_header('Content-type', 'image/jpeg')
+                        self.send_header('Content-length', str(len(buf)))
+                        self.end_headers()
+                        self.wfile.write(bytearray(buf))
+                        self.wfile.write(b'\r\n')
+                    except KeyboardInterrupt:
+                        break
+            return
 
-        if self.path.endswith('less'):
+        # Camera control request - Less sensitivity
+        elif self.path.endswith('less'):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            self.wfile.write('success')
+            self.wfile.write(b'success')
             changeDetectorInstance.minWidth = config["less_sensitivity"]
             changeDetectorInstance.minHeight = config["less_sensitivity"]
+            print("Changed sensitivity to less")
             return
 
-        if self.path.endswith('more'):
+        # Camera control request - More sensitivity
+        elif self.path.endswith('more'):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            self.wfile.write('success')
+            self.wfile.write(b'success')
             changeDetectorInstance.minWidth = config["more_sensitivity"]
             changeDetectorInstance.minHeight = config["more_sensitivity"]
+            print("Changed sensitivity to more")
             return
 
-        if self.path.endswith('default'):
+        # Camera control request - Default sensitivity
+        elif self.path.endswith('default'):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            self.wfile.write('success')
+            self.wfile.write(b'success')
             changeDetectorInstance.minWidth = config["min_width"]
             changeDetectorInstance.minHeight = config["min_width"]
+            print("Changed sensitivity to default")
             return
 
-        if self.path.endswith('start'):
+        # Camera control request - Start recording
+        elif self.path.endswith('start'):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            self.wfile.write('success')
+            self.wfile.write(b'success')
             changeDetectorInstance.arm()
+            print("Started recording.")
             return
 
-        if self.path.endswith('stop'):
+        # Camera control request - Stop recording
+        elif self.path.endswith('stop'):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            self.wfile.write('success')
+            self.wfile.write(b'success')
             changeDetectorInstance.disarm()
+            print("Stopped recording.")
             return
 
-        if self.path.endswith('delete-final'):
+        # Camera control request - Delete all photos
+        elif self.path.endswith('delete-final'):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            self.wfile.write('success')
+            self.wfile.write(b'success')
             os.system('rm /var/www/html/photos/*')
+            print("Deleted photos.")
             return
 
-        if self.path.endswith('get-status'):
+        # Camera control request - Get camera status
+        elif self.path.endswith('get-status'):
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
@@ -111,9 +156,11 @@ class CamHandler(BaseHTTPRequestHandler):
                 "sensitivity": sensitivity
             }
             json_data = json.dumps(send_data)
-            self.wfile.write(json_data)
+            self.wfile.write(json_data.encode("utf-8"))
+            print("Returned camera status.")
             return
 
+    # POST request for updating time
     def do_POST(self):
         print(self.path)
         if self.path.endswith('set-time'):
@@ -122,7 +169,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
             data_string = self.rfile.read(int(self.headers['Content-Length']))
-            data = json.loads(data_string)
+            data = json.loads(data_string.decode('utf-8'))
 
             print("Time: " + data["timeString"])
 
@@ -134,7 +181,7 @@ class CamHandler(BaseHTTPRequestHandler):
                 isTimeSet = True
                 print("Time updated.")
 
-            self.wfile.write('success')
+            self.wfile.write(b'success')
 
 
 
