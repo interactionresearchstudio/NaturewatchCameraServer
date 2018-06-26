@@ -19,7 +19,7 @@ class ChangeDetector(Thread):
 
         self.camera = PiCamera()
         self.camera.resolution = (self.config["img_width"], self.config["img_height"])
-        self.framerate = 30
+        self.framerate = 24
 
         if self.config["fix_camera_settings"] is 1:
             self.camera.iso = self.config["iso"]
@@ -67,7 +67,7 @@ class ChangeDetector(Thread):
         timestamp = datetime.datetime.now()
         filename = timestamp.strftime('%Y-%m-%d-%H-%M-%S')
         filename = filename + ".jpg"
-        cv2.imwrite(filename, image)
+        cv2.imwrite(filename, "photos/" + image)
 
     def detect_change_contours(self, img):
         # convert to gray

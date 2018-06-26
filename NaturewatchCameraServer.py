@@ -6,6 +6,7 @@ import imutils
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from socketserver import ThreadingMixIn
 from ChangeDetector import ChangeDetector
+import time
 
 os.chdir("/home/pi/NaturewatchCameraServer")
 config = json.load(open("config.json"))
@@ -39,6 +40,7 @@ class CamHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
                 self.wfile.write(file.read())
+            return
 
         # Serve web files
         elif self.path.endswith('.js') or self.path.endswith('.css') or self.path.endswith('.html'):
@@ -55,6 +57,18 @@ class CamHandler(BaseHTTPRequestHandler):
 
                 self.end_headers()
                 self.wfile.write(file.read())
+            return
+
+        # List photos directory
+        elif self.path == '/photos/':
+            files = [f for f in os.listdir('photos/') if os.path.isfile(os.path.join('photos/', f))]
+            result = json.dumps(files)
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(result.encode("utf-8"))
+            print("Served photo directory contents.")
+            return
 
         # Serve camera stream
         elif self.path.endswith('.mjpg'):
@@ -72,6 +86,7 @@ class CamHandler(BaseHTTPRequestHandler):
                         self.end_headers()
                         self.wfile.write(bytearray(buf))
                         self.wfile.write(b'\r\n')
+                        time.sleep(0.1)
                     except KeyboardInterrupt:
                         break
             return
@@ -135,7 +150,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write(b'success')
-            os.system('rm /var/www/html/photos/*')
+            os.system('rm photos/*')
             print("Deleted photos.")
             return
 
@@ -166,6 +181,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b'Page not found')
             print("Page not found.")
+            return
 
     # POST request for updating time
     def do_POST(self):
@@ -189,7 +205,6 @@ class CamHandler(BaseHTTPRequestHandler):
                 print("Time updated.")
 
             self.wfile.write(b'success')
-
 
 
 # Threaded server
