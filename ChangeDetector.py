@@ -67,7 +67,7 @@ class ChangeDetector(Thread):
         timestamp = datetime.datetime.now()
         filename = timestamp.strftime('%Y-%m-%d-%H-%M-%S')
         filename = filename + ".jpg"
-        cv2.imwrite(filename, "photos/" + image)
+        cv2.imwrite("photos/" + filename, image)
 
     def detect_change_contours(self, img):
         # convert to gray

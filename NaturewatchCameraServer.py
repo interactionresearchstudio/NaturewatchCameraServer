@@ -43,7 +43,7 @@ class CamHandler(BaseHTTPRequestHandler):
             return
 
         # Serve web files
-        elif self.path.endswith('.js') or self.path.endswith('.css') or self.path.endswith('.html'):
+        elif self.path.endswith('.js') or self.path.endswith('.css') or self.path.endswith('.html') or self.path.endswith('.jpg'):
             with open(self.path[1:], 'rb') as file:
                 print("Served file " + self.path[1:])
 
@@ -54,6 +54,8 @@ class CamHandler(BaseHTTPRequestHandler):
                     self.send_header('Content-type', 'text/css')
                 elif self.path.endswith('.html'):
                     self.send_header('Content-type', 'text/html')
+                elif self.path.endswith('.jpg'):
+                    self.send_header('Content-type', 'image/jpeg')
 
                 self.end_headers()
                 self.wfile.write(file.read())
