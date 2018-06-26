@@ -160,6 +160,13 @@ class CamHandler(BaseHTTPRequestHandler):
             print("Returned camera status.")
             return
 
+        else:
+            self.send_response(404)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write(b'Page not found')
+            print("Page not found.")
+
     # POST request for updating time
     def do_POST(self):
         print(self.path)
