@@ -2,6 +2,7 @@
 import json
 import cv2
 import os
+import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from socketserver import ThreadingMixIn
 from ChangeDetector import ChangeDetector
@@ -88,8 +89,11 @@ class CamHandler(BaseHTTPRequestHandler):
                         self.end_headers()
                         self.wfile.write(bytearray(buf))
                         self.wfile.write(b'\r\n')
-                        time.sleep(0.1)
+                        time.sleep(config["stream_delay"])
                     except KeyboardInterrupt:
+                        break
+                    except BrokenPipeError:
+                        print("Client disconnected from stream.")
                         break
             return
 
@@ -216,9 +220,12 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 
 def main():
+    if (len(sys.argv) != 2):
+        print("Error - please provide server port as first argument when calling the script.")
+        sys.exit(2)
     try:
         changeDetectorInstance.start()
-        server = ThreadedHTTPServer(('', 80), CamHandler)
+        server = ThreadedHTTPServer(('', int(sys.argv[1])), CamHandler)
         print("server started")
         server.serve_forever()
     except (KeyboardInterrupt, SystemExit):

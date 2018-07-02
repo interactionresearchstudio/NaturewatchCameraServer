@@ -1,4 +1,4 @@
-# CameraServer
+# NaturewatchCameraServer
 
 This is a Python server script that captures a video stream from a Pi Camera and serves it an an mjpg through a website to another device. Part of the Citizen Naturewatch project in collaboration with the RCA.
 
@@ -14,7 +14,7 @@ This is a Python server script that captures a video stream from a Pi Camera and
 
 Simply run the script with Python (as super user, so that the server can run on port 80). 
 
-	sudo python3 CameraServer.py
+	sudo python3 CameraServer.py 80
 	
 You can then access the camera controls at
 
