@@ -6,7 +6,7 @@ This is a Python server script that captures a video stream from a Pi Camera and
 
 - OpenCV 3.1.0, along with OpenCV_Contrib modules. 
 - Python 3.4+
-- Picamera 
+- Picamera Python module 
 - Raspberry Pi Zero W or 3 (built-in WiFi)
 - 16GB+ SD card
 

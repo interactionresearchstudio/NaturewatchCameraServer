@@ -177,6 +177,7 @@ class CamHandler(BaseHTTPRequestHandler):
             print("Returned camera status.")
             return
 
+        # 404 page
         else:
             self.send_response(404)
             self.send_header('Content-type', 'text/html')
