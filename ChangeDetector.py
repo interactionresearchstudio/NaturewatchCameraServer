@@ -3,13 +3,14 @@ import numpy as np
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 from threading import Thread
+import threading
 import imutils
 import datetime
 import time
 
 
 class ChangeDetector(Thread):
-
+    lock = threading.Lock()
     def __init__(self, configuration):
         super(ChangeDetector, self).__init__()
         self.daemon = True
@@ -59,15 +60,25 @@ class ChangeDetector(Thread):
             self.update()
 
     def cancel(self):
+        print('cancelled')
         self.cancelled = True
         self.camera.close()
 
     @staticmethod
     def take_photo(image):
+        ChangeDetector.lock.acquire()
         timestamp = datetime.datetime.now()
         filename = timestamp.strftime('%Y-%m-%d-%H-%M-%S')
         filename = filename + ".jpg"
-        cv2.imwrite(filename, image)
+
+        try:
+            print('writing: ' + filename)
+            cv2.imwrite(filename, image)
+        except:
+            print('take_photo() error: ')
+            pass
+        finally:
+            ChangeDetector.lock.release()
 
     def detect_change_contours(self, img):
         # convert to gray
@@ -101,15 +112,19 @@ class ChangeDetector(Thread):
 
         # otherwise, draw the rectangle
         if time.time() - self.lastPhotoTime >= self.config['min_photo_interval_s']:
+            print('taking a picture: ')
+            self.hiResCapture.truncate(0)
+            self.hiResCapture.seek(0)
+
             hrs = self.hiResStream.next()
             if self.config["rotate_camera"] is 1:
                 hi_res_image = imutils.rotate(hrs.array, angle=180)
             else:
                 hi_res_image = hrs.array
-            self.hiResCapture.truncate(0)
-            self.hiResCapture.seek(0)
+
             saving_thread = Thread(target=self.take_photo, args=[hi_res_image])
             saving_thread.start()
+            #self.take_photo(hi_res_image)
             self.numOfPhotos = self.numOfPhotos + 1
             self.lastPhotoTime = time.time()
 
@@ -184,18 +199,27 @@ class ChangeDetector(Thread):
         self.mode = 0
 
     def update(self):
-        lrs = self.lowResStream.next()
-        if self.config["rotate_camera"] is 1:
-            self.currentImage = imutils.rotate(lrs.array, angle=180)
-        else:
-            self.currentImage = lrs.array
-        self.lowResCapture.truncate(0)
-        self.lowResCapture.seek(0)
+        try:
+            # clear out the buffer before we try and put data in, just in case.
+            self.lowResCapture.truncate(0)
+            self.lowResCapture.seek(0)
 
-        if self.mode == 0:
-            self.currentImage = self.display_min_max(self.currentImage)
-        elif self.mode == 1:
-            self.currentImage = self.detect_change_contours(self.currentImage)
+            lrs = self.lowResStream.next()
+
+            if self.config["rotate_camera"] is 1:
+                self.currentImage = imutils.rotate(lrs.array, angle=180)
+            else:
+                self.currentImage = lrs.array
+            self.lowResCapture.truncate(0)
+            self.lowResCapture.seek(0)
+
+            if self.mode == 0:
+                self.currentImage = self.display_min_max(self.currentImage)
+            elif self.mode == 1:
+                self.currentImage = self.detect_change_contours(self.currentImage)
+        except:
+            print('update error: ')
+            pass
 
     def get_current_image(self):
         return self.currentImage
