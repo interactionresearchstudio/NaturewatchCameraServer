@@ -2,7 +2,6 @@
 import json
 import cv2
 import os
-import imutils
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from socketserver import ThreadingMixIn
 from ChangeDetector import ChangeDetector
@@ -43,7 +42,8 @@ class CamHandler(BaseHTTPRequestHandler):
             return
 
         # Serve web files
-        elif self.path.endswith('.js') or self.path.endswith('.css') or self.path.endswith('.html') or self.path.endswith('.jpg'):
+        elif self.path.endswith('.js') or self.path.endswith('.css') or self.path.endswith('.html') or \
+                self.path.endswith('.jpg'):
             with open(self.path[1:], 'rb') as file:
                 print("Served file " + self.path[1:])
 
@@ -217,7 +217,7 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 def main():
     try:
         changeDetectorInstance.start()
-        server = ThreadedHTTPServer(('', 9090), CamHandler)
+        server = ThreadedHTTPServer(('', 80), CamHandler)
         print("server started")
         server.serve_forever()
     except (KeyboardInterrupt, SystemExit):

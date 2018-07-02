@@ -10,6 +10,7 @@ import time
 
 class ChangeDetector(Thread):
 
+    # Constructor
     def __init__(self, configuration):
         super(ChangeDetector, self).__init__()
         self.daemon = True
@@ -54,10 +55,12 @@ class ChangeDetector(Thread):
 
         time.sleep(0.5)
 
+    # Thread run
     def run(self):
         while not self.cancelled:
             self.update()
 
+    # Thread cancel
     def cancel(self):
         self.cancelled = True
         self.camera.close()
@@ -135,12 +138,14 @@ class ChangeDetector(Thread):
             minColour = self.inactiveColour
             maxColour = self.activeColour
 
-        cv2.rectangle(img, (int(self.config["cv_width"]/2-self.minWidth/2), int(self.config["cv_height"]/2-self.minHeight/2)),
-                      (int(self.config["cv_width"]/2+self.minWidth/2), int(self.config["cv_height"]/2+self.minHeight/2)),
-                      minColour, 2)
-        cv2.rectangle(img, (int(self.config["cv_width"]/2-self.maxWidth/2), int(self.config["cv_height"]/2-self.maxHeight/2)),
-                      (int(self.config["cv_width"]/2+self.maxWidth/2), int(self.config["cv_height"]/2+self.maxHeight/2)),
-                      maxColour, 2)
+        cv2.rectangle(img, (int(self.config["cv_width"]/2-self.minWidth/2),
+                            int(self.config["cv_height"]/2-self.minHeight/2)),
+                      (int(self.config["cv_width"]/2+self.minWidth/2),
+                       int(self.config["cv_height"]/2+self.minHeight/2)), minColour, 2)
+        cv2.rectangle(img, (int(self.config["cv_width"]/2-self.maxWidth/2),
+                            int(self.config["cv_height"]/2-self.maxHeight/2)),
+                      (int(self.config["cv_width"]/2+self.maxWidth/2),
+                       int(self.config["cv_height"]/2+self.maxHeight/2)), maxColour, 2)
         return img
 
     def increase_min_max(self, increment):

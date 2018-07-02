@@ -5,27 +5,29 @@ This is a Python server script that captures a video stream from a Pi Camera and
 ## Requirements
 
 - OpenCV 3.1.0, along with OpenCV_Contrib modules. 
-- Python 2.7
-- Picamera array module
-- Raspberry Pi 3
-- 16GB SD card
+- Python 3.4+
+- Picamera 
+- Raspberry Pi Zero W or 3 (built-in WiFi)
+- 16GB+ SD card
 
 ## Running the main script
 
-Simply run the script with Python. 
+Simply run the script with Python (as super user, so that the server can run on port 80). 
 
-	python CameraServer.py
+	sudo python3 CameraServer.py
 	
-You can then access the OpenCV stream at
+You can then access the camera controls at
 
-	localhost.local:9090/index.mjpg
+	http://localhost.local/
 	
 Be sure to replace `localhost.local` with whatever hostname the Pi has.
 
-## ToDo
+## Reporting bugs
 
-- ~~Run multiple GET requests on separate threads~~
-- ~~Send messages to CV~~
-- ~~Integrate the NatureCam program~~
-- ~~Start / stop NatureCam~~
-- Use raspi-still and raspi-vid to capture images and video at full resolution.
+Please provide as much information as possible. If you'd like to open an issue about a 
+possible bug, please do so here and include as much information as possible. 
+
+## Support
+
+If you require support, please head over to the [My Naturewatch Forum](https://mynaturewatch.net/forum).
+
