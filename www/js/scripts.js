@@ -4,6 +4,7 @@ $(document).ready(function() {
 
     // Hide controls
     $("#sensitivity-controls").hide();
+    $("#settings-controls").hide();
     $("#delete-confirm").hide();
     $("#delete-confirm2").hide();
 
@@ -85,6 +86,9 @@ $(document).ready(function() {
                 },
                 timeout:1000
             });
+        }
+        else if (dataDest == "settings") {
+            $("#settings-controls").slideDown(100);
         }
         else sendGetRequest(dataDest);
     });

@@ -181,6 +181,16 @@ class CamHandler(BaseHTTPRequestHandler):
             print("Returned camera status.")
             return
 
+        # Camera control request - Rotate camera 180 degrees
+        elif self.path.endswith('rotate-180'):
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write(b'success')
+            new_config = changeDetectorInstance.rotate_camera()
+            self.update_config(new_config)
+            print("Rotated camera.")
+
         # 404 page
         else:
             self.send_response(404)
@@ -213,6 +223,14 @@ class CamHandler(BaseHTTPRequestHandler):
 
             self.wfile.write(b'success')
 
+    @staticmethod
+    def update_config(new_config):
+        global config
+        config = new_config
+        with open("../config.json", 'w') as json_file:
+            contents = json.dumps(config, sort_keys=True, indent=4, separators=(',', ': '))
+            json_file.write(contents)
+
 
 # Threaded server
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
@@ -220,7 +238,7 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 
 def main():
-    if (len(sys.argv) != 2):
+    if len(sys.argv) != 2:
         print("Error - please provide server port as first argument when calling the script.")
         sys.exit(2)
     try:

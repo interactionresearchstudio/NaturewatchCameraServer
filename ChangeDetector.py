@@ -188,6 +188,10 @@ class ChangeDetector(Thread):
     def disarm(self):
         self.mode = 0
 
+    def rotate_camera(self):
+        self.config["rotate_camera"] = 1 - self.config["rotate_camera"]
+        return self.config
+
     def update(self):
         lrs = self.lowResStream.__next__()
         if self.config["rotate_camera"] is 1:
