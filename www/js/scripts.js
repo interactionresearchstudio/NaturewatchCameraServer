@@ -1,5 +1,22 @@
 var controllingMin = 1;
 var baseURL = "/";
+
+var cameraShutterSpeeds = {
+    "1/30": 33333,
+    "1/40": 25000,
+    "1/50": 20000,
+    "1/60": 16666,
+    "1/80": 12500,
+    "1/100": 10000,
+    "1/125": 8000,
+    "1/160": 6250,
+    "1/200": 5000,
+    "1/250": 4000,
+    "1/320": 3125,
+    "1/400": 2500,
+    "1/500": 2000
+}
+
 $(document).ready(function() {
 
     // Hide controls
@@ -98,11 +115,16 @@ function getCameraStatus() {
     $.getJSON(baseURL + "get-status", function(data) {
         console.log("Mode: " + data.mode);
         console.log("Sensitivity: " + data.sensitivity);
+        console.log("ISO: " + data.iso);
+        console.log("Shutter speed: " + data.shutter_speed);
+        console.log("Fix camera settings: " + data.fix_camera_settings);
+
         if (data.mode == 1) {
-            $("#start-stop").data('dest', "stop");
-            $("#start-stop").addClass("btn-danger");
-            $("#start-stop").removeClass("btn-success");
-            $("#start-stop").text("Stop recording");
+            btn = $("#start-stop");
+            btn.data('dest', "stop");
+            btn.addClass("btn-danger");
+            btn.removeClass("btn-success");
+            btn.text("Stop recording");
         }
         if (data.sensitivity == "less") {
             $("#default").removeClass("active");
@@ -161,3 +183,9 @@ function sendTime(t) {
         }
     });
 }
+
+function gcd(a, b) {
+  if (b < 0.0000001) return a;
+  return gcd(b, Math.floor(a % b));
+};
+

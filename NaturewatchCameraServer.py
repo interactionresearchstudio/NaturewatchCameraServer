@@ -160,7 +160,7 @@ class CamHandler(BaseHTTPRequestHandler):
             print("Deleted photos.")
             return
 
-        # Camera control request - Get camera status
+        # Camera info request - Get camera status
         elif self.path.endswith('get-status'):
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
@@ -174,7 +174,10 @@ class CamHandler(BaseHTTPRequestHandler):
                 sensitivity = "more"
             send_data = {
                 "mode": changeDetectorInstance.mode,
-                "sensitivity": sensitivity
+                "sensitivity": sensitivity,
+                "fix_camera_settings": config["fix_camera_settings"],
+                "iso": config["iso"],
+                "shutter_speed": config["shutter_speed"]
             }
             json_data = json.dumps(send_data)
             self.wfile.write(json_data.encode("utf-8"))
@@ -191,6 +194,16 @@ class CamHandler(BaseHTTPRequestHandler):
             self.update_config(new_config)
             print("Rotated camera.")
 
+        # Camera control request - Set exposure settings to auto
+        elif self.path.endswith('auto-exposure'):
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write(b'success')
+            new_config = changeDetectorInstance.auto_exposure()
+            self.update_config(new_config)
+            print("Set exposure settings to auto.")
+
         # 404 page
         else:
             self.send_response(404)
@@ -200,9 +213,10 @@ class CamHandler(BaseHTTPRequestHandler):
             print("Page not found.")
             return
 
-    # POST request for updating time
     def do_POST(self):
         print(self.path)
+
+        # POST request - Update time
         if self.path.endswith('set-time'):
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
@@ -223,6 +237,21 @@ class CamHandler(BaseHTTPRequestHandler):
 
             self.wfile.write(b'success')
 
+        # POST request - Set exposure and ISO settings
+        elif self.path.endswith('fix-exposure'):
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+
+            data_string = self.rfile.read(int(self.headers['Content-Length']))
+            data = json.loads(data_string.decode('utf-8'))
+
+            print("ISO: " + data["iso"])
+            print("Exposure: " + data["exposure"])
+
+            new_config = changeDetectorInstance.fix_exposure(int(data["iso"]), int(data["exposure"]))
+            self.update_config(new_config)
+
     @staticmethod
     def update_config(new_config):
         global config
@@ -241,6 +270,8 @@ def main():
     if len(sys.argv) != 2:
         print("Error - please provide server port as first argument when calling the script.")
         sys.exit(2)
+
+    server = None
     try:
         changeDetectorInstance.start()
         server = ThreadedHTTPServer(('', int(sys.argv[1])), CamHandler)
@@ -248,7 +279,8 @@ def main():
         server.serve_forever()
     except (KeyboardInterrupt, SystemExit):
         changeDetectorInstance.cancel()
-        server.socket.close()
+        if server is not None:
+            server.socket.close()
 
 
 if __name__ == '__main__':

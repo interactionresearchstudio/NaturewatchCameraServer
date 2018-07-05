@@ -192,6 +192,30 @@ class ChangeDetector(Thread):
         self.config["rotate_camera"] = 1 - self.config["rotate_camera"]
         return self.config
 
+    def auto_exposure(self):
+        self.camera.iso = 0
+        self.camera.shutter_speed = 0
+        self.camera.exposure_mode = 'auto'
+        self.camera.awb_mode = 'auto'
+
+        self.config["fix_camera_settings"] = 0
+        return self.config
+
+    def fix_exposure(self, iso, shutter_speed):
+        self.camera.iso = iso
+        time.sleep(0.5)
+        self.camera.shutter_speed = shutter_speed
+        self.camera.exposure_mode = 'off'
+        g = self.camera.awb_gains
+        self.camera.awb_mode = 'off'
+        self.camera.awb_gains = g
+
+        self.config["iso"] = iso
+        self.config["shutter_speed"] = shutter_speed
+        self.config["fix_camera_settings"] = 1
+
+        return self.config
+
     def update(self):
         lrs = self.lowResStream.__next__()
         if self.config["rotate_camera"] is 1:
