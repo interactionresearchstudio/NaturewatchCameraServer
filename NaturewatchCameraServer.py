@@ -49,6 +49,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('success')
+            self.wfile.close()
             changeDetectorInstance.minWidth = config["less_sensitivity"]
             changeDetectorInstance.minHeight = config["less_sensitivity"]
             return
@@ -58,6 +59,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('success')
+            self.wfile.close()
             changeDetectorInstance.minWidth = config["more_sensitivity"]
             changeDetectorInstance.minHeight = config["more_sensitivity"]
             return
@@ -67,6 +69,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('success')
+            self.wfile.close()
             changeDetectorInstance.minWidth = config["min_width"]
             changeDetectorInstance.minHeight = config["min_width"]
             return
@@ -76,6 +79,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('success')
+            self.wfile.close()
             changeDetectorInstance.arm()
             return
 
@@ -84,6 +88,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('success')
+            self.wfile.close()
             changeDetectorInstance.disarm()
             return
 
@@ -92,6 +97,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write('success')
+            self.wfile.close()
             os.system('rm /var/www/html/photos/*')
             return
 
@@ -112,6 +118,19 @@ class CamHandler(BaseHTTPRequestHandler):
             }
             json_data = json.dumps(send_data)
             self.wfile.write(json_data)
+            self.wfile.close()
+            return
+        if self.path.endswith('info'):
+            send_data = {
+                "temp": get_cpu_temperature(),
+            }
+            json_data = json.dumps(send_data)
+
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json_data)
+            self.wfile.close()
             return
 
     def do_POST(self):
@@ -136,6 +155,10 @@ class CamHandler(BaseHTTPRequestHandler):
 
             self.wfile.write('success')
 
+    @staticmethod
+    def get_cpu_temperature():
+        res = os.popen('vcgencmd measure_temp').readline()
+        return res.replace("temp=", "").replace("'C\n", "")
 
 
 # Threaded server

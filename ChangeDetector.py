@@ -7,12 +7,15 @@ import threading
 import imutils
 import datetime
 import time
-
+import logging
 
 class ChangeDetector(Thread):
     lock = threading.Lock()
     def __init__(self, configuration):
         super(ChangeDetector, self).__init__()
+
+        logging.basicConfig(filename='/home/pi/detector_error.log', level=logging.DEBUG)
+
         self.daemon = True
         self.cancelled = False
 
@@ -53,14 +56,20 @@ class ChangeDetector(Thread):
         self.isMinActive = False
         self.currentImage = None
 
+        self.error = False
         time.sleep(0.5)
 
     def run(self):
         while not self.cancelled:
-            self.update()
+            try:
+                self.update()
+            except Exception as e:
+                logging.exception(e)
+                continue
+
 
     def cancel(self):
-        print('cancelled')
+        logging.debug('cancelled')
         self.cancelled = True
         self.camera.close()
 
@@ -72,10 +81,11 @@ class ChangeDetector(Thread):
         filename = filename + ".jpg"
 
         try:
-            print('writing: ' + filename)
+            logging.info('writing: ' + filename)
             cv2.imwrite(filename, image)
-        except:
-            print('take_photo() error: ')
+        except Exception as e:
+            logging.debug('take_photo() error: ')
+            logging.exception(e)
             pass
         finally:
             ChangeDetector.lock.release()
@@ -112,7 +122,7 @@ class ChangeDetector(Thread):
 
         # otherwise, draw the rectangle
         if time.time() - self.lastPhotoTime >= self.config['min_photo_interval_s']:
-            print('taking a picture: ')
+            logging.info('taking a picture: ')
             self.hiResCapture.truncate(0)
             self.hiResCapture.seek(0)
 
@@ -201,6 +211,7 @@ class ChangeDetector(Thread):
     def update(self):
         try:
             # clear out the buffer before we try and put data in, just in case.
+
             self.lowResCapture.truncate(0)
             self.lowResCapture.seek(0)
 
@@ -209,7 +220,12 @@ class ChangeDetector(Thread):
             if self.config["rotate_camera"] is 1:
                 self.currentImage = imutils.rotate(lrs.array, angle=180)
             else:
+                if self.error:
+                    logging.debug('update setting image')
                 self.currentImage = lrs.array
+
+            if self.error:
+                logging.debug('update truncating again')
             self.lowResCapture.truncate(0)
             self.lowResCapture.seek(0)
 
@@ -217,8 +233,21 @@ class ChangeDetector(Thread):
                 self.currentImage = self.display_min_max(self.currentImage)
             elif self.mode == 1:
                 self.currentImage = self.detect_change_contours(self.currentImage)
-        except:
-            print('update error: ')
+
+            self.error = False
+        except Exception as e:
+            logging.debug('update error')
+            logging.exception(e)
+            if self.error:
+                logging.debug('resetting camera')
+                self.hiResCapture = PiRGBArray(self.camera)
+                self.lowResCapture = PiRGBArray(self.camera, size=(self.config["cv_width"], self.config["cv_height"]))
+                self.hiResStream = self.camera.capture_continuous(self.hiResCapture, format="bgr", use_video_port=True)
+                self.lowResStream = self.camera.capture_continuous(self.lowResCapture, format="bgr",
+                                                                   use_video_port=True,
+                                                                   splitter_port=2, resize=(self.config["cv_width"],
+                                                                                            self.config["cv_height"]))
+            self.error = True
             pass
 
     def get_current_image(self):
