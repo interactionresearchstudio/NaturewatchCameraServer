@@ -8,6 +8,7 @@ import imutils
 import datetime
 import time
 import logging
+import os
 
 class ChangeDetector(Thread):
     lock = threading.Lock()
@@ -252,3 +253,8 @@ class ChangeDetector(Thread):
 
     def get_current_image(self):
         return self.currentImage
+
+    @staticmethod
+    def get_cpu_temperature():
+        res = os.popen('vcgencmd measure_temp').readline()
+        return res.replace("temp=", "").replace("'C\n", "")

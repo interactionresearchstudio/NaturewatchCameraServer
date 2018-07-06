@@ -16,7 +16,6 @@ changeDetectorInstance = ChangeDetector(config)
 
 isTimeSet = False
 
-
 # Handle HTTP requests.
 class CamHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -122,7 +121,7 @@ class CamHandler(BaseHTTPRequestHandler):
             return
         if self.path.endswith('info'):
             send_data = {
-                "temp": get_cpu_temperature(),
+                "temp": changeDetectorInstance.get_cpu_temperature(),
             }
             json_data = json.dumps(send_data)
 
@@ -155,16 +154,10 @@ class CamHandler(BaseHTTPRequestHandler):
 
             self.wfile.write('success')
 
-    @staticmethod
-    def get_cpu_temperature():
-        res = os.popen('vcgencmd measure_temp').readline()
-        return res.replace("temp=", "").replace("'C\n", "")
-
 
 # Threaded server
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in separate threads"""
-
 
 def main():
     try:
