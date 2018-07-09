@@ -25,6 +25,7 @@ class CamHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "X-Requested-With")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
+        self.wfile.close()
 
     def do_GET(self):
         print(self.path)
@@ -119,9 +120,10 @@ class CamHandler(BaseHTTPRequestHandler):
             self.wfile.write(json_data)
             self.wfile.close()
             return
+
         if self.path.endswith('info'):
             send_data = {
-                "temp": changeDetectorInstance.get_cpu_temperature(),
+                "temp": self.get_cpu_temperature(),
             }
             json_data = json.dumps(send_data)
 
@@ -153,6 +155,11 @@ class CamHandler(BaseHTTPRequestHandler):
                 print("Time updated.")
 
             self.wfile.write('success')
+
+    @staticmethod
+    def get_cpu_temperature():
+        res = os.popen('vcgencmd measure_temp').readline()
+        return res.replace("temp=", "").replace("'C\n", "")
 
 
 # Threaded server

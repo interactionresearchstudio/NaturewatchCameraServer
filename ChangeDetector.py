@@ -23,7 +23,7 @@ class ChangeDetector(Thread):
         self.config = configuration
 
         self.camera = PiCamera()
-        self.camera.resolution = (self.config["img_width"], self.config["img_height"])
+        self.camera.resolution = (self.safe_width(self.config["img_width"]), self.safe_height(self.config["img_height"]))
         self.framerate = 30
 
         if self.config["fix_camera_settings"] is 1:
@@ -36,11 +36,11 @@ class ChangeDetector(Thread):
             self.camera.awb_gains = g
 
         self.hiResCapture = PiRGBArray(self.camera)
-        self.lowResCapture = PiRGBArray(self.camera, size=(self.config["cv_width"], self.config["cv_height"]))
+        self.lowResCapture = PiRGBArray(self.camera, size=(self.safe_width(self.config["cv_width"]), self.safe_height(self.config["cv_height"])))
         self.hiResStream = self.camera.capture_continuous(self.hiResCapture, format="bgr", use_video_port=True)
         self.lowResStream = self.camera.capture_continuous(self.lowResCapture, format="bgr", use_video_port=True,
-                                                           splitter_port=2, resize=(self.config["cv_width"],
-                                                                                    self.config["cv_height"]))
+                                                           splitter_port=2, resize=(self.safe_width(self.config["cv_width"]),
+                                                                                    self.safe_height(self.config["cv_height"])))
 
         self.minWidth = self.config["min_width"]
         self.maxWidth = self.config["max_width"]
@@ -58,6 +58,7 @@ class ChangeDetector(Thread):
         self.currentImage = None
 
         self.error = False
+        self.delta = time.time()
         time.sleep(0.5)
 
     def run(self):
@@ -239,15 +240,9 @@ class ChangeDetector(Thread):
         except Exception as e:
             logging.debug('update error')
             logging.exception(e)
-            if self.error:
-                logging.debug('resetting camera')
-                self.hiResCapture = PiRGBArray(self.camera)
-                self.lowResCapture = PiRGBArray(self.camera, size=(self.config["cv_width"], self.config["cv_height"]))
-                self.hiResStream = self.camera.capture_continuous(self.hiResCapture, format="bgr", use_video_port=True)
-                self.lowResStream = self.camera.capture_continuous(self.lowResCapture, format="bgr",
-                                                                   use_video_port=True,
-                                                                   splitter_port=2, resize=(self.config["cv_width"],
-                                                                                            self.config["cv_height"]))
+            self.hiResCapture = PiRGBArray(self.camera)
+            self.lowResCapture = PiRGBArray(self.camera, size=(self.safe_width(self.config["cv_width"]),
+                                                               self.safe_height(self.config["cv_height"])))
             self.error = True
             pass
 
@@ -255,6 +250,21 @@ class ChangeDetector(Thread):
         return self.currentImage
 
     @staticmethod
-    def get_cpu_temperature():
-        res = os.popen('vcgencmd measure_temp').readline()
-        return res.replace("temp=", "").replace("'C\n", "")
+    def safe_width(width):
+        div = width % 32
+        if div is 0:
+            return width
+        else:
+            logging.info("width " + str(width) + " not divisible by 32 trying " + str(width + 1))
+            return ChangeDetector.safe_width(width+1)
+
+    @staticmethod
+    def safe_height(height):
+        div = height % 16
+        if div is 0:
+            return height
+        else:
+            logging.info("height " + str(height) +" not divisible by 16 trying " + str(height+1))
+            return ChangeDetector.safe_height(height+1)
+
+
