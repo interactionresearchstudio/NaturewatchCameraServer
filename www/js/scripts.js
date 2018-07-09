@@ -156,14 +156,14 @@ can be used with the Unix date command.
 function getDateString() {
     var date = new Date();
     var hours = date.getHours();
-    var hoursString = ('0' + hours).slice(-2)
+    var hoursString = ('0' + hours).slice(-2);
     var minutes = date.getMinutes();
-    var minutesString = ('0' + minutes).slice(-2)
+    var minutesString = ('0' + minutes).slice(-2);
     var year = date.getFullYear();
     var month = date.getMonth() + 1;
-    var monthString = ('0' + month).slice(-2)
+    var monthString = ('0' + month).slice(-2);
     var day = date.getDate();
-    var dayString = ('0' + day).slice(-2)
+    var dayString = ('0' + day).slice(-2);
 
     return year.toString() + monthString + dayString + " " + hoursString + ":" + minutesString;
 }
@@ -187,5 +187,5 @@ function sendTime(t) {
 function gcd(a, b) {
   if (b < 0.0000001) return a;
   return gcd(b, Math.floor(a % b));
-};
+}
 
