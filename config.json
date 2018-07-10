@@ -5,7 +5,7 @@
     "img_height": 1080,
     "camera_warmup": 2.5,
     "stream_delay": 0.2,
-    "rotate_camera": 0,
+    "rotate_camera": 1,
     "delta_threshold": 5,
     "min_width": 100,
     "min_height": 100,

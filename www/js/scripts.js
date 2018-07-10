@@ -212,15 +212,14 @@ function getCameraStatus() {
             $("#default").removeClass("active");
             $("#more").addClass("active");
         }
-        if (data.fix_camera_settings) {
+        if (data.rotate_camera) {
             $("#flip-default").removeClass("active");
-            $("#flip-upsidedown").addClass("active");
+            $("#flip-180").addClass("active");
         }
-        else if (!data.fix_camera_settings) {
+        else if (!data.rotate_camera) {
             $("#flip-default").addClass("active");
-            $("#flip-upsidedown").removeClass("active");
+            $("#flip-180").removeClass("active");
         }
-
 
         // Manual / Auto settings
         if (!data.fix_camera_settings) {
@@ -229,6 +228,8 @@ function getCameraStatus() {
         }
         else {
             $("#mode-manual").addClass("active");
+            $("#mode-auto").removeClass("active");
+            $("#manual-controls").show();
         }
 
         // Exposure slider settings

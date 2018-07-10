@@ -238,7 +238,6 @@ class ChangeDetector(Thread):
         self.camera.awb_mode = 'off'
         self.camera.awb_gains = g
 
-        self.config["iso"] = iso
         self.config["shutter_speed"] = shutter_speed
         self.config["fix_camera_settings"] = 1
 
@@ -249,7 +248,7 @@ class ChangeDetector(Thread):
             self.lowResCapture.truncate(0)
             self.lowResCapture.seek(0)
 
-            lrs = self.lowResStream.next()
+            lrs = self.lowResStream.__next__()
 
             if self.config["rotate_camera"] is 1:
                 self.currentImage = imutils.rotate(lrs.array, angle=180)
