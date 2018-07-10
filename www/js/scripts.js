@@ -70,7 +70,7 @@ $(document).ready(function() {
                     thisButton.data('dest', "stop");
                     thisButton.addClass("btn-danger");
                     thisButton.removeClass("btn-success");
-                    thisButton.text("Stop recording");
+                    thisButton.text("Stop Image Capture");
                 },
                 timeout: 1000
             });
@@ -86,7 +86,7 @@ $(document).ready(function() {
                     thisButton.data('dest', "start");
                     thisButton.addClass("btn-success");
                     thisButton.removeClass("btn-danger");
-                    thisButton.text("Start recording");
+                    thisButton.text("Start Image Capture");
                 },
                 timeout: 1000
             });

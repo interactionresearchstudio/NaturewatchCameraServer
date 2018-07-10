@@ -66,7 +66,7 @@ class ChangeDetector(Thread):
         self.camera.close()
 
     @staticmethod
-    def take_photo(image):
+    def save_photo(image):
         timestamp = datetime.datetime.now()
         filename = timestamp.strftime('%Y-%m-%d-%H-%M-%S')
         filename = filename + ".jpg"
@@ -104,23 +104,23 @@ class ChangeDetector(Thread):
 
         # otherwise, draw the rectangle
         if time.time() - self.lastPhotoTime >= self.config['min_photo_interval_s']:
-            self.snap_photo()
+            self.capture_photo()
             
         cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 2)
         cv2.putText(img, "%d" % self.numOfPhotos, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
         return img
     
-    def snap_photo(self):
+    def capture_photo(self):
         """Take a single photo on demand"""
-        hrs = self.hiResStream.next()
+        hrs = self.hiResStream.__next__()
         if self.config["rotate_camera"] is 1:
             hi_res_image = imutils.rotate(hrs.array, angle=180)
         else:
             hi_res_image = hrs.array
         self.hiResCapture.truncate(0)
         self.hiResCapture.seek(0)
-        saving_thread = Thread(target=self.take_photo, args=[hi_res_image])
+        saving_thread = Thread(target=self.save_photo, args=[hi_res_image])
         saving_thread.start()
         self.numOfPhotos = self.numOfPhotos + 1
         self.lastPhotoTime = time.time()

@@ -78,6 +78,8 @@
             var numOfPhotos = 0;
             var photoHTML = "";
             //$(data).find("a:contains(" + fileExtension + ")").each(function() {
+            data.sort();
+            data.reverse();
             $.each(data, function() {
                 console.log(this);
                 //var filename = this.href.replace(window.location.host, "").replace("http://", "");
