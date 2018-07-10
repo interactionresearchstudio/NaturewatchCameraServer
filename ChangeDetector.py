@@ -10,6 +10,7 @@ import time
 
 class ChangeDetector(Thread):
 
+    # Constructor
     def __init__(self, configuration):
         super(ChangeDetector, self).__init__()
         self.daemon = True
@@ -19,7 +20,7 @@ class ChangeDetector(Thread):
 
         self.camera = PiCamera()
         self.camera.resolution = (self.config["img_width"], self.config["img_height"])
-        self.framerate = 30
+        self.framerate = 24
 
         if self.config["fix_camera_settings"] is 1:
             self.camera.iso = self.config["iso"]
@@ -54,10 +55,12 @@ class ChangeDetector(Thread):
 
         time.sleep(0.5)
 
+    # Thread run
     def run(self):
         while not self.cancelled:
             self.update()
 
+    # Thread cancel
     def cancel(self):
         self.cancelled = True
         self.camera.close()
@@ -67,7 +70,7 @@ class ChangeDetector(Thread):
         timestamp = datetime.datetime.now()
         filename = timestamp.strftime('%Y-%m-%d-%H-%M-%S')
         filename = filename + ".jpg"
-        cv2.imwrite(filename, image)
+        cv2.imwrite("photos/" + filename, image)
 
     def detect_change_contours(self, img):
         # convert to gray
@@ -102,7 +105,7 @@ class ChangeDetector(Thread):
         # otherwise, draw the rectangle
         if time.time() - self.lastPhotoTime >= self.config['min_photo_interval_s']:
             self.snap_photo()
-
+            
         cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 2)
         cv2.putText(img, "%d" % self.numOfPhotos, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
@@ -139,12 +142,14 @@ class ChangeDetector(Thread):
             minColour = self.inactiveColour
             maxColour = self.activeColour
 
-        cv2.rectangle(img, (self.config["cv_width"]/2-self.minWidth/2, self.config["cv_height"]/2-self.minHeight/2),
-                      (self.config["cv_width"]/2+self.minWidth/2, self.config["cv_height"]/2+self.minHeight/2),
-                      minColour, 2)
-        cv2.rectangle(img, (self.config["cv_width"]/2-self.maxWidth/2, self.config["cv_height"]/2-self.maxHeight/2),
-                      (self.config["cv_width"]/2+self.maxWidth/2, self.config["cv_height"]/2+self.maxHeight/2),
-                      maxColour, 2)
+        cv2.rectangle(img, (int(self.config["cv_width"]/2-self.minWidth/2),
+                            int(self.config["cv_height"]/2-self.minHeight/2)),
+                      (int(self.config["cv_width"]/2+self.minWidth/2),
+                       int(self.config["cv_height"]/2+self.minHeight/2)), minColour, 2)
+        cv2.rectangle(img, (int(self.config["cv_width"]/2-self.maxWidth/2),
+                            int(self.config["cv_height"]/2-self.maxHeight/2)),
+                      (int(self.config["cv_width"]/2+self.maxWidth/2),
+                       int(self.config["cv_height"]/2+self.maxHeight/2)), maxColour, 2)
         return img
 
     def increase_min_max(self, increment):
@@ -187,8 +192,36 @@ class ChangeDetector(Thread):
     def disarm(self):
         self.mode = 0
 
+    def rotate_camera(self):
+        self.config["rotate_camera"] = 1 - self.config["rotate_camera"]
+        return self.config
+
+    def auto_exposure(self):
+        self.camera.iso = 0
+        self.camera.shutter_speed = 0
+        self.camera.exposure_mode = 'auto'
+        self.camera.awb_mode = 'auto'
+
+        self.config["fix_camera_settings"] = 0
+        return self.config
+
+    def fix_exposure(self, shutter_speed):
+        self.camera.iso = 800
+        time.sleep(0.5)
+        self.camera.shutter_speed = shutter_speed
+        self.camera.exposure_mode = 'off'
+        g = self.camera.awb_gains
+        self.camera.awb_mode = 'off'
+        self.camera.awb_gains = g
+
+        self.config["iso"] = iso
+        self.config["shutter_speed"] = shutter_speed
+        self.config["fix_camera_settings"] = 1
+
+        return self.config
+
     def update(self):
-        lrs = self.lowResStream.next()
+        lrs = self.lowResStream.__next__()
         if self.config["rotate_camera"] is 1:
             self.currentImage = imutils.rotate(lrs.array, angle=180)
         else:

@@ -4,6 +4,7 @@
     "img_width": 1920,
     "img_height": 1080,
     "camera_warmup": 2.5,
+    "stream_delay": 0.2,
     "rotate_camera": 0,
     "delta_threshold": 5,
     "min_width": 100,
@@ -15,5 +16,5 @@
     "min_photo_interval_s": 1,
     "fix_camera_settings": 0,
     "iso": 800,
-    "shutter_speed": 8333
+    "shutter_speed": 8000
 }
