@@ -12,6 +12,8 @@ import os
 
 class ChangeDetector(Thread):
     lock = threading.Lock()
+
+    # Constructor
     def __init__(self, configuration):
         super(ChangeDetector, self).__init__()
 
@@ -24,7 +26,7 @@ class ChangeDetector(Thread):
 
         self.camera = PiCamera()
         self.camera.resolution = (self.safe_width(self.config["img_width"]), self.safe_height(self.config["img_height"]))
-        self.framerate = 30
+        self.framerate = 24
 
         if self.config["fix_camera_settings"] is 1:
             self.camera.iso = self.config["iso"]
@@ -61,6 +63,7 @@ class ChangeDetector(Thread):
         self.delta = time.time()
         time.sleep(0.5)
 
+    # Thread run
     def run(self):
         while not self.cancelled:
             try:
@@ -70,13 +73,14 @@ class ChangeDetector(Thread):
                 continue
 
 
+    # Thread cancel
     def cancel(self):
         logging.debug('cancelled')
         self.cancelled = True
         self.camera.close()
 
     @staticmethod
-    def take_photo(image):
+    def save_photo(image):
         ChangeDetector.lock.acquire()
         timestamp = datetime.datetime.now()
         filename = timestamp.strftime('%Y-%m-%d-%H-%M-%S')
@@ -84,7 +88,7 @@ class ChangeDetector(Thread):
 
         try:
             logging.info('writing: ' + filename)
-            cv2.imwrite(filename, image)
+            cv2.imwrite("photos/" + filename, image)
         except Exception as e:
             logging.debug('take_photo() error: ')
             logging.exception(e)
@@ -124,26 +128,26 @@ class ChangeDetector(Thread):
 
         # otherwise, draw the rectangle
         if time.time() - self.lastPhotoTime >= self.config['min_photo_interval_s']:
-            logging.info('taking a picture: ')
-            self.hiResCapture.truncate(0)
-            self.hiResCapture.seek(0)
-
-            hrs = self.hiResStream.next()
-            if self.config["rotate_camera"] is 1:
-                hi_res_image = imutils.rotate(hrs.array, angle=180)
-            else:
-                hi_res_image = hrs.array
-
-            saving_thread = Thread(target=self.take_photo, args=[hi_res_image])
-            saving_thread.start()
-            #self.take_photo(hi_res_image)
-            self.numOfPhotos = self.numOfPhotos + 1
-            self.lastPhotoTime = time.time()
-
+            self.capture_photo()
+            
         cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 2)
         cv2.putText(img, "%d" % self.numOfPhotos, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
 
         return img
+    
+    def capture_photo(self):
+        logging.info('Taking a photo...')
+        self.hiResCapture.truncate(0)
+        self.hiResCapture.seek(0)
+        hrs = self.hiResStream.__next__()
+        if self.config["rotate_camera"] is 1:
+            hi_res_image = imutils.rotate(hrs.array, angle=180)
+        else:
+            hi_res_image = hrs.array
+        saving_thread = Thread(target=self.save_photo, args=[hi_res_image])
+        saving_thread.start()
+        self.numOfPhotos = self.numOfPhotos + 1
+        self.lastPhotoTime = time.time()
 
     @staticmethod
     def get_largest_contour(contours):
@@ -162,12 +166,14 @@ class ChangeDetector(Thread):
             minColour = self.inactiveColour
             maxColour = self.activeColour
 
-        cv2.rectangle(img, (self.config["cv_width"]/2-self.minWidth/2, self.config["cv_height"]/2-self.minHeight/2),
-                      (self.config["cv_width"]/2+self.minWidth/2, self.config["cv_height"]/2+self.minHeight/2),
-                      minColour, 2)
-        cv2.rectangle(img, (self.config["cv_width"]/2-self.maxWidth/2, self.config["cv_height"]/2-self.maxHeight/2),
-                      (self.config["cv_width"]/2+self.maxWidth/2, self.config["cv_height"]/2+self.maxHeight/2),
-                      maxColour, 2)
+        cv2.rectangle(img, (int(self.config["cv_width"]/2-self.minWidth/2),
+                            int(self.config["cv_height"]/2-self.minHeight/2)),
+                      (int(self.config["cv_width"]/2+self.minWidth/2),
+                       int(self.config["cv_height"]/2+self.minHeight/2)), minColour, 2)
+        cv2.rectangle(img, (int(self.config["cv_width"]/2-self.maxWidth/2),
+                            int(self.config["cv_height"]/2-self.maxHeight/2)),
+                      (int(self.config["cv_width"]/2+self.maxWidth/2),
+                       int(self.config["cv_height"]/2+self.maxHeight/2)), maxColour, 2)
         return img
 
     def increase_min_max(self, increment):
@@ -210,10 +216,36 @@ class ChangeDetector(Thread):
     def disarm(self):
         self.mode = 0
 
+    def rotate_camera(self):
+        self.config["rotate_camera"] = 1 - self.config["rotate_camera"]
+        return self.config
+
+    def auto_exposure(self):
+        self.camera.iso = 0
+        self.camera.shutter_speed = 0
+        self.camera.exposure_mode = 'auto'
+        self.camera.awb_mode = 'auto'
+
+        self.config["fix_camera_settings"] = 0
+        return self.config
+
+    def fix_exposure(self, shutter_speed):
+        self.camera.iso = 800
+        time.sleep(0.5)
+        self.camera.shutter_speed = shutter_speed
+        self.camera.exposure_mode = 'off'
+        g = self.camera.awb_gains
+        self.camera.awb_mode = 'off'
+        self.camera.awb_gains = g
+
+        self.config["iso"] = iso
+        self.config["shutter_speed"] = shutter_speed
+        self.config["fix_camera_settings"] = 1
+
+        return self.config
+
     def update(self):
         try:
-            # clear out the buffer before we try and put data in, just in case.
-
             self.lowResCapture.truncate(0)
             self.lowResCapture.seek(0)
 
