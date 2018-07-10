@@ -17,7 +17,6 @@ changeDetectorInstance = ChangeDetector(config)
 
 isTimeSet = False
 
-
 # Handle HTTP requests.
 class CamHandler(BaseHTTPRequestHandler):
     # Options
@@ -28,6 +27,7 @@ class CamHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "X-Requested-With")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
+        self.wfile.close()
         print("Sent options.")
 
     def do_GET(self):
@@ -103,6 +103,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write(b'success')
+            self.wfile.close()
             changeDetectorInstance.minWidth = config["less_sensitivity"]
             changeDetectorInstance.minHeight = config["less_sensitivity"]
             print("Changed sensitivity to less")
@@ -114,6 +115,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write(b'success')
+            self.wfile.close()
             changeDetectorInstance.minWidth = config["more_sensitivity"]
             changeDetectorInstance.minHeight = config["more_sensitivity"]
             print("Changed sensitivity to more")
@@ -125,6 +127,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write(b'success')
+            self.wfile.close()
             changeDetectorInstance.minWidth = config["min_width"]
             changeDetectorInstance.minHeight = config["min_width"]
             print("Changed sensitivity to default")
@@ -136,6 +139,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write(b'success')
+            self.wfile.close()
             changeDetectorInstance.arm()
             print("Started recording.")
             return
@@ -146,6 +150,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write(b'success')
+            self.wfile.close()
             changeDetectorInstance.disarm()
             print("Stopped recording.")
             return
@@ -156,6 +161,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write(b'success')
+            self.wfile.close()
             os.system('rm photos/*')
             print("Deleted photos.")
             return
@@ -181,6 +187,7 @@ class CamHandler(BaseHTTPRequestHandler):
             }
             json_data = json.dumps(send_data)
             self.wfile.write(json_data.encode("utf-8"))
+            self.wfile.close()
             print("Returned camera status.")
             return
 
@@ -193,6 +200,7 @@ class CamHandler(BaseHTTPRequestHandler):
             new_config = changeDetectorInstance.rotate_camera()
             self.update_config(new_config)
             print("Rotated camera.")
+            return
 
         # Camera control request - Set exposure settings to auto
         elif self.path.endswith('auto-exposure'):
@@ -203,6 +211,7 @@ class CamHandler(BaseHTTPRequestHandler):
             new_config = changeDetectorInstance.auto_exposure()
             self.update_config(new_config)
             print("Set exposure settings to auto.")
+            return
 
         # 404 page
         else:
@@ -210,6 +219,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             self.wfile.write(b'Page not found')
+            self.wfile.close()
             print("Page not found.")
             return
 
@@ -236,7 +246,8 @@ class CamHandler(BaseHTTPRequestHandler):
                 print("Time updated.")
 
             self.wfile.write(b'success')
-
+            self.wfile.close()
+            
         # POST request - Set exposure and ISO settings
         elif self.path.endswith('fix-exposure'):
             self.send_response(200)
@@ -265,7 +276,6 @@ class CamHandler(BaseHTTPRequestHandler):
 # Threaded server
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in separate threads"""
-
 
 def main():
     if len(sys.argv) != 2:

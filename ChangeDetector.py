@@ -3,23 +3,29 @@ import numpy as np
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 from threading import Thread
+import threading
 import imutils
 import datetime
 import time
-
+import logging
+import os
 
 class ChangeDetector(Thread):
+    lock = threading.Lock()
 
     # Constructor
     def __init__(self, configuration):
         super(ChangeDetector, self).__init__()
+
+        logging.basicConfig(filename='/home/pi/detector_error.log', level=logging.DEBUG)
+
         self.daemon = True
         self.cancelled = False
 
         self.config = configuration
 
         self.camera = PiCamera()
-        self.camera.resolution = (self.config["img_width"], self.config["img_height"])
+        self.camera.resolution = (self.safe_width(self.config["img_width"]), self.safe_height(self.config["img_height"]))
         self.framerate = 24
 
         if self.config["fix_camera_settings"] is 1:
@@ -32,11 +38,11 @@ class ChangeDetector(Thread):
             self.camera.awb_gains = g
 
         self.hiResCapture = PiRGBArray(self.camera)
-        self.lowResCapture = PiRGBArray(self.camera, size=(self.config["cv_width"], self.config["cv_height"]))
+        self.lowResCapture = PiRGBArray(self.camera, size=(self.safe_width(self.config["cv_width"]), self.safe_height(self.config["cv_height"])))
         self.hiResStream = self.camera.capture_continuous(self.hiResCapture, format="bgr", use_video_port=True)
         self.lowResStream = self.camera.capture_continuous(self.lowResCapture, format="bgr", use_video_port=True,
-                                                           splitter_port=2, resize=(self.config["cv_width"],
-                                                                                    self.config["cv_height"]))
+                                                           splitter_port=2, resize=(self.safe_width(self.config["cv_width"]),
+                                                                                    self.safe_height(self.config["cv_height"])))
 
         self.minWidth = self.config["min_width"]
         self.maxWidth = self.config["max_width"]
@@ -53,24 +59,42 @@ class ChangeDetector(Thread):
         self.isMinActive = False
         self.currentImage = None
 
+        self.error = False
+        self.delta = time.time()
         time.sleep(0.5)
 
     # Thread run
     def run(self):
         while not self.cancelled:
-            self.update()
+            try:
+                self.update()
+            except Exception as e:
+                logging.exception(e)
+                continue
+
 
     # Thread cancel
     def cancel(self):
+        logging.debug('cancelled')
         self.cancelled = True
         self.camera.close()
 
     @staticmethod
     def save_photo(image):
+        ChangeDetector.lock.acquire()
         timestamp = datetime.datetime.now()
         filename = timestamp.strftime('%Y-%m-%d-%H-%M-%S')
         filename = filename + ".jpg"
-        cv2.imwrite("photos/" + filename, image)
+
+        try:
+            logging.info('writing: ' + filename)
+            cv2.imwrite("photos/" + filename, image)
+        except Exception as e:
+            logging.debug('take_photo() error: ')
+            logging.exception(e)
+            pass
+        finally:
+            ChangeDetector.lock.release()
 
     def detect_change_contours(self, img):
         # convert to gray
@@ -112,14 +136,14 @@ class ChangeDetector(Thread):
         return img
     
     def capture_photo(self):
-        """Take a single photo on demand"""
+        logging.info('Taking a photo...')
+        self.hiResCapture.truncate(0)
+        self.hiResCapture.seek(0)
         hrs = self.hiResStream.__next__()
         if self.config["rotate_camera"] is 1:
             hi_res_image = imutils.rotate(hrs.array, angle=180)
         else:
             hi_res_image = hrs.array
-        self.hiResCapture.truncate(0)
-        self.hiResCapture.seek(0)
         saving_thread = Thread(target=self.save_photo, args=[hi_res_image])
         saving_thread.start()
         self.numOfPhotos = self.numOfPhotos + 1
@@ -221,18 +245,58 @@ class ChangeDetector(Thread):
         return self.config
 
     def update(self):
-        lrs = self.lowResStream.__next__()
-        if self.config["rotate_camera"] is 1:
-            self.currentImage = imutils.rotate(lrs.array, angle=180)
-        else:
-            self.currentImage = lrs.array
-        self.lowResCapture.truncate(0)
-        self.lowResCapture.seek(0)
+        try:
+            self.lowResCapture.truncate(0)
+            self.lowResCapture.seek(0)
 
-        if self.mode == 0:
-            self.currentImage = self.display_min_max(self.currentImage)
-        elif self.mode == 1:
-            self.currentImage = self.detect_change_contours(self.currentImage)
+            lrs = self.lowResStream.next()
+
+            if self.config["rotate_camera"] is 1:
+                self.currentImage = imutils.rotate(lrs.array, angle=180)
+            else:
+                if self.error:
+                    logging.debug('update setting image')
+                self.currentImage = lrs.array
+
+            if self.error:
+                logging.debug('update truncating again')
+            self.lowResCapture.truncate(0)
+            self.lowResCapture.seek(0)
+
+            if self.mode == 0:
+                self.currentImage = self.display_min_max(self.currentImage)
+            elif self.mode == 1:
+                self.currentImage = self.detect_change_contours(self.currentImage)
+
+            self.error = False
+        except Exception as e:
+            logging.debug('update error')
+            logging.exception(e)
+            self.hiResCapture = PiRGBArray(self.camera)
+            self.lowResCapture = PiRGBArray(self.camera, size=(self.safe_width(self.config["cv_width"]),
+                                                               self.safe_height(self.config["cv_height"])))
+            self.error = True
+            pass
 
     def get_current_image(self):
         return self.currentImage
+
+    @staticmethod
+    def safe_width(width):
+        div = width % 32
+        if div is 0:
+            return width
+        else:
+            logging.info("width " + str(width) + " not divisible by 32 trying " + str(width + 1))
+            return ChangeDetector.safe_width(width+1)
+
+    @staticmethod
+    def safe_height(height):
+        div = height % 16
+        if div is 0:
+            return height
+        else:
+            logging.info("height " + str(height) +" not divisible by 16 trying " + str(height+1))
+            return ChangeDetector.safe_height(height+1)
+
+
