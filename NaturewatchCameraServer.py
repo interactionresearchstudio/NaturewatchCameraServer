@@ -246,11 +246,12 @@ class CamHandler(BaseHTTPRequestHandler):
             data_string = self.rfile.read(int(self.headers['Content-Length']))
             data = json.loads(data_string.decode('utf-8'))
 
-            print("ISO: " + data["iso"])
-            print("Exposure: " + data["exposure"])
+            print("Exposure: {}".format(data["exposure"]))
 
-            new_config = changeDetectorInstance.fix_exposure(int(data["iso"]), int(data["exposure"]))
+            new_config = changeDetectorInstance.fix_exposure(int(data["exposure"]))
             self.update_config(new_config)
+
+            self.wfile.write(b'success')
 
     @staticmethod
     def update_config(new_config):

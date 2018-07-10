@@ -14,30 +14,37 @@
                 <img src="feed.mjpg">
             </div>
             <div class="col-md-6" id="controls">
-                <button type="button" id="start-stop" class="btn btn-success" data-dest="start">Start recording</button>
-                <button type="button" class="btn btn-primary" data-dest="sensitivity">Sensitivity</button>
-                <div class="btn-group" id="sensitivity-controls">
-                    <button type="button" id="less" class="btn btn-secondary" data-dest="less">Less</button>
-                    <button type="button" id="default" class="btn btn-secondary active" data-dest="default">Default</button>
-                    <button type="button" id="more" class="btn btn-secondary" data-dest="more">More</button>
-                </div>
+                <button type="button" id="start-stop" class="btn btn-success" data-dest="start">Start Image Capture</button>
 
-                <a href="photos.html" class="btn btn-secondary" role="button">View photos</a>
+                <a href="photos.html" class="btn btn-primary" role="button">Image Gallery</a>
 
-                <div class="gap"></div>
-                <button type="button" class="btn btn-secondary" data-dest="settings">Settings</button>
-                <div class="gap"></div>
+                <button type="button" class="btn btn-primary" data-dest="settings">Settings</button>
                 <div id="settings-controls">
-                    <p>Flip image</p>
-                    <label class="switch" id="flip-image">
-                        <input type="checkbox">
-                        <span class="slider"></span>
-                    </label>
-                    <p>Manual exposure settings</p>
-                    <label class="switch" id="exposure-fix">
-                        <input type="checkbox">
-                        <span class="slider"></span>
-                    </label>
+                    <button type="button" class="btn btn-secondary" data-dest="sensitivity">Movement Sensitivity</button>
+                    <div class="btn-group" id="sensitivity-controls">
+                        <button type="button" id="less" class="btn btn-secondary" data-dest="less">Less</button>
+                        <button type="button" id="default" class="btn btn-secondary active" data-dest="default">Default</button>
+                        <button type="button" id="more" class="btn btn-secondary" data-dest="more">More</button>
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-dest="flip">Image Orientation</button>
+                    <div class="btn-group" id="flip-controls">
+                        <button type="button" id="flip-default" class="btn btn-secondary" data-dest="flip-default">Default</button>
+                        <button type="button" id="flip-180" class="btn btn-secondary" data-dest="flip-180">Flip 180</button>
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-dest="controls">Exposure Mode</button>
+                    <div id="camera-controls">
+                        <div class="btn-group" id="mode-controls">
+                            <button type="button" id="mode-auto" class="btn btn-secondary no-top-margin" data-dest="mode-auto">Auto</button>
+                            <button type="button" id="mode-manual" class="btn btn-secondary no-top-margin" data-dest="mode-manual">Manual</button>
+                        </div>
+                        <div id="manual-controls">
+                            <label for="shutter-range" class="bg-secondary">Fixed Shutter speed: <span></span></label>
+                            <div class="bg-tertiary">
+                                <input type="range" class="form-control-range" id="shutter-range" min="0" max="21" step="1">
+                            </div>
+                            <button type="button" class="btn btn-secondary no-top-margin" data-dest="update-manual">Update Manual Settings</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

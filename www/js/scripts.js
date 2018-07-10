@@ -1,4 +1,3 @@
-var controllingMin = 1;
 var baseURL = "/";
 
 var cameraShutterSpeeds = {
@@ -14,16 +13,27 @@ var cameraShutterSpeeds = {
     "1/250": 4000,
     "1/320": 3125,
     "1/400": 2500,
-    "1/500": 2000
-}
+    "1/500": 2000,
+    "1/640": 1563,
+    "1/800": 1250,
+    "1/1000": 1000,
+    "1/1250": 800,
+    "1/1600": 625,
+    "1/2000": 500,
+    "1/2500": 400,
+    "1/3200": 313,
+    "1/4000": 250
+};
 
 $(document).ready(function() {
 
     // Hide controls
     $("#sensitivity-controls").hide();
     $("#settings-controls").hide();
+    $("#flip-controls").hide();
     $("#delete-confirm").hide();
     $("#delete-confirm2").hide();
+    $("#camera-controls").hide();
 
     getCameraStatus();
     sendTime(getDateString());
@@ -107,7 +117,75 @@ $(document).ready(function() {
         else if (dataDest == "settings") {
             $("#settings-controls").slideDown(100);
         }
+        else if (dataDest == "flip") {
+            $("#flip-controls").slideDown(100);
+        }
+        else if (dataDest == "controls") {
+            $("#camera-controls").slideDown(100);
+        }
+        else if (dataDest == "flip-default") {
+            $.ajax({
+                url: baseURL + "rotate-180",
+                error: function() {
+                    console.log("Failed to rotate image.");
+                },
+                success: function() {
+                    console.log("Clicked flip default");
+                    $("#flip-180").removeClass("active");
+                    $("#flip-default").addClass("active");
+                },
+                timeout: 1000
+            });
+        }
+        else if (dataDest == "flip-180") {
+            $.ajax({
+                url: baseURL + "rotate-180",
+                error: function() {
+                    console.log("Failed to rotate image.");
+                },
+                success: function() {
+                    console.log("Clicked flip 180");
+                    $("#flip-180").addClass("active");
+                    $("#flip-default").removeClass("active");
+                },
+                timeout: 1000
+            });
+        }
+        else if (dataDest == "mode-auto") {
+            $.ajax({
+                url: baseURL + "auto-exposure",
+                error: function() {
+                    console.log("Failed to rotate image.");
+                },
+                success: function() {
+                    $("#mode-auto").addClass("active");
+                    $("#mode-manual").removeClass("active");
+                    $("#manual-controls").slideUp(100);
+                },
+                timeout: 1000
+            });
+        }
+        else if (dataDest == "mode-manual") {
+            sendManualSettings();
+            $("#mode-auto").removeClass("active");
+            $("#mode-manual").addClass("active");
+            $("#manual-controls").slideDown(100);
+        }
+        else if (dataDest == "update-manual") {
+            sendManualSettings();
+            $("#mode-auto").removeClass("active");
+            $("#mode-manual").addClass("active");
+        }
         else sendGetRequest(dataDest);
+    });
+
+    // Range events
+    $("input[type='range']").on('input', function () {
+        $(this).trigger('change');
+        console.log($(this).val());
+        if ($(this).attr('id') == "shutter-range") {
+            $("label[for='" + $(this).attr('id') + "'] span").html(Object.keys(cameraShutterSpeeds)[$(this).val()]);
+        }
     });
 });
 
@@ -134,6 +212,35 @@ function getCameraStatus() {
             $("#default").removeClass("active");
             $("#more").addClass("active");
         }
+        if (data.fix_camera_settings) {
+            $("#flip-default").removeClass("active");
+            $("#flip-upsidedown").addClass("active");
+        }
+        else if (!data.fix_camera_settings) {
+            $("#flip-default").addClass("active");
+            $("#flip-upsidedown").removeClass("active");
+        }
+
+
+        // Manual / Auto settings
+        if (!data.fix_camera_settings) {
+            $("#manual-controls").hide();
+            $("#mode-auto").addClass("active");
+        }
+        else {
+            $("#mode-manual").addClass("active");
+        }
+
+        // Exposure slider settings
+        $.each(cameraShutterSpeeds, function (key, value) {
+            if(value == data.shutter_speed) {
+                console.log("Found shutter speed");
+                var index = Object.keys(cameraShutterSpeeds).indexOf(key);
+                $("#shutter-range").val(index);
+                $("label[for='shutter-range'] span").html(Object.keys(cameraShutterSpeeds)[$("#shutter-range").val()]);
+                console.log(key);
+            }
+        });
     });
 }
 
@@ -180,12 +287,31 @@ function sendTime(t) {
         data: postData,
         success: function() {
             console.log("Sent time to Python server.");
-        }
+        },
+        timeout: 1000
     });
 }
 
-function gcd(a, b) {
-  if (b < 0.0000001) return a;
-  return gcd(b, Math.floor(a % b));
+function sendManualSettings() {
+    var iso = parseInt($("#iso-range").val());
+    var shutter = Object.keys(cameraShutterSpeeds)[$("#shutter-range").val()];
+    var shutter_us = cameraShutterSpeeds[shutter];
+    console.log("Shutter microseconds: " + shutter_us)
+    var postData = JSON.stringify({"exposure": shutter_us});
+
+    $.ajax({
+        type: "POST",
+        url: baseURL + 'fix-exposure',
+        dataType: 'json',
+        contentType: 'application/json',
+        data: postData,
+        success: function() {
+            console.log("Sent exposure settings to Python server.");
+            return true;
+        },
+        timeout: 1000
+    });
+
 }
+
 

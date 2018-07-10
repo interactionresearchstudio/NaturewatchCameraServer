@@ -201,8 +201,8 @@ class ChangeDetector(Thread):
         self.config["fix_camera_settings"] = 0
         return self.config
 
-    def fix_exposure(self, iso, shutter_speed):
-        self.camera.iso = iso
+    def fix_exposure(self, shutter_speed):
+        self.camera.iso = 800
         time.sleep(0.5)
         self.camera.shutter_speed = shutter_speed
         self.camera.exposure_mode = 'off'
