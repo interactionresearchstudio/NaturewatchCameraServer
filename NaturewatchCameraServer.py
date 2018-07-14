@@ -212,7 +212,18 @@ class CamHandler(BaseHTTPRequestHandler):
             self.update_config(new_config)
             print("Set exposure settings to auto.")
             return
+        elif self.path.endswith('info'):
+            send_data = {
+                "temp": self.get_cpu_temperature(),
+            }
+            json_data = json.dumps(send_data)
 
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json_data)
+            self.wfile.close()
+            return
         # 404 page
         else:
             self.send_response(404)
@@ -272,6 +283,10 @@ class CamHandler(BaseHTTPRequestHandler):
             contents = json.dumps(config, sort_keys=True, indent=4, separators=(',', ': '))
             json_file.write(contents)
 
+    @staticmethod
+    def get_cpu_temperature():
+        res = os.popen('vcgencmd measure_temp').readline()
+        return res.replace("temp=", "").replace("'C\n", "")
 
 # Threaded server
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
