@@ -47,6 +47,7 @@ class ChangeDetector(Thread):
         self.currentImage = None
 
         self.error = False
+        self.errorLogged = False
         self.delta = time.time()
         time.sleep(0.5)
 
@@ -95,7 +96,6 @@ class ChangeDetector(Thread):
         filename = filename + ".jpg"
 
         try:
-            logging.info('writing: ' + filename)
             cv2.imwrite("photos/" + filename, image)
         except Exception as e:
             logging.debug('take_photo() error: ')
@@ -144,7 +144,6 @@ class ChangeDetector(Thread):
         return img
 
     def capture_photo(self):
-        logging.info('Taking a photo...')
         self.hiResCapture.truncate(0)
         self.hiResCapture.seek(0)
         hrs = self.hiResStream.__next__()
@@ -277,8 +276,10 @@ class ChangeDetector(Thread):
 
             self.error = False
         except Exception as e:
-            logging.debug('update error')
-            logging.exception(e)
+            if not self.errorLogged:
+                logging.debug('update error')
+                logging.exception(e)
+                self.errorLogged = True
             self.init_camera()
             self.error = True
             pass
