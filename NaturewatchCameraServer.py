@@ -212,6 +212,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.update_config(new_config)
             print("Set exposure settings to auto.")
             return
+
         elif self.path.endswith('info'):
             send_data = {
                 "temp": self.get_cpu_temperature(),
@@ -221,7 +222,7 @@ class CamHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json_data)
+            self.wfile.write(json_data.encode("utf-8"))
             self.wfile.close()
             return
         # 404 page

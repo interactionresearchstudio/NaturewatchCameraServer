@@ -317,13 +317,13 @@ function sendManualSettings() {
 
 function pollTemperature() {
     $.ajax({
-        url: baseUrl + "info",
+        url: baseURL + "info",
         type: "GET",
         success: function(data) {
             $('#temp-info').text('SoC: ' + data.temp + 'c')
         },
         dataType: "json",
-        complete: setTimeout(function() {poll()}, 5000),
+        complete: setTimeout(function() {pollTemperature()}, 5000),
         timeout: 2000
     })
 }
