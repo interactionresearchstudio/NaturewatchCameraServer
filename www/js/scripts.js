@@ -37,6 +37,7 @@ $(document).ready(function() {
 
     getCameraStatus();
     sendTime(getDateString());
+    pollTemperature();
 
     // Button events
     $(".btn").click(function() {
@@ -313,6 +314,19 @@ function sendManualSettings() {
         timeout: 1000
     });
 
+}
+
+function pollTemperature() {
+    $.ajax({
+        url: baseURL + "info",
+        type: "GET",
+        success: function(data) {
+            $('#temp-info').text('SoC: ' + data.temp + 'c')
+        },
+        dataType: "json",
+        complete: setTimeout(function() {pollTemperature()}, 5000),
+        timeout: 2000
+    })
 }
 
 
