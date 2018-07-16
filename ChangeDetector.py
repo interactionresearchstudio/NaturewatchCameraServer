@@ -51,6 +51,8 @@ class ChangeDetector(Thread):
         self.delta = time.time()
         time.sleep(0.5)
 
+
+
     # Thread run
     def run(self):
         while not self.cancelled:
@@ -89,6 +91,7 @@ class ChangeDetector(Thread):
         self.lowResStream = self.camera.capture_continuous(self.lowResCapture, format="bgr", use_video_port=True,
                                                            splitter_port=2, resize=(self.safe_width(self.config["cv_width"]),
                                                                                     self.safe_height(self.config["cv_height"])))
+
     @staticmethod
     def save_photo(image):
         timestamp = datetime.datetime.now()
@@ -285,7 +288,7 @@ class ChangeDetector(Thread):
             pass
 
     def get_current_image(self):
-        return self.currentImage
+        return self.currentImage.copy()
 
     @staticmethod
     def safe_width(width):
