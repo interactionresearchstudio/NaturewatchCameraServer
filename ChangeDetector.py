@@ -44,10 +44,6 @@ class ChangeDetector(Thread):
         self.isMinActive = False
         self.currentImage = None
 
-        self.error = False
-        self.delta = time.time()
-        time.sleep(0.5)
-
     # Initialise camera with splitter port.
     def initialise_camera(self):
         if self.camera is not None:
@@ -75,6 +71,7 @@ class ChangeDetector(Thread):
                                                            splitter_port=2,
                                                            resize=(self.safe_width(self.config["cv_width"]),
                                                                    self.safe_height(self.config["cv_height"])))
+        time.sleep(2)
 
     # Thread run
     def run(self):
@@ -260,26 +257,17 @@ class ChangeDetector(Thread):
             if self.config["rotate_camera"] is 1:
                 self.currentImage = imutils.rotate(lrs.array, angle=180)
             else:
-                if self.error:
-                    logging.debug('update setting image')
                 self.currentImage = lrs.array
-
-            if self.error:
-                logging.debug('update truncating again')
-            self.lowResCapture.truncate(0)
-            self.lowResCapture.seek(0)
 
             if self.mode == 0:
                 self.currentImage = self.display_min_max(self.currentImage)
             elif self.mode == 1:
                 self.currentImage = self.detect_change_contours(self.currentImage)
 
-            self.error = False
         except Exception as e:
             logging.debug('update error')
             logging.exception(e)
             self.initialise_camera()
-            self.error = True
             pass
 
     def get_current_image(self):
