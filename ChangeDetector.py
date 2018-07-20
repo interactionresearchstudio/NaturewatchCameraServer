@@ -3,15 +3,12 @@ import numpy as np
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 from threading import Thread
-import threading
 import imutils
 import datetime
 import time
 import logging
-import os
 
 class ChangeDetector(Thread):
-    lock = threading.Lock()
 
     # Constructor
     def __init__(self, configuration):
@@ -24,25 +21,13 @@ class ChangeDetector(Thread):
 
         self.config = configuration
 
-        self.camera = PiCamera()
-        self.camera.resolution = (self.safe_width(self.config["img_width"]), self.safe_height(self.config["img_height"]))
+        self.camera = None
+        self.hiResCapture = None
+        self.hiResStream = None
+        self.lowResCapture = None
+        self.lowResStream = None
         self.framerate = 24
-
-        if self.config["fix_camera_settings"] is 1:
-            self.camera.iso = self.config["iso"]
-            time.sleep(0.2)
-            self.camera.shutter_speed = self.config["shutter_speed"]
-            self.camera.exposure_mode = 'off'
-            g = self.camera.awb_gains
-            self.camera.awb_mode = 'off'
-            self.camera.awb_gains = g
-
-        self.hiResCapture = PiRGBArray(self.camera)
-        self.lowResCapture = PiRGBArray(self.camera, size=(self.safe_width(self.config["cv_width"]), self.safe_height(self.config["cv_height"])))
-        self.hiResStream = self.camera.capture_continuous(self.hiResCapture, format="bgr", use_video_port=True)
-        self.lowResStream = self.camera.capture_continuous(self.lowResCapture, format="bgr", use_video_port=True,
-                                                           splitter_port=2, resize=(self.safe_width(self.config["cv_width"]),
-                                                                                    self.safe_height(self.config["cv_height"])))
+        self.initialise_camera()
 
         self.minWidth = self.config["min_width"]
         self.maxWidth = self.config["max_width"]
@@ -63,6 +48,34 @@ class ChangeDetector(Thread):
         self.delta = time.time()
         time.sleep(0.5)
 
+    # Initialise camera with splitter port.
+    def initialise_camera(self):
+        if self.camera is not None:
+            self.camera.close()
+
+        self.camera = PiCamera()
+        PiCamera.CAPTURE_TIMEOUT = 60
+
+        self.camera.resolution = (self.safe_width(self.config["img_width"]), self.safe_height(self.config["img_height"]))
+
+        if self.config["fix_camera_settings"] is 1:
+            self.camera.iso = self.config["iso"]
+            time.sleep(0.2)
+            self.camera.shutter_speed = self.config["shutter_speed"]
+            self.camera.exposure_mode = 'off'
+            g = self.camera.awb_gains
+            self.camera.awb_mode = 'off'
+            self.camera.awb_gains = g
+
+        self.hiResCapture = PiRGBArray(self.camera)
+        self.lowResCapture = PiRGBArray(self.camera, size=(self.safe_width(self.config["cv_width"]),
+                                                           self.safe_height(self.config["cv_height"])))
+        self.hiResStream = self.camera.capture_continuous(self.hiResCapture, format="bgr", use_video_port=True)
+        self.lowResStream = self.camera.capture_continuous(self.lowResCapture, format="bgr", use_video_port=True,
+                                                           splitter_port=2,
+                                                           resize=(self.safe_width(self.config["cv_width"]),
+                                                                   self.safe_height(self.config["cv_height"])))
+
     # Thread run
     def run(self):
         while not self.cancelled:
@@ -72,29 +85,23 @@ class ChangeDetector(Thread):
                 logging.exception(e)
                 continue
 
-
     # Thread cancel
     def cancel(self):
-        logging.debug('cancelled')
         self.cancelled = True
         self.camera.close()
 
     @staticmethod
     def save_photo(image):
-        ChangeDetector.lock.acquire()
         timestamp = datetime.datetime.now()
         filename = timestamp.strftime('%Y-%m-%d-%H-%M-%S')
         filename = filename + ".jpg"
 
         try:
-            logging.info('writing: ' + filename)
             cv2.imwrite("photos/" + filename, image)
         except Exception as e:
             logging.debug('take_photo() error: ')
             logging.exception(e)
             pass
-        finally:
-            ChangeDetector.lock.release()
 
     def detect_change_contours(self, img):
         # convert to gray
@@ -271,14 +278,12 @@ class ChangeDetector(Thread):
         except Exception as e:
             logging.debug('update error')
             logging.exception(e)
-            self.hiResCapture = PiRGBArray(self.camera)
-            self.lowResCapture = PiRGBArray(self.camera, size=(self.safe_width(self.config["cv_width"]),
-                                                               self.safe_height(self.config["cv_height"])))
+            self.initialise_camera()
             self.error = True
             pass
 
     def get_current_image(self):
-        return self.currentImage
+        return self.currentImage.copy()
 
     @staticmethod
     def safe_width(width):
@@ -286,7 +291,6 @@ class ChangeDetector(Thread):
         if div is 0:
             return width
         else:
-            logging.info("width " + str(width) + " not divisible by 32 trying " + str(width + 1))
             return ChangeDetector.safe_width(width+1)
 
     @staticmethod
@@ -295,7 +299,5 @@ class ChangeDetector(Thread):
         if div is 0:
             return height
         else:
-            logging.info("height " + str(height) +" not divisible by 16 trying " + str(height+1))
             return ChangeDetector.safe_height(height+1)
-
 
