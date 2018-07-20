@@ -14,7 +14,7 @@ class ChangeDetector(Thread):
     def __init__(self, configuration):
         super(ChangeDetector, self).__init__()
 
-        logging.basicConfig(filename='/home/pi/detector_error.log', level=logging.DEBUG)
+        logging.basicConfig(filename='/home/pi/camera.log', level=logging.DEBUG)
 
         self.daemon = True
         self.cancelled = False
