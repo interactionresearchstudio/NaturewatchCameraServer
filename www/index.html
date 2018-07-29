@@ -31,6 +31,13 @@
                         <button type="button" id="flip-default" class="btn btn-secondary" data-dest="flip-default">Default</button>
                         <button type="button" id="flip-180" class="btn btn-secondary" data-dest="flip-180">Flip 180</button>
                     </div>
+
+                    <label for="framerate-range" class="bg-secondary top-margin">Framerate: <span></span></label>
+                    <div class="bg-tertiary">
+                        <input type="range" class="form-control-range" id="framerate-range" min="1" max="24" step="1">
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-dest="update-framerate">Update Framerate Settings</button>
+                    
                     <button type="button" class="btn btn-secondary" data-dest="controls">Exposure Mode</button>
                     <div id="camera-controls">
                         <div class="btn-group" id="mode-controls">
@@ -42,7 +49,7 @@
                             <div class="bg-tertiary">
                                 <input type="range" class="form-control-range" id="shutter-range" min="0" max="21" step="1">
                             </div>
-                            <button type="button" class="btn btn-secondary no-top-margin" data-dest="update-manual">Update Manual Settings</button>
+                        <button type="button" class="btn btn-secondary" data-dest="update-manual">Update Manual Settings</button>
                         </div>
                     </div>
                 </div>

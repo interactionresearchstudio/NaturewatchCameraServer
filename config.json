@@ -16,5 +16,6 @@
     "min_photo_interval_s": 1,
     "fix_camera_settings": 0,
     "iso": 800,
-    "shutter_speed": 8000
+    "shutter_speed": 8000,
+    "framerate": 24
 }

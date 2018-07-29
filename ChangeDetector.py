@@ -14,7 +14,7 @@ class ChangeDetector(Thread):
     def __init__(self, configuration):
         super(ChangeDetector, self).__init__()
 
-        logging.basicConfig(filename='/home/pi/camera.log', level=logging.DEBUG)
+        logging.basicConfig(filename='/home/pi/camera.log', datefmt='%Y-%m-%d-%H-%M-%S', level=logging.DEBUG)
 
         self.daemon = True
         self.cancelled = False
@@ -26,13 +26,13 @@ class ChangeDetector(Thread):
         self.hiResStream = None
         self.lowResCapture = None
         self.lowResStream = None
-        self.framerate = 24
         self.initialise_camera()
 
         self.minWidth = self.config["min_width"]
         self.maxWidth = self.config["max_width"]
         self.minHeight = self.config["min_height"]
         self.maxHeight = self.config["max_height"]
+        self.framerate = self.config["framerate"]
 
         self.mode = 0
         self.avg = None
@@ -51,6 +51,7 @@ class ChangeDetector(Thread):
 
         self.camera = PiCamera()
         PiCamera.CAPTURE_TIMEOUT = 60
+        self.camera.framerate = self.config["framerate"]
 
         self.camera.resolution = (self.safe_width(self.config["img_width"]), self.safe_height(self.config["img_height"]))
 
@@ -231,6 +232,9 @@ class ChangeDetector(Thread):
         self.camera.awb_mode = 'auto'
 
         self.config["fix_camera_settings"] = 0
+        
+        logging.info("Shutter Speed set to: auto")
+        
         return self.config
 
     def fix_exposure(self, shutter_speed):
@@ -244,7 +248,20 @@ class ChangeDetector(Thread):
 
         self.config["shutter_speed"] = shutter_speed
         self.config["fix_camera_settings"] = 1
+        
+        logging.info("Shutter Speed set to: {}".format(self.camera.shutter_speed))
 
+        return self.config
+        
+    # function to change the frame rate of the camera,
+    def setFramerate(self, inFramerate):
+        inFramerate = int(inFramerate) # casting to int to ensure it is accepted by picamera module
+        self.camera.framerate = inFramerate
+        self.framerate = inFramerate
+        self.config["framerate"] = inFramerate
+        
+        logging.info("Framerate set to: {}".format(self.camera.framerate))
+        
         return self.config
 
     def update(self):

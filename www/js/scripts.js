@@ -173,9 +173,11 @@ $(document).ready(function() {
         }
         else if (dataDest == "update-manual") {
             sendManualSettings();
-            $("#mode-auto").removeClass("active");
-            $("#mode-manual").addClass("active");
         }
+        else if (dataDest == "update-framerate") {
+            sendFramerateSettings();
+        }
+        
         else sendGetRequest(dataDest);
     });
 
@@ -184,7 +186,10 @@ $(document).ready(function() {
         $(this).trigger('change');
         console.log($(this).val());
         if ($(this).attr('id') == "shutter-range") {
-            $("label[for='" + $(this).attr('id') + "'] span").html(Object.keys(cameraShutterSpeeds)[$(this).val()]);
+            $("label[for='shutter-range'] span").html(Object.keys(cameraShutterSpeeds)[$(this).val()]);
+        }
+        else if ($(this).attr('id') == "framerate-range"){
+            $("label[for='framerate-range'] span").html($(this).val());
         }
     });
 });
@@ -231,6 +236,8 @@ function getCameraStatus() {
             $("#mode-auto").removeClass("active");
             $("#manual-controls").show();
         }
+        
+        $("label[for='framerate-range'] span").html(String(data.framerate));
 
         // Exposure slider settings
         $.each(cameraShutterSpeeds, function (key, value) {
@@ -294,6 +301,8 @@ function sendTime(t) {
 }
 
 function sendManualSettings() {
+    
+    
     var iso = parseInt($("#iso-range").val());
     var shutter = Object.keys(cameraShutterSpeeds)[$("#shutter-range").val()];
     var shutter_us = cameraShutterSpeeds[shutter];
@@ -308,6 +317,25 @@ function sendManualSettings() {
         data: postData,
         success: function() {
             console.log("Sent exposure settings to Python server.");
+            return true;
+        },
+        timeout: 1000
+    });
+}
+    
+function sendFramerateSettings(){
+    var framerate = $("#framerate-range").val();
+    console.log("Framerate: " + framerate)
+    var postData = JSON.stringify({"framerate": framerate});
+    
+    $.ajax({
+        type: "POST",
+        url: baseURL + 'framerate',
+        dataType: 'json',
+        contentType: 'application/json',
+        data: postData,
+        success: function(){
+            console.log("Sent framerate settings to Python server.");
             return true;
         },
         timeout: 1000

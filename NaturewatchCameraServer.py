@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 import json
+import sys
+
+sys.path.append('/home/pi/.local/lib/python3.5/site-packages')
+
 import cv2
 import os
-import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from socketserver import ThreadingMixIn
 from ChangeDetector import ChangeDetector
@@ -177,7 +180,8 @@ class CamHandler(BaseHTTPRequestHandler):
                 "fix_camera_settings": config["fix_camera_settings"],
                 "iso": config["iso"],
                 "shutter_speed": config["shutter_speed"],
-                "rotate_camera": config["rotate_camera"]
+                "rotate_camera": config["rotate_camera"],
+                "framerate": config["framerate"]
             }
             json_data = json.dumps(send_data)
             self.wfile.write(json_data.encode("utf-8"))
@@ -253,6 +257,22 @@ class CamHandler(BaseHTTPRequestHandler):
             new_config = changeDetectorInstance.fix_exposure(int(data["exposure"]))
             self.update_config(new_config)
 
+            self.wfile.write(b'success')
+            
+        # POST request - Setting a new framerate
+        elif self.path.endswith('framerate'):
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html')
+            self.end_headers()
+            
+            data_string = self.rfile.read(int(self.headers['Content-Length']))
+            data = json.loads(data_string.decode('utf-8'))
+            
+            print("Framerate: {}".format(data["framerate"]))
+            
+            new_config = changeDetectorInstance.setFramerate(int(data["framerate"]))
+            self.update_config(new_config)
+            
             self.wfile.write(b'success')
 
     @staticmethod
