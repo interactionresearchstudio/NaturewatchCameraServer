@@ -238,6 +238,7 @@ function getCameraStatus() {
         }
         
         $("label[for='framerate-range'] span").html(String(data.framerate));
+        $("#framerate-range").val(data.framerate);
 
         // Exposure slider settings
         $.each(cameraShutterSpeeds, function (key, value) {
