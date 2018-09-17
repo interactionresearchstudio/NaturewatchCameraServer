@@ -94,6 +94,9 @@ class CamHandler(BaseHTTPRequestHandler):
                     except BrokenPipeError:
                         print("Client disconnected from stream.")
                         break
+                    except ConnectionResetError:
+                        print("Connection reset by peer.")
+                        break
             return
 
         # Camera control request - Less sensitivity
