@@ -20,6 +20,13 @@ isTimeSet = False
 
 # Handle HTTP requests.
 class CamHandler(BaseHTTPRequestHandler):
+    type_map = {
+        '.js': 'text/javascript',
+        '.css': 'text/css',
+        '.html': 'text/html',
+        '.jpg': 'image/jpeg',
+    }
+
     # Options
     def do_OPTIONS(self):
         self.send_response(200, "ok")
@@ -32,6 +39,8 @@ class CamHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         print(self.path)
+        base, ext = os.path.splitext(self.path)
+
         # Serve root website
         if self.path == '/':
             with open('index.html', 'rb') as file:
@@ -43,20 +52,15 @@ class CamHandler(BaseHTTPRequestHandler):
             return
 
         # Serve web files
-        elif self.path.endswith('.js') or self.path.endswith('.css') or self.path.endswith('.html') or \
-                self.path.endswith('.jpg'):
-            with open(self.path[1:], 'rb') as file:
-                print("Served file " + self.path[1:])
+        elif ext in self.type_map:
+            file_name = self.path[1:]
+            with open(file_name, 'rb') as file:
+                print("Served file " + file_name)
 
                 self.send_response(200)
-                if self.path.endswith('.js'):
-                    self.send_header('Content-type', 'text/javascript')
-                elif self.path.endswith('.css'):
-                    self.send_header('Content-type', 'text/css')
-                elif self.path.endswith('.html'):
-                    self.send_header('Content-type', 'text/html')
-                elif self.path.endswith('.jpg'):
-                    self.send_header('Content-type', 'image/jpeg')
+                for extension, content_type in self.type_map.items():
+                    if self.path.endswith(extension):
+                        self.send_header('Content-type', content_type)
 
                 self.end_headers()
                 self.wfile.write(file.read())
