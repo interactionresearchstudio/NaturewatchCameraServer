@@ -17,6 +17,7 @@ changeDetectorInstance = ChangeDetector(config)
 
 isTimeSet = False
 
+
 # Handle HTTP requests.
 class CamHandler(BaseHTTPRequestHandler):
     # Options
@@ -79,24 +80,24 @@ class CamHandler(BaseHTTPRequestHandler):
             self.end_headers()
             print("Serving mjpg...")
             while True:
-                    try:
-                        img = changeDetectorInstance.get_current_image()
-                        r, buf = cv2.imencode(".jpg", img)
-                        self.wfile.write(b'--jpgboundary\r\n')
-                        self.send_header('Content-type', 'image/jpeg')
-                        self.send_header('Content-length', str(len(buf)))
-                        self.end_headers()
-                        self.wfile.write(bytearray(buf))
-                        self.wfile.write(b'\r\n')
-                        time.sleep(config["stream_delay"])
-                    except KeyboardInterrupt:
-                        break
-                    except BrokenPipeError:
-                        print("Client disconnected from stream.")
-                        break
-                    except ConnectionResetError:
-                        print("Connection reset by peer.")
-                        break
+                try:
+                    img = changeDetectorInstance.get_current_image()
+                    r, buf = cv2.imencode(".jpg", img)
+                    self.wfile.write(b'--jpgboundary\r\n')
+                    self.send_header('Content-type', 'image/jpeg')
+                    self.send_header('Content-length', str(len(buf)))
+                    self.end_headers()
+                    self.wfile.write(bytearray(buf))
+                    self.wfile.write(b'\r\n')
+                    time.sleep(config["stream_delay"])
+                except KeyboardInterrupt:
+                    break
+                except BrokenPipeError:
+                    print("Client disconnected from stream.")
+                    break
+                except ConnectionResetError:
+                    print("Connection reset by peer.")
+                    break
             return
 
         # Camera control request - Less sensitivity
@@ -270,6 +271,7 @@ class CamHandler(BaseHTTPRequestHandler):
 # Threaded server
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in separate threads"""
+
 
 def main():
     if len(sys.argv) != 2:
