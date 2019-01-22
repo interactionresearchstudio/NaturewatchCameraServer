@@ -7,6 +7,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from socketserver import ThreadingMixIn
 from ChangeDetector import ChangeDetector
 import time
+from urllib.parse import urlparse, parse_qs
 
 os.chdir("/home/pi/NaturewatchCameraServer")
 config = json.load(open("config.json"))
@@ -67,9 +68,18 @@ class CamHandler(BaseHTTPRequestHandler):
             return
 
         # List photos directory
-        elif self.path == '/photos/':
-            files = [f for f in os.listdir('photos/') if os.path.isfile(os.path.join('photos/', f))]
-            result = json.dumps(files)
+        elif self.path.startswith('/photos/'):
+            files = [
+                f for f in sorted(os.listdir('photos/'))
+                if os.path.isfile(os.path.join('photos/', f)) and f.endswith('.jpg')
+            ]
+            start, end = self._get_start_and_end(files)
+            data = {
+                'total': len(files),
+                'files': files[start:end]
+            }
+            result = json.dumps(data)
+
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
@@ -223,6 +233,19 @@ class CamHandler(BaseHTTPRequestHandler):
             print("Page not found.")
             return
 
+    def _get_start_and_end(self, files):
+        args = parse_qs(urlparse(self.path).query)
+        page = int(self._get_query_value(args, 'page', '1'))
+        size = self._get_query_value(args, 'size', 'all')
+        if 'all' == size:
+            start = 0
+            end = len(files)
+        else:
+            size = int(size)
+            start = (page - 1) * size
+            end = start + size
+        return start, end
+
     def do_POST(self):
         print(self.path)
 
@@ -270,6 +293,15 @@ class CamHandler(BaseHTTPRequestHandler):
         with open("../config.json", 'w') as json_file:
             contents = json.dumps(config, sort_keys=True, indent=4, separators=(',', ': '))
             json_file.write(contents)
+
+    def _get_query_value(self, args, key, default):
+        values = args.get(key, [])
+        if values:
+            try:
+                value = values.pop()
+            except IndexError:
+                value = default
+            return value
 
 
 # Threaded server

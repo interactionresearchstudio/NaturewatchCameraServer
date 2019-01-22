@@ -176,7 +176,9 @@ $(document).ready(function() {
             $("#mode-auto").removeClass("active");
             $("#mode-manual").addClass("active");
         }
-        else sendGetRequest(dataDest);
+        else if (typeof dataDest !== 'undefined') {
+            sendGetRequest(dataDest);
+        }
     });
 
     // Range events
