@@ -35,6 +35,9 @@ $(document).ready(function() {
     $("#delete-confirm2").hide();
     $("#camera-controls").hide();
 
+    // Enable tooltips for photos.html
+    $('[data-toggle="tooltip"]').tooltip();
+
     getCameraStatus();
     sendTime(getDateString());
 
