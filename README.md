@@ -23,6 +23,11 @@ You can then access the camera controls at
 	
 Be sure to replace `localhost.local` with whatever hostname the Pi has.
 
+## Compiling CSS for the web interface
+CSS for the web interface is written in Less.css. Therefore, a Less compiler must be used. You can use the [node compiler](http://lesscss.org/usage/) detailed on the Less website, or a standalone app such as [Koala](http://koala-app.com/).
+
+JS is not currently being compiled / minified.
+
 ## Reporting bugs
 
 Please provide as much information as possible. If you'd like to open an issue about a 
