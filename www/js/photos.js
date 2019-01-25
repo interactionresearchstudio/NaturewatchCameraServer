@@ -27,6 +27,8 @@ let loadFunction = function () {
 
     function buildPaginationLinks(response) {
         $('[data-toggle="tooltip"]').tooltip('hide');
+        let $navigation = $('#navigation');
+        $navigation.show();
         $('#page-nav li').each(function (idx, obj) {
             if (!$(obj).hasClass('move-backwards') && !$(obj).hasClass('move-forwards')) {
                 $(obj).remove();
@@ -35,6 +37,12 @@ let loadFunction = function () {
 
         // Total number of pages needed to show all photos
         numPages = Math.ceil(response.total / pageSize);
+
+        // If no pages or single page, hide and don't do navigation
+        if (numPages < 2) {
+            $navigation.hide();
+            return;
+        }
 
         // The number of extra link slots to each side of the selected page
         let side = Math.floor(pageWindow / 2);
@@ -49,12 +57,12 @@ let loadFunction = function () {
         let addToRightSide = (leftSidePointer < 1) ? leftSidePointer - 1 : 0;
 
         // If we are at the end always have a whole window of pages
-        if (startNumber > numPages - pageWindow) {
+        if (startNumber > pageWindow && startNumber > numPages - pageWindow) {
             startNumber = numPages - pageWindow + 1;
         }
 
-        // numPages if pageNumber plus the side goes over, otherwise the page number with the side and any extra from the left
-        let endNumber = (((pageNumber + side) - numPages > 0) ? numPages : pageNumber + side) + (-addToRightSide);
+        // numPages if pageNumber plus the side is higher, otherwise the page number plus side and any extra from the left
+        let endNumber = (((pageNumber + side) - numPages > 0) ? numPages : pageNumber + side + (-addToRightSide));
 
         for (let i = startNumber; i <= endNumber; ++i) {
             let $link = $(
@@ -117,8 +125,10 @@ let loadFunction = function () {
         if (numOfPhotos === 0) {
             $("#photos").append("<div class='row'><div class='col-md-12'><h2>No photos.</h2></div></div>");
             $("#download-zip").hide();
+            $("#navigation").hide();
         } else {
             $("#photos").append(photoHTML);
+            $("#navigation").show();
         }
     }
 

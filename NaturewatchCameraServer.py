@@ -69,15 +69,18 @@ class CamHandler(BaseHTTPRequestHandler):
 
         # List photos directory
         elif self.path.startswith('/photos/'):
+            data = {
+                'total': 0,
+                'files': []
+            }
             files = [
                 f for f in sorted(os.listdir('photos/'))
                 if os.path.isfile(os.path.join('photos/', f)) and f.endswith('.jpg')
             ]
-            start, end = self._get_start_and_end(files)
-            data = {
-                'total': len(files),
-                'files': files[start:end]
-            }
+            if len(files) > 0:
+                start, end = self._get_start_and_end(files)
+                data['total'] = len(files)
+                data['files'] = files[start:end]
             result = json.dumps(data)
 
             self.send_response(200)
