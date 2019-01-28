@@ -35,6 +35,9 @@ $(document).ready(function() {
     $("#delete-confirm2").hide();
     $("#camera-controls").hide();
 
+    // Enable tooltips for photos.html
+    $('[data-toggle="tooltip"]').tooltip();
+
     getCameraStatus();
     sendTime(getDateString());
 
@@ -176,7 +179,9 @@ $(document).ready(function() {
             $("#mode-auto").removeClass("active");
             $("#mode-manual").addClass("active");
         }
-        else sendGetRequest(dataDest);
+        else if (typeof dataDest !== 'undefined') {
+            sendGetRequest(dataDest);
+        }
     });
 
     // Range events
