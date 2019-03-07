@@ -26,13 +26,14 @@ class ChangeDetector(Thread):
         self.hiResStream = None
         self.lowResCapture = None
         self.lowResStream = None
-        self.framerate = 24
         self.initialise_camera()
 
+        self.framerate = self.config["frame_rate"]
         self.minWidth = self.config["min_width"]
         self.maxWidth = self.config["max_width"]
         self.minHeight = self.config["min_height"]
         self.maxHeight = self.config["max_height"]
+
 
         self.mode = 0
         self.avg = None
@@ -279,7 +280,7 @@ class ChangeDetector(Thread):
         if div is 0:
             return width
         else:
-            return ChangeDetector.safe_width(width+1)
+            return ChangeDetector.safe_width(width-1)
 
     @staticmethod
     def safe_height(height):
@@ -287,5 +288,5 @@ class ChangeDetector(Thread):
         if div is 0:
             return height
         else:
-            return ChangeDetector.safe_height(height+1)
+            return ChangeDetector.safe_height(height-1)
 
