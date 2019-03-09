@@ -14,7 +14,8 @@ class ChangeDetector(Thread):
     def __init__(self, configuration):
         super(ChangeDetector, self).__init__()
 
-        logging.basicConfig(filename='/home/pi/camera.log', level=logging.DEBUG)
+        FORMAT = '%(asctime)-15s %(message)s'
+        logging.basicConfig(filename='/home/pi/camera.log', level=logging.DEBUG, format=FORMAT)
 
         self.daemon = True
         self.cancelled = False
@@ -28,7 +29,6 @@ class ChangeDetector(Thread):
         self.lowResStream = None
         self.initialise_camera()
 
-        self.framerate = self.config["frame_rate"]
         self.minWidth = self.config["min_width"]
         self.maxWidth = self.config["max_width"]
         self.minHeight = self.config["min_height"]
@@ -54,7 +54,9 @@ class ChangeDetector(Thread):
         PiCamera.CAPTURE_TIMEOUT = 60
 
         self.camera.resolution = (self.safe_width(self.config["img_width"]), self.safe_height(self.config["img_height"]))
-
+        self.camera.framerate = self.config["frame_rate"]
+        time.sleep(1)
+		
         if self.config["fix_camera_settings"] is 1:
             self.camera.iso = self.config["iso"]
             time.sleep(0.2)
@@ -67,7 +69,7 @@ class ChangeDetector(Thread):
         self.hiResCapture = PiRGBArray(self.camera)
         self.lowResCapture = PiRGBArray(self.camera, size=(self.safe_width(self.config["cv_width"]),
                                                            self.safe_height(self.config["cv_height"])))
-        self.hiResStream = self.camera.capture_continuous(self.hiResCapture, format="bgr", use_video_port=True)
+        self.hiResStream = self.camera.capture_continuous(self.hiResCapture, format="bgr", use_video_port=False)
         self.lowResStream = self.camera.capture_continuous(self.lowResCapture, format="bgr", use_video_port=True,
                                                            splitter_port=2,
                                                            resize=(self.safe_width(self.config["cv_width"]),
@@ -97,7 +99,7 @@ class ChangeDetector(Thread):
         try:
             cv2.imwrite("photos/" + filename, image)
         except Exception as e:
-            logging.debug('take_photo() error: ')
+            logging.error('save_photo() error: ')
             logging.exception(e)
             pass
 
@@ -141,10 +143,17 @@ class ChangeDetector(Thread):
         return img
     
     def capture_photo(self):
-        logging.info('Taking a photo...')
-        self.hiResCapture.truncate(0)
-        self.hiResCapture.seek(0)
-        hrs = self.hiResStream.__next__()
+        logging.info('Capturing a photo...')
+        try:
+            self.hiResCapture.truncate(0)
+            self.hiResCapture.seek(0)
+            hrs = self.hiResStream.__next__()
+        except Exception as e:
+            logging.error('capture_photo() error: ')
+            logging.exception(e)
+            pass
+        else:
+            logging.debug('Captured %dx%d image', self.hiResCapture.array.shape[1], self.hiResCapture.array.shape[0])
         if self.config["rotate_camera"] is 1:
             hi_res_image = imutils.rotate(hrs.array, angle=180)
         else:
@@ -216,9 +225,11 @@ class ChangeDetector(Thread):
                 self.maxHeight = self.config["cv_height"]
 
     def arm(self):
+        logging.info('Start image capturing')
         self.mode = 1
 
     def disarm(self):
+        logging.info('Ending image capturing')
         self.mode = 0
 
     def rotate_camera(self):
@@ -266,7 +277,7 @@ class ChangeDetector(Thread):
                 self.currentImage = self.detect_change_contours(self.currentImage)
 
         except Exception as e:
-            logging.debug('update error')
+            logging.warning('update error')
             logging.exception(e)
             self.initialise_camera()
             pass
