@@ -76,10 +76,11 @@ class ChangeDetector(Thread):
                                                                    self.safe_height(self.config["cv_height"])))
         # high resolution images for capturing photos
         self.hiResCapture = PiRGBArray(self.camera)
-        self.hiResStream = self.camera.capture_continuous(self.hiResCapture, format="bgr", use_video_port=True)
+        self.hiResStream = self.camera.capture_continuous(self.hiResCapture, format="bgr", use_video_port=self.config["use_video_port"])
 
         logging.debug('Camera initialised with a resolution of %s and a framerate of %s', self.camera.resolution, self.camera.framerate)
         time.sleep(2)
+        logging.info('Ready to capture photos')
 
     # Thread run
     def run(self):
@@ -230,11 +231,11 @@ class ChangeDetector(Thread):
                 self.maxHeight = self.config["cv_height"]
 
     def arm(self):
-        logging.info('Start image capturing')
+        logging.info('Starting photo capturing')
         self.mode = 1
 
     def disarm(self):
-        logging.info('Ending image capturing')
+        logging.info('Ending photo capturing')
         self.mode = 0
 
     def rotate_camera(self):
