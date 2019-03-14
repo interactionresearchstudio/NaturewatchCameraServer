@@ -1,9 +1,10 @@
 {
-    "cv_width": 384,
-    "cv_height": 216,
-    "img_width": 1920,
-    "img_height": 1080,
-	"frame_rate": 24,
+    "cv_width": 400,
+    "cv_height": 300,
+    "img_width": 3280,
+    "img_height": 2464,
+    "frame_rate": 10,
+    "use_video_port": false,
     "camera_warmup": 2.5,
     "stream_delay": 0.2,
     "rotate_camera": 1,
@@ -17,5 +18,6 @@
     "min_photo_interval_s": 1,
     "fix_camera_settings": 0,
     "iso": 800,
-    "shutter_speed": 8000
+    "shutter_speed": 8000,
+    "log_level": "INFO"
 }
