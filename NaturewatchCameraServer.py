@@ -1,24 +1,37 @@
-#!/usr/bin/env python
+#!flask/bin/python
 import json
 import cv2
 import os
 import sys
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from socketserver import ThreadingMixIn
 from ChangeDetector import ChangeDetector
 import time
 from urllib.parse import urlparse, parse_qs
+from flask import Flask, send_from_directory
 
-os.chdir("/home/pi/NaturewatchCameraServer")
-config = json.load(open("config.json"))
-os.chdir("/home/pi/NaturewatchCameraServer/www")
+# os.chdir("/home/pi/NaturewatchCameraServer")
+# config = json.load(open("config.json"))
+# os.chdir("/home/pi/NaturewatchCameraServer/www")
 
 # NatureCam implementation
-changeDetectorInstance = ChangeDetector(config)
+# changeDetectorInstance = ChangeDetector(config)
 
 isTimeSet = False
 
+# Flask
+app = Flask(__name__, static_folder='www/')
 
+# Serve static website
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
+
+
+
+'''
 # Handle HTTP requests.
 class CamHandler(BaseHTTPRequestHandler):
     type_map = {
@@ -36,7 +49,6 @@ class CamHandler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "X-Requested-With")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
-        print("Sent options.")
 
     def do_GET(self):
         print(self.path)
@@ -99,7 +111,8 @@ class CamHandler(BaseHTTPRequestHandler):
             while True:
                 try:
                     img = changeDetectorInstance.get_current_image()
-                    r, buf = cv2.imencode(".jpg", img)
+                    # r, buf = cv2.imencode(".jpg", img)
+                    r, buf = (None, None)
                     self.wfile.write(b'--jpgboundary\r\n')
                     self.send_header('Content-type', 'image/jpeg')
                     self.send_header('Content-length', str(len(buf)))
@@ -327,7 +340,8 @@ def main():
         changeDetectorInstance.cancel()
         if server is not None:
             server.socket.close()
-
+'''
 
 if __name__ == '__main__':
-    main()
+    # main()
+    app.run(debug=True, threaded=True)

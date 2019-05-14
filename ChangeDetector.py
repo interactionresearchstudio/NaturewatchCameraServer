@@ -7,6 +7,8 @@ import imutils
 import datetime
 import time
 import logging
+sys.path.append('..')
+from CameraController import CameraController
 
 class ChangeDetector(Thread):
 
@@ -25,18 +27,10 @@ class ChangeDetector(Thread):
         logging.basicConfig(filename='/home/pi/camera.log', level=numeric_loglevel, format='%(asctime)-15s %(levelname)s: %(message)s')
         logging.info('logging initialised')
 
-        self.camera = None
-        self.hiResCapture = None
-        self.hiResStream = None
-        self.lowResCapture = None
-        self.lowResStream = None
-        self.initialise_camera()
-
         self.minWidth = self.config["min_width"]
         self.maxWidth = self.config["max_width"]
         self.minHeight = self.config["min_height"]
         self.maxHeight = self.config["max_height"]
-
 
         self.mode = 0
         self.avg = None
