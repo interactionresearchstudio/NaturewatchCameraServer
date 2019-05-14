@@ -1,24 +1,23 @@
 import cv2
 import numpy as np
-from picamera.array import PiRGBArray
-from picamera import PiCamera
 from threading import Thread
-import imutils
 import datetime
 import time
 import logging
-sys.path.append('..')
 from CameraController import CameraController
 
 class ChangeDetector(Thread):
 
     # Constructor
-    def __init__(self, configuration):
+    def __init__(self, configuration, camera_controller):
         super(ChangeDetector, self).__init__()
 
         self.config = configuration
         self.daemon = True
         self.cancelled = False
+
+        self.camera_controller = camera_controller
+        self.camera_controller
 
         # initialise logging
         numeric_loglevel = getattr(logging, self.config["log_level"].upper(), None)
@@ -42,41 +41,7 @@ class ChangeDetector(Thread):
         self.isMinActive = False
         self.currentImage = None
 
-    # Initialise camera
-    def initialise_camera(self):
-        logging.info('Initialising camera ...')
-        if self.camera is not None:
-            self.camera.close()
-
-        # setting resolution and framerate at construction saves time
-        self.camera = PiCamera(resolution = (self.safe_width(self.config["img_width"]), self.safe_height(self.config["img_height"])),framerate = self.config["frame_rate"])
-        time.sleep(1)
-		
-        if self.config["fix_camera_settings"] is 1:
-            self.camera.iso = self.config["iso"]
-            time.sleep(0.2)
-            self.camera.shutter_speed = self.config["shutter_speed"]
-            self.camera.exposure_mode = 'off'
-            g = self.camera.awb_gains
-            self.camera.awb_mode = 'off'
-            self.camera.awb_gains = g
-
-        # low resolution images for movement detection
-        self.lowResCapture = PiRGBArray(self.camera, size=(self.safe_width(self.config["cv_width"]),
-                                                           self.safe_height(self.config["cv_height"])))
-        self.lowResStream = self.camera.capture_continuous(self.lowResCapture, format="bgr", use_video_port=True,
-                                                           splitter_port=2,
-                                                           resize=(self.safe_width(self.config["cv_width"]),
-                                                                   self.safe_height(self.config["cv_height"])))
-        # high resolution images for capturing photos
-        self.hiResCapture = PiRGBArray(self.camera)
-        self.hiResStream = self.camera.capture_continuous(self.hiResCapture, format="bgr", use_video_port=self.config["use_video_port"])
-
-        logging.debug('Camera initialised with a resolution of %s and a framerate of %s', self.camera.resolution, self.camera.framerate)
-        time.sleep(2)
-        logging.info('Ready to capture photos')
-
-    # Thread run
+    # Run thread
     def run(self):
         while not self.cancelled:
             try:
@@ -85,7 +50,7 @@ class ChangeDetector(Thread):
                 logging.exception(e)
                 continue
 
-    # Thread cancel
+    # Cancel thread
     def cancel(self):
         self.cancelled = True
         self.camera.close()

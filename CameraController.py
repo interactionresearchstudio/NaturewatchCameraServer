@@ -60,33 +60,38 @@ class CameraController(threading.Thread):
     # Main routine
     def run(self):
         while not self.is_stopped():
-            if picamera_exists:
-                try:
-                    # Get image from Pi camera
-                    self.picamera_capture.truncate(0)
-                    self.picamera_capture.seek(0)
-                    s = self.picamera_stream.__next__()
-                    self.image = s.array
+            try:
+                if picamera_exists:
+                    try:
+                        # Get image from Pi camera
+                        self.picamera_capture.truncate(0)
+                        self.picamera_capture.seek(0)
+                        s = self.picamera_stream.__next__()
+                        self.image = s.array
+
+                        if self.image is None:
+                            logging.warning("Got empty image.")
+
+                    except Exception as e:
+                        logging.error("picamera update error.")
+                        logging.exception(e)
+                        self.initialise_picamera()
+                        pass
+
+                else:
+                    # Get image from webcam
+                    if self.use_splitter_port:
+                        ret, self.splitter_image = self.capture.read()
+                        if self.splitter_image is not None:
+                            self.image = imutils.resize(self.splitter_image, width=self.width, height=self.height)
+                    else:
+                        ret, self.image = self.capture.read()
 
                     if self.image is None:
                         logging.warning("Got empty image.")
-
-                except Exception as e:
-                    logging.error("picamera update error.")
-                    logging.exception(e)
-                    self.initialise_picamera()
-                    pass
-
-            else:
-                # Get image from webcam
-                if self.use_splitter_port:
-                    ret, self.splitter_image = self.capture.read()
-                    self.image = imutils.resize(self.splitter_image, width=self.width, height=self.height)
-                else:
-                    ret, self.image = self.capture.read()
-
-                if self.image is None:
-                    logging.warning("Got empty image.")
+            except KeyboardInterrupt:
+                logging.info("Received KeyboardInterrupt. Shutting down CameraController...")
+                self.stop()
 
     # Stop thread
     def stop(self):
@@ -94,6 +99,7 @@ class CameraController(threading.Thread):
 
         if picamera_exists:
             # Close pi camera
+            self.camera.close()
             pass
         else:
             # Close webcam
@@ -112,6 +118,11 @@ class CameraController(threading.Thread):
                 return imutils.rotate(self.image.copy(), angle=180)
             else:
                 return self.image.copy()
+
+    # Get CV image in binary jpeg encoding format
+    def get_image_binary(self):
+        r, buf = cv2.imencode(".jpg", self.get_image())
+        return buf
 
     # Get splitter image
     def get_splitter_image(self):
@@ -139,6 +150,7 @@ class CameraController(threading.Thread):
             return None
 
     # Initialise picamera. If already started, close and reinitialise.
+    # TODO - reset with manual exposure, if it was set before.
     def initialise_picamera(self):
         if picamera_exists:
             if self.camera is not None:

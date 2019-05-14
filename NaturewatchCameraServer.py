@@ -1,24 +1,25 @@
-#!flask/bin/python
+#!naturewatchenv/bin/python
 import json
-import cv2
 import os
+import logging
 import sys
 from ChangeDetector import ChangeDetector
+from CameraController import CameraController
 import time
 from urllib.parse import urlparse, parse_qs
-from flask import Flask, send_from_directory
-
-# os.chdir("/home/pi/NaturewatchCameraServer")
-# config = json.load(open("config.json"))
-# os.chdir("/home/pi/NaturewatchCameraServer/www")
+from flask import Flask, send_from_directory, Response
 
 # NatureCam implementation
 # changeDetectorInstance = ChangeDetector(config)
 
 isTimeSet = False
 
+camera_controller = CameraController(use_splitter_port=True)
+
 # Flask
 app = Flask(__name__, static_folder='www/')
+
+
 
 # Serve static website
 @app.route('/', defaults={'path': ''})
@@ -30,6 +31,36 @@ def serve(path):
         return send_from_directory(app.static_folder, 'index.html')
 
 
+def generate_mjpg():
+    while camera_controller.is_alive():
+        try:
+            frame = camera_controller.get_image_binary()
+            yield(b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + bytearray(frame) + b'\r\n')
+        except BrokenPipeError:
+            app.logger.info("Client disconnected from camera feed.")
+            break
+        except ConnectionResetError:
+            app.logger.info("Camera feed connection reset by peer.")
+            break
+
+
+@app.route('/feed')
+def feed():
+    app.logger.info("Serving camera feed...")
+    return Response(generate_mjpg(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+def setup_logger(name, log_file, level=logging.INFO):
+    """Function setup as many loggers as you want"""
+
+    handler = logging.FileHandler(log_file)
+    handler.setFormatter(formatter)
+
+    logger = logging.getLogger(name)
+    logger.setLevel(level)
+    logger.addHandler(handler)
+
+    return logger
 
 '''
 # Handle HTTP requests.
@@ -342,6 +373,9 @@ def main():
             server.socket.close()
 '''
 
+# Set up loggers
+camera_logger = setup_logger('camera_controller_controller', 'camera_controller.log')
+
 if __name__ == '__main__':
-    # main()
+    camera_controller.start()
     app.run(debug=True, threaded=True)
