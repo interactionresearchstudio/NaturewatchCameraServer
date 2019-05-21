@@ -219,3 +219,6 @@ class CameraController(threading.Thread):
             return height
         else:
             return CameraController.safe_height(height + 1)
+
+# Instatiate one camera controller for all server routes
+camera_controller = CameraController(use_splitter_port=True)

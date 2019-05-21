@@ -4,7 +4,7 @@ from threading import Thread
 import datetime
 import time
 import logging
-from CameraController import CameraController
+
 
 class ChangeDetector(Thread):
 
