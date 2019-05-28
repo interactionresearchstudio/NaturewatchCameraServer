@@ -1,4 +1,4 @@
-#!../naturewatchenv/bin/python
+#!../venv/bin/python
 import logging
 from CameraController import CameraController
 from flask import Flask
@@ -43,5 +43,4 @@ camera_logger = setup_logger('camera_controller_controller', 'camera_controller.
 if __name__ == '__main__':
     app = create_app()
     app.camera_controller.start()
-
     app.run(debug=True, threaded=True)

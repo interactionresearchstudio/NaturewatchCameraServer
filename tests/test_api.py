@@ -39,3 +39,13 @@ def test_jpg(test_client):
     response = test_client.get('/api/frame')
     assert response.status_code == 200
     assert b"Content-Type: image/jpeg" in response.data
+
+def test_mjpg(test_client):
+    """
+    GIVEN a Flask application
+    WHEN the '/api/feed' page is requested (GET)
+    THEN check the response is valid
+    """
+    response = test_client.get('/api/feed')
+    assert response.status_code == 200
+    assert b"Content-Type: image/jpeg" in response.data
