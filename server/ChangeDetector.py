@@ -3,12 +3,12 @@ import numpy as np
 from threading import Thread
 import datetime
 import time
+import imutils
 import logging
 
 
 class ChangeDetector(Thread):
 
-    # Constructor
     def __init__(self, configuration, camera_controller):
         super(ChangeDetector, self).__init__()
 
@@ -17,13 +17,13 @@ class ChangeDetector(Thread):
         self.cancelled = False
 
         self.camera_controller = camera_controller
-        self.camera_controller
 
         # initialise logging
         numeric_loglevel = getattr(logging, self.config["log_level"].upper(), None)
         if not isinstance(numeric_loglevel, int):
             raise ValueError('Invalid log level: %s' % self.config["log_level"])
-        logging.basicConfig(filename='/home/pi/camera.log', level=numeric_loglevel, format='%(asctime)-15s %(levelname)s: %(message)s')
+        logging.basicConfig(filename='/home/pi/camera.log', level=numeric_loglevel,
+                            format='%(asctime)-15s %(levelname)s: %(message)s')
         logging.info('logging initialised')
 
         self.minWidth = self.config["min_width"]
@@ -41,8 +41,11 @@ class ChangeDetector(Thread):
         self.isMinActive = False
         self.currentImage = None
 
-    # Run thread
     def run(self):
+        """
+        Main run function
+        :return: none
+        """
         while not self.cancelled:
             try:
                 self.update()
@@ -50,13 +53,21 @@ class ChangeDetector(Thread):
                 logging.exception(e)
                 continue
 
-    # Cancel thread
     def cancel(self):
+        """
+        Cancel thread
+        :return: none
+        """
         self.cancelled = True
         self.camera.close()
 
     @staticmethod
     def save_photo(image):
+        """
+        Save numpy image to a jpg file
+        :param image: numpy array image
+        :return: none
+        """
         timestamp = datetime.datetime.now()
         filename = timestamp.strftime('%Y-%m-%d-%H-%M-%S')
         filename = filename + ".jpg"
@@ -69,6 +80,12 @@ class ChangeDetector(Thread):
             pass
 
     def detect_change_contours(self, img):
+        """
+        Detect changed contours in frame
+        :param img: current image
+        :return: True if it's time to capture
+        """
+
         # convert to gray
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
@@ -94,18 +111,15 @@ class ChangeDetector(Thread):
 
         (x, y, w, h) = cv2.boundingRect(largest_contour)
 
-        # if the contour is too small, just return the image.
+        # if the contour is too small, return false
         if w > self.maxWidth or w < self.minWidth or h > self.maxHeight or h < self.minHeight:
-            return img
+            # return img
+            return False
+        else:
+            if time.time() - self.lastPhotoTime >= self.config['min_photo_interval_s']:
+                return True
 
-        # otherwise, draw the rectangle
-        if time.time() - self.lastPhotoTime >= self.config['min_photo_interval_s']:
-            self.capture_photo()
-            
-        cv2.rectangle(img, (x, y), (x+w, y+h), (0, 0, 255), 2)
-        cv2.putText(img, "%d" % self.numOfPhotos, (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-
-        return img
+        return False
     
     def capture_photo(self):
         logging.info('Capturing a photo ...')
@@ -130,6 +144,11 @@ class ChangeDetector(Thread):
 
     @staticmethod
     def get_largest_contour(contours):
+        """
+        Get the largest contour in a list of contours
+        :param contours: a list of contours
+        :return: the largest contour object
+        """
         if not contours:
             return None
         else:
@@ -196,33 +215,6 @@ class ChangeDetector(Thread):
     def disarm(self):
         logging.info('Ending photo capturing')
         self.mode = 0
-
-    def rotate_camera(self):
-        self.config["rotate_camera"] = 1 - self.config["rotate_camera"]
-        return self.config
-
-    def auto_exposure(self):
-        self.camera.iso = 0
-        self.camera.shutter_speed = 0
-        self.camera.exposure_mode = 'auto'
-        self.camera.awb_mode = 'auto'
-
-        self.config["fix_camera_settings"] = 0
-        return self.config
-
-    def fix_exposure(self, shutter_speed):
-        self.camera.iso = 800
-        time.sleep(0.5)
-        self.camera.shutter_speed = shutter_speed
-        self.camera.exposure_mode = 'off'
-        g = self.camera.awb_gains
-        self.camera.awb_mode = 'off'
-        self.camera.awb_gains = g
-
-        self.config["shutter_speed"] = shutter_speed
-        self.config["fix_camera_settings"] = 1
-
-        return self.config
 
     def update(self):
         try:

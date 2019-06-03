@@ -1,5 +1,6 @@
 import pytest
 import sys
+import json
 sys.path.insert(0, './server')
 import naturewatch_camera_server
 
@@ -48,4 +49,4 @@ def test_mjpg(test_client):
     """
     response = test_client.get('/api/feed')
     assert response.status_code == 200
-    assert b"Content-Type: image/jpeg" in response.data
+    # TODO test actual stream

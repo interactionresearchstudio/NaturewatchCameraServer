@@ -1,6 +1,7 @@
 #!../venv/bin/python
 import logging
 from CameraController import CameraController
+from ChangeDetector import ChangeDetector
 from flask import Flask
 from api import api
 from static_page import static_page
@@ -33,6 +34,7 @@ def create_app():
     flask_app.register_blueprint(static_page)
 
     flask_app.camera_controller = CameraController(use_splitter_port=True)
+    # flask_app.change_detector = ChangeDetector(flask_app.camera_controller)
 
     return flask_app
 

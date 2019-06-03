@@ -194,31 +194,39 @@ class CameraController(threading.Thread):
             self.camera.awb_mode = 'off'
             self.camera.awb_gains = g
 
-    # Set picamera exposure to auto
     def auto_exposure(self):
+        """
+        Set picamera exposure to auto
+        :return: none
+        """
         if picamera_exists:
             self.camera.iso = 0
             self.camera.shutter_speed = 0
             self.camera.exposure_mode = 'auto'
             self.camera.awb_mode = 'auto'
 
-    # Return safe width (multiple of 32)
     @staticmethod
     def safe_width(width):
+        """
+        Return safe width (multiple of 32)
+        :param width: width in pixels
+        :return: safe width in pixels
+        """
         div = width % 32
         if div is 0:
             return width
         else:
             return CameraController.safe_width(width + 1)
 
-    # Return safe height (multiple of 32)
     @staticmethod
     def safe_height(height):
+        """
+        Return safe height (multiple of 32)
+        :param height: height in pixels
+        :return: safe height in pixels
+        """
         div = height % 16
         if div is 0:
             return height
         else:
             return CameraController.safe_height(height + 1)
-
-# Instatiate one camera controller for all server routes
-# camera_controller = CameraController(use_splitter_port=True)
