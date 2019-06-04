@@ -26,7 +26,7 @@ class FileSaver(Thread):
         filename = filename + ".jpg"
 
         try:
-            cv2.imwrite("photos/" + filename, image)
+            cv2.imwrite(filename, image)
             return filename
         except Exception as e:
             self.logging.error('FileSaver: save_photo() error: ')

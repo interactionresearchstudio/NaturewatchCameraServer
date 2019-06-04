@@ -28,3 +28,4 @@ def test_client():
 def test_image_save():
     filename = file_saver.save_image(app.camera_controller.get_image())
     assert os.path.isfile(filename)
+    
