@@ -66,3 +66,9 @@ def test_get_settings(test_client):
     assert "rotation" in response_dict
     assert "exposure" in response_dict
     assert "sensitivity" in response_dict
+    assert response_dict["sensitivity"]["min"] == 100
+    assert response_dict["sensitivity"]["max"] == 200
+    assert response_dict["exposure"]["mode"] == 'auto'
+    assert response_dict["exposure"]["iso"] == 0
+    assert response_dict["exposure"]["shutter_speed"] == 0
+    assert response_dict["rotation"] is False
