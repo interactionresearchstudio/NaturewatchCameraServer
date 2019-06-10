@@ -74,7 +74,7 @@ def test_get_settings(test_client):
 def test_post_settings(test_client):
     """
     GIVEN a Flask application
-    WHEN '/api/settings is requested (POST
+    WHEN '/api/settings' is requested (POST)
     THEN the settings object should be updated
     """
     settings = {
@@ -103,3 +103,15 @@ def test_post_settings(test_client):
     assert response_dict["exposure"]["iso"] == 0
     assert response_dict["exposure"]["shutter_speed"] == 0
     assert response_dict["rotation"] is True
+
+def test_session_status(test_client):
+    """
+    GIVEN a Flask application
+    WHEN '/api/session' is requested (GET)
+    THEN the session status object should be returned
+    """
+    response = test_client.get('/api/session')
+    assert response.status_code == 200
+    response_dict = json.loads(response.data.decode('utf8'))
+    assert "time_started" in response_dict
+    assert response_dict["mode"] == "inactive"

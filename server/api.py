@@ -103,3 +103,16 @@ def construct_settings_object(camera_controller, change_detector):
         }
     }
     return settings
+
+
+@api.route('/session')
+def get_session():
+    """
+    Get session status
+    :return: session status json object
+    """
+    session_status = {
+        "mode": current_app.change_detector.mode,
+        "time_started": current_app.change_detector.session_start_time
+    }
+    return Response(json.dumps(session_status), mimetype='application/json')

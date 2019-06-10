@@ -25,7 +25,8 @@ class ChangeDetector(Thread):
         self.minHeight = self.config["min_height"]
         self.maxHeight = self.config["max_height"]
 
-        self.mode = 0
+        self.mode = "inactive"
+        self.session_start_time = None
         self.avg = None
         self.lastPhotoTime = time.time()
         self.numOfPhotos = 0
@@ -211,11 +212,16 @@ class ChangeDetector(Thread):
 
     def arm(self):
         self.logger.info('Starting photo capturing')
-        self.mode = 1
+        self.mode = "photo"
+
+    def start_photo_session(self):
+        self.logger.info('Starting photo capturing')
+        self.mode = "photo"
+        self.session_start_time = time.time()
 
     def disarm(self):
         self.logger.info('Ending photo capturing')
-        self.mode = 0
+        self.mode = "video"
 
     def update(self):
         try:
@@ -229,9 +235,9 @@ class ChangeDetector(Thread):
             else:
                 self.currentImage = lrs.array
 
-            if self.mode == 0:
+            if self.mode == "inactive":
                 self.currentImage = self.display_min_max(self.currentImage)
-            elif self.mode == 1:
+            elif self.mode == "photo":
                 self.currentImage = self.detect_change_contours(self.currentImage)
 
         except Exception as e:
