@@ -1,27 +1,14 @@
 #!../venv/bin/python
+import json
 import logging
+import os
+import sys
+from logging.handlers import RotatingFileHandler
 from CameraController import CameraController
 from ChangeDetector import ChangeDetector
 from flask import Flask
 from api import api
 from static_page import static_page
-
-
-def setup_logger(name, log_file, level=logging.INFO):
-    """
-    Setup logger
-    :param name: Logger name
-    :param log_file: File to save to
-    :param level: Logging level
-    :return: Logger object
-    """
-    handler = logging.FileHandler(log_file)
-
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
-    logger.addHandler(handler)
-
-    return logger
 
 
 def create_app():
@@ -33,14 +20,21 @@ def create_app():
     flask_app.register_blueprint(api, url_prefix='/api')
     flask_app.register_blueprint(static_page)
 
+    # Setup logger
+    # handler = RotatingFileHandler('naturewatch_camera_server.log', maxBytes=10000, backupCount=1)
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.INFO)
+    flask_app.logger.addHandler(handler)
+
+    # Load configuration json
+    config = json.load(open(os.path.join(sys.path[0], "config.json")))
+
+    # Instantiate classes
     flask_app.camera_controller = CameraController(use_splitter_port=True)
-    # flask_app.change_detector = ChangeDetector(flask_app.camera_controller)
+    flask_app.change_detector = ChangeDetector(flask_app.camera_controller, config, flask_app.logger)
 
     return flask_app
 
-
-# Set up loggers
-camera_logger = setup_logger('camera_controller_controller', 'camera_controller.log')
 
 if __name__ == '__main__':
     app = create_app()

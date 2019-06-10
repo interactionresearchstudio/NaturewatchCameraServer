@@ -9,7 +9,7 @@ import logging
 
 class ChangeDetector(Thread):
 
-    def __init__(self, configuration, camera_controller):
+    def __init__(self, camera_controller, configuration, logger):
         super(ChangeDetector, self).__init__()
 
         self.config = configuration
@@ -18,13 +18,7 @@ class ChangeDetector(Thread):
 
         self.camera_controller = camera_controller
 
-        # initialise logging
-        numeric_loglevel = getattr(logging, self.config["log_level"].upper(), None)
-        if not isinstance(numeric_loglevel, int):
-            raise ValueError('Invalid log level: %s' % self.config["log_level"])
-        logging.basicConfig(filename='/home/pi/camera.log', level=numeric_loglevel,
-                            format='%(asctime)-15s %(levelname)s: %(message)s')
-        logging.info('logging initialised')
+        self.logger = logger
 
         self.minWidth = self.config["min_width"]
         self.maxWidth = self.config["max_width"]
@@ -50,7 +44,7 @@ class ChangeDetector(Thread):
             try:
                 self.update()
             except Exception as e:
-                logging.exception(e)
+                self.logger.exception(e)
                 continue
 
     def cancel(self):
@@ -75,8 +69,8 @@ class ChangeDetector(Thread):
         try:
             cv2.imwrite("photos/" + filename, image)
         except Exception as e:
-            logging.error('save_photo() error: ')
-            logging.exception(e)
+            self.logger.error('save_photo() error: ')
+            self.logger.exception(e)
             pass
 
     def detect_change_contours(self, img):
@@ -122,17 +116,18 @@ class ChangeDetector(Thread):
         return False
     
     def capture_photo(self):
-        logging.info('Capturing a photo ...')
+        self.logger.info('Capturing a photo ...')
         try:
             self.hiResCapture.truncate(0)
             self.hiResCapture.seek(0)
             hrs = self.hiResStream.__next__()
         except Exception as e:
-            logging.error('capture_photo() error: ')
-            logging.exception(e)
+            self.logger.error('capture_photo() error: ')
+            self.logger.exception(e)
             pass
         else:
-            logging.debug('Captured %dx%d photo', self.hiResCapture.array.shape[1], self.hiResCapture.array.shape[0])
+            self.logger.debug('Captured %dx%d photo', self.hiResCapture.array.shape[1],
+                              self.hiResCapture.array.shape[0])
         if self.config["rotate_camera"] is 1:
             hi_res_image = imutils.rotate(hrs.array, angle=180)
         else:
@@ -174,6 +169,12 @@ class ChangeDetector(Thread):
                        int(self.config["cv_height"]/2+self.maxHeight/2)), maxColour, 2)
         return img
 
+    def set_sensitivity(self, min, max):
+        self.minWidth = min
+        self.minHeight = min
+        self.maxWidth = max
+        self.maxHeight = max
+
     def increase_min_max(self, increment):
         if self.isMinActive is True:
             self.minWidth = self.minWidth + increment
@@ -209,11 +210,11 @@ class ChangeDetector(Thread):
                 self.maxHeight = self.config["cv_height"]
 
     def arm(self):
-        logging.info('Starting photo capturing')
+        self.logger.info('Starting photo capturing')
         self.mode = 1
 
     def disarm(self):
-        logging.info('Ending photo capturing')
+        self.logger.info('Ending photo capturing')
         self.mode = 0
 
     def update(self):
@@ -234,8 +235,8 @@ class ChangeDetector(Thread):
                 self.currentImage = self.detect_change_contours(self.currentImage)
 
         except Exception as e:
-            logging.warning('update error')
-            logging.exception(e)
+            self.logger.warning('update error')
+            self.logger.exception(e)
             self.initialise_camera()
             pass
 

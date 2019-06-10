@@ -184,15 +184,33 @@ class CameraController(threading.Thread):
         self.rotated_camera = rotation
 
     # Set picamera exposure
-    def set_exposure(self, shutter_speed):
+    def set_exposure(self, shutter_speed, iso):
         if picamera_exists:
-            self.camera.iso = 800
+            self.camera.iso = iso
             time.sleep(0.5)
             self.camera.shutter_speed = shutter_speed
             self.camera.exposure_mode = 'off'
             g = self.camera.awb_gains
             self.camera.awb_mode = 'off'
             self.camera.awb_gains = g
+
+    def get_exposure_mode(self):
+        if picamera_exists:
+            return self.camera.exposure_mode
+        else:
+            return 'auto'
+
+    def get_iso(self):
+        if picamera_exists:
+            return self.camera.iso
+        else:
+            return 0
+
+    def get_shutter_speed(self):
+        if picamera_exists:
+            return self.camera.shutter_speed
+        else:
+            return 0
 
     def auto_exposure(self):
         """

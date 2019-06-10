@@ -1,7 +1,7 @@
-from flask import Blueprint, Response
+from flask import Blueprint, Response, request, json
 from flask import current_app
 import time
-# from CameraController import camera_controller
+import json
 
 api = Blueprint('api', __name__)
 
@@ -57,3 +57,47 @@ def generate_jpg(camera_controller):
         current_app.logger.exception(e)
         return b'Empty'
 
+
+@api.route('/settings', methods=['GET', 'POST'])
+def settings_handler():
+    """
+    Settings endpoint
+    :return: settings json object
+    """
+    if request.method == 'GET':
+        settings = construct_settings_object(current_app.camera_controller, current_app.change_detector)
+        return Response(json.dumps(settings), mimetype='application/json')
+    elif request.method == 'POST':
+        settings = request.json
+        current_app.camera_controller.set_camera_rotation(settings["rotation"])
+        current_app.camera_controller.sensitivity(settings["rotation"])
+        current_app.change_detector.set_sensitivity(settings["sensitivity"]["min"], settings["sensitivity"]["max"])
+        if settings["mode"] is "auto":
+            current_app.camera_controller.auto_exposure()
+        else:
+            current_app.camera_controller.set_exposure(settings["exposure"]["shutter_speed"],
+                                                       settings["exposure"]["iso"])
+        new_settings = construct_settings_object(current_app.camera_controller, current_app.change_detector)
+        return Response(json.dumps(new_settings), mimetype='application/json')
+
+
+def construct_settings_object(camera_controller, change_detector):
+    """
+    Construct a dictionary populated with the current settings of the camera controller and change detector.
+    :param camera_controller: Running camera controller object
+    :param change_detector: Running change detector object
+    :return: settings dictionary
+    """
+    settings = {
+        "rotation": camera_controller.rotated_camera,
+        "exposure": {
+            "mode": camera_controller.get_exposure_mode(),
+            "iso": camera_controller.get_iso(),
+            "shutter_speed": camera_controller.get_shutter_speed(),
+        },
+        "sensitivity": {
+            "min": change_detector.minWidth,
+            "max": change_detector.maxWidth
+        }
+    }
+    return settings

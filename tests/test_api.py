@@ -50,3 +50,19 @@ def test_mjpg(test_client):
     response = test_client.get('/api/feed')
     assert response.status_code == 200
     # TODO test actual stream
+
+
+def test_get_settings(test_client):
+    """
+    GIVEN a Flask application
+    WHEN '/api/settings' is requested (GET)
+    THEN check the settings object is valid
+    :param test_client:
+    :return:
+    """
+    response = test_client.get('/api/settings')
+    assert response.status_code == 200
+    response_dict = json.loads(response.data.decode('utf8'))
+    assert "rotation" in response_dict
+    assert "exposure" in response_dict
+    assert "sensitivity" in response_dict
