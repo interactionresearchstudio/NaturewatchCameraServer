@@ -69,12 +69,14 @@ def settings_handler():
         return Response(json.dumps(settings), mimetype='application/json')
     elif request.method == 'POST':
         settings = request.json
-        current_app.camera_controller.set_camera_rotation(settings["rotation"])
-        current_app.change_detector.set_sensitivity(settings["sensitivity"]["min"], settings["sensitivity"]["max"])
+        if "rotation" in settings:
+            current_app.camera_controller.set_camera_rotation(settings["rotation"])
+        if "sensitivity" in settings:
+            current_app.change_detector.set_sensitivity(settings["sensitivity"]["min"], settings["sensitivity"]["max"])
         if "mode" in settings["exposure"]:
             if settings["exposure"]["mode"] == "auto":
                 current_app.camera_controller.auto_exposure()
-        else:
+        elif "shutter_speed" in settings and "iso" in settings:
             current_app.camera_controller.set_exposure(settings["exposure"]["shutter_speed"],
                                                        settings["exposure"]["iso"])
         new_settings = construct_settings_object(current_app.camera_controller, current_app.change_detector)
