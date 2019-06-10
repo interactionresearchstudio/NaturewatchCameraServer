@@ -57,8 +57,6 @@ def test_get_settings(test_client):
     GIVEN a Flask application
     WHEN '/api/settings' is requested (GET)
     THEN check the settings object is valid
-    :param test_client:
-    :return:
     """
     response = test_client.get('/api/settings')
     assert response.status_code == 200
@@ -72,3 +70,36 @@ def test_get_settings(test_client):
     assert response_dict["exposure"]["iso"] == 0
     assert response_dict["exposure"]["shutter_speed"] == 0
     assert response_dict["rotation"] is False
+
+def test_post_settings(test_client):
+    """
+    GIVEN a Flask application
+    WHEN '/api/settings is requested (POST
+    THEN the settings object should be updated
+    """
+    settings = {
+        "rotation": True,
+        "exposure": {
+            "mode": "auto",
+        },
+        "sensitivity": {
+            "min": 150,
+            "max": 350
+        }
+    }
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json"
+    }
+    response = test_client.post('/api/settings', data=json.dumps(settings), headers=headers)
+    assert response.status_code == 200
+    response_dict = json.loads(response.data.decode('utf8'))
+    assert "rotation" in response_dict
+    assert "exposure" in response_dict
+    assert "sensitivity" in response_dict
+    assert response_dict["sensitivity"]["min"] == 150
+    assert response_dict["sensitivity"]["max"] == 350
+    assert response_dict["exposure"]["mode"] == 'auto'
+    assert response_dict["exposure"]["iso"] == 0
+    assert response_dict["exposure"]["shutter_speed"] == 0
+    assert response_dict["rotation"] is True

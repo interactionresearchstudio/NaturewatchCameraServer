@@ -70,10 +70,10 @@ def settings_handler():
     elif request.method == 'POST':
         settings = request.json
         current_app.camera_controller.set_camera_rotation(settings["rotation"])
-        current_app.camera_controller.sensitivity(settings["rotation"])
         current_app.change_detector.set_sensitivity(settings["sensitivity"]["min"], settings["sensitivity"]["max"])
-        if settings["mode"] is "auto":
-            current_app.camera_controller.auto_exposure()
+        if "mode" in settings["exposure"]:
+            if settings["exposure"]["mode"] == "auto":
+                current_app.camera_controller.auto_exposure()
         else:
             current_app.camera_controller.set_exposure(settings["exposure"]["shutter_speed"],
                                                        settings["exposure"]["iso"])
