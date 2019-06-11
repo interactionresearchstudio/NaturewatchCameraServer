@@ -115,3 +115,27 @@ def test_session_status(test_client):
     response_dict = json.loads(response.data.decode('utf8'))
     assert "time_started" in response_dict
     assert response_dict["mode"] == "inactive"
+
+def test_session_start_photo(test_client):
+    """
+    GIVEN a Flask application
+    WHEN '/api/session/start/photo' is requested (POST)
+    THEN photo session should start and new status object should be returned
+    """
+    response = test_client.post('/api/session/start/photo')
+    assert response.status_code == 200
+    response_dict = json.loads(response.data.decode('utf8'))
+    assert "time_started" in response_dict
+    assert response_dict["mode"] == "photo"
+
+def test_session_stop(test_client):
+    """
+    GIVEN a Flask application
+    WHEN '/api/session/stop' is requested (POST)
+    THEN session should stop and new status object should be returned
+    """
+    response = test_client.post('/api/session/stop')
+    assert response.status_code == 200
+    response_dict = json.loads(response.data.decode('utf8'))
+    assert "time_started" in response_dict
+    assert response_dict["mode"] == "inactive"

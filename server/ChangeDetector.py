@@ -219,9 +219,10 @@ class ChangeDetector(Thread):
         self.mode = "photo"
         self.session_start_time = time.time()
 
-    def disarm(self):
+    def stop_session(self):
         self.logger.info('Ending photo capturing')
-        self.mode = "video"
+        self.mode = "inactive"
+        self.session_start_time = time.time()
 
     def update(self):
         try:

@@ -116,3 +116,33 @@ def get_session():
         "time_started": current_app.change_detector.session_start_time
     }
     return Response(json.dumps(session_status), mimetype='application/json')
+
+
+@api.route('/session/start/<session_type>', methods=['POST'])
+def start_session_handler(session_type):
+    """
+    Start session of type photo or video
+    :return: session status json object
+    """
+    if session_type == "photo":
+        current_app.change_detector.start_photo_session()
+
+    session_status = {
+        "mode": current_app.change_detector.mode,
+        "time_started": current_app.change_detector.session_start_time
+    }
+    return Response(json.dumps(session_status), mimetype='application/json')
+
+
+@api.route('/session/stop', methods=['POST'])
+def stop_session_handler():
+    """
+    Stop running session
+    :return: session status json object
+    """
+    current_app.change_detector.stop_session()
+    session_status = {
+        "mode": current_app.change_detector.mode,
+        "time_started": current_app.change_detector.session_start_time
+    }
+    return Response(json.dumps(session_status), mimetype='application/json')
