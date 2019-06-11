@@ -1,13 +1,15 @@
 import pytest
 import sys
 import json
-sys.path.insert(0, './server')
-import naturewatch_camera_server
+#sys.path.insert(0, './naturewatch_camera_server')
+#import naturewatch_camera_server
+from naturewatch_camera_server import create_app
+
 
 
 @pytest.fixture()
 def test_client():
-    app = naturewatch_camera_server.create_app()
+    app = create_app()
     testing_client = app.test_client()
 
     # Establish application context

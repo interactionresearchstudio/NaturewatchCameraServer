@@ -3,11 +3,10 @@ import sys
 import json
 import os
 import time
-sys.path.insert(0, './server')
-from FileSaver import FileSaver
-import naturewatch_camera_server
+from naturewatch_camera_server import create_app
+from naturewatch_camera_server.FileSaver import FileSaver
 
-app = naturewatch_camera_server.create_app()
+app = create_app()
 file_saver = FileSaver()
 
 

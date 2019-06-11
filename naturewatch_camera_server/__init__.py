@@ -4,11 +4,11 @@ import logging
 import os
 import sys
 from logging.handlers import RotatingFileHandler
-from CameraController import CameraController
-from ChangeDetector import ChangeDetector
+from naturewatch_camera_server.CameraController import CameraController
+from naturewatch_camera_server.ChangeDetector import ChangeDetector
 from flask import Flask
-from api import api
-from static_page import static_page
+from naturewatch_camera_server.api import api
+from naturewatch_camera_server.static_page import static_page
 
 
 def create_app():
@@ -27,7 +27,7 @@ def create_app():
     flask_app.logger.addHandler(handler)
 
     # Load configuration json
-    config = json.load(open(os.path.join(sys.path[0], "config.json")))
+    config = json.load(open(os.path.join(sys.path[0], "naturewatch_camera_server/config.json")))
 
     # Instantiate classes
     flask_app.camera_controller = CameraController(use_splitter_port=True)
