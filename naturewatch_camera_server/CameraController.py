@@ -14,7 +14,8 @@ except ImportError:
 
 class CameraController(threading.Thread):
 
-    def __init__(self, width=320, height=240, use_splitter_port=False, splitter_width=1920, splitter_height=1080):
+    def __init__(self, logger, width=320, height=240, use_splitter_port=False, splitter_width=1920,
+                 splitter_height=1080):
         threading.Thread.__init__(self)
         self._stop_event = threading.Event()
         self.cancelled = False
@@ -31,23 +32,20 @@ class CameraController(threading.Thread):
         self.camera = None
         self.rotated_camera = False
 
-        # Truncate and open log file
-        with open('camera_controller.log', 'w'):
-            pass
-        logging.basicConfig(filename='camera_controller.log', level=logging.DEBUG)
+        self.logger = logger
 
         if picamera_exists:
             # Use pi camera
-            logging.info("picamera module exists.")
+            self.logger.info("picamera module exists.")
             self.initialise_picamera()
 
         else:
             # Use webcam
-            logging.info("picamera module not found. Using oCV VideoCapture instead.")
+            self.logger.info("picamera module not found. Using oCV VideoCapture instead.")
             self.capture = cv2.VideoCapture(0)
 
             if use_splitter_port is True:
-                logging.info("Using splitter port")
+                self.logger.info("Using splitter port")
                 self.capture.set(3, splitter_width)
                 self.capture.set(4, splitter_height)
             else:
@@ -70,11 +68,11 @@ class CameraController(threading.Thread):
                         self.image = s.array
 
                         if self.image is None:
-                            logging.warning("Got empty image.")
+                            self.logger.warning("Got empty image.")
 
                     except Exception as e:
-                        logging.error("picamera update error.")
-                        logging.exception(e)
+                        self.logger.error("picamera update error.")
+                        self.logger.exception(e)
                         self.initialise_picamera()
                         pass
 
@@ -88,9 +86,9 @@ class CameraController(threading.Thread):
                         ret, self.image = self.capture.read()
 
                     if self.image is None:
-                        logging.warning("Got empty image.")
+                        self.logger.warning("Got empty image.")
             except KeyboardInterrupt:
-                logging.info("Received KeyboardInterrupt. Shutting down CameraController...")
+                self.logger.info("Received KeyboardInterrupt. Shutting down CameraController...")
                 self.stop()
 
     # Stop thread
@@ -105,7 +103,7 @@ class CameraController(threading.Thread):
             # Close webcam
             cv2.VideoCapture(0).release()
 
-        logging.info('Cancelling...')
+        self.logger.info('Cancelling...')
 
     # Check if thread is stopped
     def is_stopped(self):
@@ -126,7 +124,7 @@ class CameraController(threading.Thread):
 
     # Get splitter image
     def get_splitter_image(self):
-        logging.info("Requested splitter image.")
+        self.logger.info("Requested splitter image.")
         if self.use_splitter_port:
             if picamera_exists:
                 self.picamera_splitter_capture.truncate(0)
@@ -146,7 +144,7 @@ class CameraController(threading.Thread):
                 else:
                     return None
         else:
-            logging.warning("Splitter image was not opened in constructor.")
+            self.logger.warning("Splitter image was not opened in constructor.")
             return None
 
     # Initialise picamera. If already started, close and reinitialise.

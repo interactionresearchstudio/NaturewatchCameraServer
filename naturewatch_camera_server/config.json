@@ -19,5 +19,6 @@
     "fix_camera_settings": 0,
     "iso": 800,
     "shutter_speed": 8000,
-    "log_level": "INFO"
+    "log_level": "INFO",
+    "photos_path": "data/photos/"
 }

@@ -30,7 +30,7 @@ def create_app():
     config = json.load(open(os.path.join(sys.path[0], "naturewatch_camera_server/config.json")))
 
     # Instantiate classes
-    flask_app.camera_controller = CameraController(use_splitter_port=True)
+    flask_app.camera_controller = CameraController(flask_app.logger, use_splitter_port=True)
     flask_app.change_detector = ChangeDetector(flask_app.camera_controller, config, flask_app.logger)
 
     return flask_app

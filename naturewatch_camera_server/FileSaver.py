@@ -7,13 +7,15 @@ import logging
 
 class FileSaver(Thread):
 
-    def __init__(self, logger=None):
+    def __init__(self, config, logger=None):
         super(FileSaver, self).__init__()
 
         if logger is not None:
             self.logging = logger
         else:
             self.logging = logging
+
+        self.config = config
 
     def save_image(self, image):
         """
@@ -26,7 +28,7 @@ class FileSaver(Thread):
         filename = filename + ".jpg"
 
         try:
-            cv2.imwrite(filename, image)
+            cv2.imwrite(self.config["photos_path"] + filename, image)
             return filename
         except Exception as e:
             self.logging.error('FileSaver: save_photo() error: ')

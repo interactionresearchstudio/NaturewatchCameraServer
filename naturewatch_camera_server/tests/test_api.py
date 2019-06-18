@@ -1,10 +1,7 @@
 import pytest
 import sys
 import json
-#sys.path.insert(0, './naturewatch_camera_server')
-#import naturewatch_camera_server
 from naturewatch_camera_server import create_app
-
 
 
 @pytest.fixture()
@@ -141,3 +138,14 @@ def test_session_stop(test_client):
     response_dict = json.loads(response.data.decode('utf8'))
     assert "time_started" in response_dict
     assert response_dict["mode"] == "inactive"
+
+def test_photos(test_client):
+    """
+    GIVEN a Flask application
+    WHEN '/api/photos' is requested (GET)
+    THEN list of photos should be returned.
+    """
+    response = test_client.get('/api/photos')
+    assert response.status_code == 200
+    response_list = json.loads(response.data.decode('utf8'))
+    assert response_list == list

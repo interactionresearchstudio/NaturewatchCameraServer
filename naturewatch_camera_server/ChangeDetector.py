@@ -10,10 +10,10 @@ from naturewatch_camera_server.FileSaver import FileSaver
 
 class ChangeDetector(Thread):
 
-    def __init__(self, camera_controller, configuration, logger):
+    def __init__(self, camera_controller, config, logger):
         super(ChangeDetector, self).__init__()
 
-        self.config = configuration
+        self.config = config
         self.daemon = True
         self.cancelled = False
 
@@ -21,7 +21,7 @@ class ChangeDetector(Thread):
 
         self.logger = logger
 
-        self.file_saver = FileSaver()
+        self.file_saver = FileSaver(self.config)
 
         self.minWidth = self.config["min_width"]
         self.maxWidth = self.config["max_width"]

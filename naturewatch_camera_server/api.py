@@ -146,3 +146,4 @@ def stop_session_handler():
         "time_started": current_app.change_detector.session_start_time
     }
     return Response(json.dumps(session_status), mimetype='application/json')
+
