@@ -6,13 +6,15 @@ import time
 from naturewatch_camera_server import create_app
 from naturewatch_camera_server.FileSaver import FileSaver
 
-config = json.load(open(os.path.join(sys.path[0], "naturewatch_camera_server/config.json")))
-app = create_app()
-file_saver = FileSaver(config)
-
+file_saver = None
+app = None
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
+    global file_saver
+    global app
+    app = create_app()
+    file_saver = FileSaver(app.user_config)
     testing_client = app.test_client()
 
     while app.camera_controller.is_alive() is False:
@@ -32,6 +34,6 @@ def run_around_tests():
 
 def test_image_save():
     filename = file_saver.save_image(app.camera_controller.get_image())
-    assert os.path.isfile(config["photos_path"] + filename)
-    assert os.path.getsize(config["photos_path"] + filename) != 0
-    os.remove(config["photos_path"] + filename)
+    assert os.path.isfile(app.user_config["photos_path"] + filename)
+    assert os.path.getsize(app.user_config["photos_path"] + filename) != 0
+    os.remove(app.user_config["photos_path"] + filename)

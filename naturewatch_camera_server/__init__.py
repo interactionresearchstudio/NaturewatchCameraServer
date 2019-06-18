@@ -8,6 +8,7 @@ from naturewatch_camera_server.CameraController import CameraController
 from naturewatch_camera_server.ChangeDetector import ChangeDetector
 from flask import Flask
 from naturewatch_camera_server.api import api
+from naturewatch_camera_server.data import data
 from naturewatch_camera_server.static_page import static_page
 
 
@@ -18,6 +19,7 @@ def create_app():
     """
     flask_app = Flask(__name__)
     flask_app.register_blueprint(api, url_prefix='/api')
+    flask_app.register_blueprint(data, url_prefix='/data')
     flask_app.register_blueprint(static_page)
 
     # Setup logger
@@ -27,11 +29,11 @@ def create_app():
     flask_app.logger.addHandler(handler)
 
     # Load configuration json
-    config = json.load(open(os.path.join(sys.path[0], "naturewatch_camera_server/config.json")))
+    flask_app.user_config = json.load(open(os.path.join(sys.path[0], "naturewatch_camera_server/config.json")))
 
     # Instantiate classes
     flask_app.camera_controller = CameraController(flask_app.logger, use_splitter_port=True)
-    flask_app.change_detector = ChangeDetector(flask_app.camera_controller, config, flask_app.logger)
+    flask_app.change_detector = ChangeDetector(flask_app.camera_controller, flask_app.user_config, flask_app.logger)
 
     return flask_app
 

@@ -30,6 +30,7 @@ def test_root_page(test_client):
     assert response.status_code == 200
     assert b"My Naturewatch Camera" in response.data
 
+
 def test_jpg(test_client):
     """
     GIVEN a Flask application
@@ -39,6 +40,7 @@ def test_jpg(test_client):
     response = test_client.get('/api/frame')
     assert response.status_code == 200
     assert b"Content-Type: image/jpeg" in response.data
+
 
 def test_mjpg(test_client):
     """
@@ -69,6 +71,7 @@ def test_get_settings(test_client):
     assert response_dict["exposure"]["iso"] == 0
     assert response_dict["exposure"]["shutter_speed"] == 0
     assert response_dict["rotation"] is False
+
 
 def test_post_settings(test_client):
     """
@@ -103,6 +106,7 @@ def test_post_settings(test_client):
     assert response_dict["exposure"]["shutter_speed"] == 0
     assert response_dict["rotation"] is True
 
+
 def test_session_status(test_client):
     """
     GIVEN a Flask application
@@ -114,6 +118,7 @@ def test_session_status(test_client):
     response_dict = json.loads(response.data.decode('utf8'))
     assert "time_started" in response_dict
     assert response_dict["mode"] == "inactive"
+
 
 def test_session_start_photo(test_client):
     """
@@ -127,6 +132,7 @@ def test_session_start_photo(test_client):
     assert "time_started" in response_dict
     assert response_dict["mode"] == "photo"
 
+
 def test_session_stop(test_client):
     """
     GIVEN a Flask application
@@ -138,14 +144,3 @@ def test_session_stop(test_client):
     response_dict = json.loads(response.data.decode('utf8'))
     assert "time_started" in response_dict
     assert response_dict["mode"] == "inactive"
-
-def test_photos(test_client):
-    """
-    GIVEN a Flask application
-    WHEN '/api/photos' is requested (GET)
-    THEN list of photos should be returned.
-    """
-    response = test_client.get('/api/photos')
-    assert response.status_code == 200
-    response_list = json.loads(response.data.decode('utf8'))
-    assert response_list == list
