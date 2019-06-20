@@ -17,7 +17,7 @@ def get_photos():
 def get_photo(filename):
     file_path = current_app.user_config["photos_path"] + filename
     if os.path.isfile(os.path.join(file_path)):
-        send_from_directory(current_app.user_config["photos_path"], filename, mimetype="image/jpg")
+        return send_from_directory(os.path.join('static/data/photos'), filename, mimetype="image/jpg")
     else:
         return Response("{'NOT_FOUND':'" + filename + "'}", status=404, mimetype='application/json')
 
