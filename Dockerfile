@@ -13,7 +13,7 @@ FROM sgtwilko/rpi-raspbian-opencv:stretch-latest
 COPY . .
 
 # Install python dependencies
-RUN pip install -r requirements-pi.txt
+RUN pip3 install -r requirements-pi.txt
 
 # Expose port
 EXPOSE 5000
