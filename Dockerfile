@@ -11,6 +11,7 @@ FROM sgtwilko/rpi-raspbian-opencv:stretch-latest
 
 # Bundle source
 COPY requirements-pi.txt .
+COPY requirements.txt .
 
 # Install python dependencies
 RUN pip3 install -r requirements-pi.txt
