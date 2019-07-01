@@ -29,7 +29,8 @@ def create_app():
     flask_app.logger.addHandler(handler)
 
     # Load configuration json
-    flask_app.user_config = json.load(open(os.path.join(sys.path[0], "naturewatch_camera_server/config.json")))
+    module_path = os.path.abspath(os.path.dirname(__file__))
+    flask_app.user_config = json.load(open(os.path.join(module_path, "../config.json")))
 
     # Instantiate classes
     flask_app.camera_controller = CameraController(flask_app.logger, use_splitter_port=True)
