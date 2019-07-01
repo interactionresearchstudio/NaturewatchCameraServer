@@ -10,10 +10,12 @@ FROM sgtwilko/rpi-raspbian-opencv:stretch-latest
 #ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Bundle source
-COPY . .
+COPY requirements-pi.txt .
 
 # Install python dependencies
 RUN pip3 install -r requirements-pi.txt
+
+COPY naturewatch_camera_server naturewatch_camera_server
 
 # Expose port
 EXPOSE 5000
