@@ -98,6 +98,7 @@ class CameraController(threading.Thread):
         if picamera_exists:
             # Close pi camera
             self.camera.close()
+            self.camera = None
             pass
         else:
             # Close webcam
