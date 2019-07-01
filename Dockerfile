@@ -19,5 +19,5 @@ RUN pip3 install -r requirements-pi.txt
 EXPOSE 5000
 
 # Run
-CMD ["python", "-m", "naturewatch_camera_server"]
+CMD ["python3", "-m", "naturewatch_camera_server"]
 
