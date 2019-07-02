@@ -97,6 +97,8 @@ class CameraController(threading.Thread):
 
         if picamera_exists:
             # Close pi camera
+            self.picamera_splitter_capture.truncate(0)
+            self.picamera_splitter_capture.seek(0)
             self.camera.close()
             self.camera = None
             pass
