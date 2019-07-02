@@ -20,5 +20,5 @@
     "iso": 800,
     "shutter_speed": 8000,
     "log_level": "DEBUG",
-    "photos_path": "naturewatch_camera_server/static/data/photos/"
+    "photos_path": "static/data/photos/"
 }

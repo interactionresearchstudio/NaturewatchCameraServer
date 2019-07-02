@@ -4,29 +4,31 @@ This is a Python server script that captures a video stream from a Pi Camera and
 
 ## Requirements
 
-- OpenCV 3.1.0, along with OpenCV_Contrib modules. 
-- Python 3.4+
-- Raspbian Stretch
-- Picamera Python module 
-- Raspberry Pi Zero W or 3 (built-in WiFi)
-- 16GB+ SD card
+- Docker installed on Raspbian Stretch
 
-## Running the main script
+## Running the server
 
-Simply run the script with Python (as super user, so that the server can run on port 80). 
+Build the docker container
 
-	sudo python3 CameraServer.py 80
+    docker build -t naturewatchcameraserver .
+    
+    
+Run the docker container
+
+    docker run --device /dev/vcsm --device /dev/vchiq -p 5000:5000 naturewatchcameraserver
+
+The website is then accessible through its hostname:
+
+	http://raspberrypi.local:5000/
 	
-You can then access the camera controls at
+Be sure to replace `raspberrypi.local` with whatever hostname the Pi has.
 
-	http://localhost.local/
-	
-Be sure to replace `localhost.local` with whatever hostname the Pi has.
+## Running tests
 
-## Compiling CSS for the web interface
-CSS for the web interface is written in Less.css. Therefore, a Less compiler must be used. You can use the [node compiler](http://lesscss.org/usage/) detailed on the Less website, or a standalone app such as [Koala](http://koala-app.com/).
+You can run tests directly on the Raspberry pi to test the various functions of the
+software as well as the API. After building the container, run the tests with pytest.
 
-JS is not currently being compiled / minified.
+    docker run --device /dev/vcsm --device /dev/vchiq -p 5000:5000 naturewatchcameraserver pytest -v naturewatch_camera_server/tests
 
 ## Reporting bugs
 
@@ -44,3 +46,4 @@ testing your PR against the `dev` branch, which has more experimental features.
 ## Support
 
 If you require support, please head over to the [My Naturewatch Forum](https://mynaturewatch.net/forum).
+

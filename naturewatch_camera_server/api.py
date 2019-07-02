@@ -26,7 +26,7 @@ def generate_mjpg(camera_controller):
     while camera_controller.is_alive() is False:
         camera_controller.start()
         time.sleep(1)
-    while True:
+    while camera_controller.is_alive():
         latest_frame = camera_controller.get_image_binary()
         response = b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + bytearray(latest_frame) + b'\r\n'
         yield(response)
