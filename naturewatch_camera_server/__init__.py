@@ -23,8 +23,8 @@ def create_app():
     flask_app.register_blueprint(static_page)
 
     # Setup logger
-    # handler = RotatingFileHandler('naturewatch_camera_server.log', maxBytes=10000, backupCount=1)
-    handler = logging.StreamHandler()
+    handler = RotatingFileHandler('naturewatch_camera_server.log', maxBytes=10000, backupCount=1)
+    #handler = logging.StreamHandler()
     handler.setLevel(logging.INFO)
     flask_app.logger.addHandler(handler)
 

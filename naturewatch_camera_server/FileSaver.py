@@ -3,6 +3,7 @@ import datetime
 import cv2
 import io
 import logging
+import os
 
 
 class FileSaver(Thread):
@@ -28,7 +29,7 @@ class FileSaver(Thread):
         filename = filename + ".jpg"
 
         try:
-            cv2.imwrite(self.config["photos_path"] + filename, image)
+            cv2.imwrite(os.path.join(self.config["photos_path"], filename), image)
             return filename
         except Exception as e:
             self.logging.error('FileSaver: save_photo() error: ')

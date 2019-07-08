@@ -15,7 +15,11 @@ Build the docker container
     
 Run the docker container
 
-    docker run --device /dev/vcsm --device /dev/vchiq -p 5000:5000 naturewatchcameraserver
+    docker run \
+    --device /dev/vcsm --device /dev/vchiq \
+    -p 5000:5000 \
+    -v ~/data:/naturewatch_camera_server/static/data \
+    naturewatchcameraserver
 
 The website is then accessible through its hostname:
 
@@ -28,7 +32,12 @@ Be sure to replace `raspberrypi.local` with whatever hostname the Pi has.
 You can run tests directly on the Raspberry pi to test the various functions of the
 software as well as the API. After building the container, run the tests with pytest.
 
-    docker run --device /dev/vcsm --device /dev/vchiq -p 5000:5000 naturewatchcameraserver pytest -v naturewatch_camera_server/tests
+    docker run \
+    --device /dev/vcsm --device /dev/vchiq \
+    -p 5000:5000 \
+    -v ~/data:/naturewatch_camera_server/static/data \
+    naturewatchcameraserver \
+    pytest -v naturewatch_camera_server/
 
 ## Reporting bugs
 
