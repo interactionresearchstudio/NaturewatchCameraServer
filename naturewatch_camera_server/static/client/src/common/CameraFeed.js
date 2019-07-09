@@ -22,7 +22,7 @@ class CameraFeed extends React.Component {
     inactiveFeed() {
         return (
            <div id="inactive-feed">
-               <h2>Preview paused to save power</h2>
+               <span><h2>Preview paused <br/>to save power</h2></span>
            </div>
         )
     }
@@ -30,7 +30,7 @@ class CameraFeed extends React.Component {
     closingFeed(status) {
         return (
             <div id="closing-feed">
-                <h2>Preview ends in {status}</h2>
+                <span><h2>Preview ends <br/>in {status}</h2></span>
             </div>
         )
     }
