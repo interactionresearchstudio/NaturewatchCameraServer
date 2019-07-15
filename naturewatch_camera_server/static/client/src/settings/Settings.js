@@ -135,7 +135,10 @@ class Settings extends React.Component {
                             </Accordion.Toggle>
                             <Accordion.Collapse eventKey={0}>
                                 <Card.Body>
-                                    <SensitivitySetting onValueChange={this.onSensitivityChange} value={this.state.settings.sensitivity}/>
+                                    <SensitivitySetting
+                                        onValueChange={this.onSensitivityChange}
+                                        value={this.state.settings.sensitivity}
+                                    />
                                 </Card.Body>
                             </Accordion.Collapse>
                         </Card>
@@ -162,7 +165,7 @@ class Settings extends React.Component {
                                 <Card.Body>
                                     <ExposureSetting
                                         mode={this.state.settings.exposure.mode}
-                                        speed={this.state.settings.exposure.shutter_speed}
+                                        shutterSpeed={this.state.settings.exposure.shutter_speed}
                                         onShutterChange={this.onShutterChange}
                                         onModeChange={this.onModeChange}
                                     />
