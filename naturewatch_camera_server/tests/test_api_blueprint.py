@@ -65,8 +65,7 @@ def test_get_settings(test_client):
     assert "rotation" in response_dict
     assert "exposure" in response_dict
     assert "sensitivity" in response_dict
-    assert response_dict["sensitivity"]["min"] == 100
-    assert response_dict["sensitivity"]["max"] == 200
+    assert response_dict["sensitivity"] == "default"
     assert response_dict["exposure"]["mode"] == 'auto'
     assert response_dict["exposure"]["iso"] == 0
     assert response_dict["exposure"]["shutter_speed"] == 0
@@ -84,10 +83,7 @@ def test_post_settings(test_client):
         "exposure": {
             "mode": "auto",
         },
-        "sensitivity": {
-            "min": 150,
-            "max": 350
-        }
+        "sensitivity": "less"
     }
     headers = {
         "Content-Type": "application/json",
@@ -99,8 +95,7 @@ def test_post_settings(test_client):
     assert "rotation" in response_dict
     assert "exposure" in response_dict
     assert "sensitivity" in response_dict
-    assert response_dict["sensitivity"]["min"] == 150
-    assert response_dict["sensitivity"]["max"] == 350
+    assert response_dict["sensitivity"] == "less"
     assert response_dict["exposure"]["mode"] == 'auto'
     assert response_dict["exposure"]["iso"] == 0
     assert response_dict["exposure"]["shutter_speed"] == 0

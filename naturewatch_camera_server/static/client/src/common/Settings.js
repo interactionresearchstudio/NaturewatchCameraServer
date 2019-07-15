@@ -1,13 +1,33 @@
 import React from 'react';
+import axios from 'axios';
 import {Button, Collapse, Accordion, Card} from 'react-bootstrap';
+import SensitivitySetting from '../settings/SensitivitySetting';
 
 class Settings extends React.Component {
     constructor(props, context) {
         super(props, context);
 
+        this.onSensitivityChange = this.onSensitivityChange.bind(this);
+
         this.state = {
-            isOpen: false
+            isOpen: false,
+            settings: {
+            }
         };
+    }
+
+    componentDidMount() {
+        this.getSettings();
+    }
+
+    getSettings() {
+        axios.get('/api/settings')
+            .then((res) => {
+                const settings = res.data;
+                this.setState({settings});
+                console.log("INFO: settings updated. ");
+                console.log(this.state.settings);
+            });
     }
 
     renderBackButton() {
@@ -23,6 +43,20 @@ class Settings extends React.Component {
                 </Button>
             )
         }
+    }
+
+    onSensitivityChange(value) {
+        console.log("INFO: Received sensitivity value");
+        console.log(value);
+        /*
+        const sensitivity = value;
+        this.setState({
+            settings: {sensitivity}
+        });
+        console.log("INFO: Changed sensitivity.");
+        console.log(this.state.settings.sensitivity);
+
+         */
     }
 
     render() {
@@ -44,7 +78,7 @@ class Settings extends React.Component {
                             </Accordion.Toggle>
                             <Accordion.Collapse eventKey={0}>
                                 <Card.Body>
-                                    Sensitivity settings...
+                                    <SensitivitySetting onValueChange={this.onSensitivityChange} value={this.state.settings.sensitivity}/>
                                 </Card.Body>
                             </Accordion.Collapse>
                         </Card>

@@ -72,13 +72,21 @@ def settings_handler():
         if "rotation" in settings:
             current_app.camera_controller.set_camera_rotation(settings["rotation"])
         if "sensitivity" in settings:
-            current_app.change_detector.set_sensitivity(settings["sensitivity"]["min"], settings["sensitivity"]["max"])
+            if settings["sensitivity"] == "less":
+                current_app.change_detector.set_sensitivity(current_app.user_config["less_sensitivity"],
+                                                            current_app.user_config["max_width"])
+            elif settings["sensitivity"] == "default":
+                current_app.change_detector.set_sensitivity(current_app.user_config["min_width"],
+                                                            current_app.user_config["max_width"])
+            elif settings["sensitivity"] == "more":
+                current_app.change_detector.set_sensitivity(current_app.user_config["more_sensitivity"],
+                                                            current_app.user_config["max_width"])
         if "mode" in settings["exposure"]:
             if settings["exposure"]["mode"] == "auto":
                 current_app.camera_controller.auto_exposure()
-        elif "shutter_speed" in settings and "iso" in settings:
-            current_app.camera_controller.set_exposure(settings["exposure"]["shutter_speed"],
-                                                       settings["exposure"]["iso"])
+            elif "shutter_speed" in settings and "iso" in settings:
+                current_app.camera_controller.set_exposure(settings["exposure"]["shutter_speed"],
+                                                           settings["exposure"]["iso"])
         new_settings = construct_settings_object(current_app.camera_controller, current_app.change_detector)
         return Response(json.dumps(new_settings), mimetype='application/json')
 
@@ -90,6 +98,15 @@ def construct_settings_object(camera_controller, change_detector):
     :param change_detector: Running change detector object
     :return: settings dictionary
     """
+
+    sensitivity = "default"
+    if change_detector.minWidth == current_app.user_config["less_sensitivity"]:
+        sensitivity = "less"
+    elif change_detector.minWidth == current_app.user_config["min_width"]:
+        sensitivity = "default"
+    elif change_detector.minWidth == current_app.user_config["min_width"]:
+        sensitivity = "more"
+
     settings = {
         "rotation": camera_controller.rotated_camera,
         "exposure": {
@@ -97,10 +114,7 @@ def construct_settings_object(camera_controller, change_detector):
             "iso": camera_controller.get_iso(),
             "shutter_speed": camera_controller.get_shutter_speed(),
         },
-        "sensitivity": {
-            "min": change_detector.minWidth,
-            "max": change_detector.maxWidth
-        }
+        "sensitivity": sensitivity
     }
     return settings
 
@@ -146,4 +160,3 @@ def stop_session_handler():
         "time_started": current_app.change_detector.session_start_time
     }
     return Response(json.dumps(session_status), mimetype='application/json')
-
