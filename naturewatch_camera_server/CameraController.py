@@ -44,6 +44,10 @@ class CameraController(threading.Thread):
             self.logger.info("picamera module not found. Using oCV VideoCapture instead.")
             self.capture = cv2.VideoCapture(0)
 
+            self.shutter_speed = 0
+            self.exposure_mode = "auto"
+            self.iso = "auto"
+
             if use_splitter_port is True:
                 self.logger.info("Using splitter port")
                 self.capture.set(3, splitter_width)
@@ -194,24 +198,28 @@ class CameraController(threading.Thread):
             g = self.camera.awb_gains
             self.camera.awb_mode = 'off'
             self.camera.awb_gains = g
+        else:
+            self.iso = iso
+            self.shutter_speed = shutter_speed
+            self.exposure_mode = 'off'
 
     def get_exposure_mode(self):
         if picamera_exists:
             return self.camera.exposure_mode
         else:
-            return 'auto'
+            return self.exposure_mode
 
     def get_iso(self):
         if picamera_exists:
             return self.camera.iso
         else:
-            return 0
+            return self.iso
 
     def get_shutter_speed(self):
         if picamera_exists:
             return self.camera.shutter_speed
         else:
-            return 0
+            return self.shutter_speed
 
     def auto_exposure(self):
         """
@@ -223,6 +231,10 @@ class CameraController(threading.Thread):
             self.camera.shutter_speed = 0
             self.camera.exposure_mode = 'auto'
             self.camera.awb_mode = 'auto'
+        else:
+            self.iso = 'auto'
+            self.shutter_speed = 0
+            self.exposure_mode = 'auto'
 
     @staticmethod
     def safe_width(width):

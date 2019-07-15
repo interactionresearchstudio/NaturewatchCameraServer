@@ -1,17 +1,28 @@
 import React from 'react';
 import axios from 'axios';
 import {Button, Collapse, Accordion, Card} from 'react-bootstrap';
-import SensitivitySetting from '../settings/SensitivitySetting';
+import SensitivitySetting from './SensitivitySetting';
+import ExposureSetting from './ExposureSetting';
 
 class Settings extends React.Component {
     constructor(props, context) {
         super(props, context);
 
         this.onSensitivityChange = this.onSensitivityChange.bind(this);
+        this.onImageOrientationChange = this.onImageOrientationChange.bind(this);
+        this.onShutterChange = this.onShutterChange.bind(this);
+        this.onModeChange = this.onModeChange.bind(this);
 
         this.state = {
             isOpen: false,
             settings: {
+                rotation: null,
+                exposure: {
+                    mode: "",
+                    iso: "",
+                    shutter_speed: ""
+                },
+                sensitivity: ""
             }
         };
     }
@@ -79,6 +90,32 @@ class Settings extends React.Component {
         });
     }
 
+    onImageOrientationChange() {
+        let currentSettings = this.state.settings;
+        currentSettings.rotation = !currentSettings.rotation;
+        this.setState({
+            settings: currentSettings
+        }, () => {
+            console.log("INFO: Changed orientation.")
+            this.postSettings();
+        });
+    }
+
+    onShutterChange(e) {
+
+    }
+
+    onModeChange(value) {
+        let currentSettings = this.state.settings;
+        currentSettings.exposure.mode = value;
+        this.setState({
+            settings: currentSettings
+        }, () => {
+            console.log("INFO: Changed exposure mode");
+            this.postSettings();
+        });
+    }
+
     render() {
         return (
             <div className="settings">
@@ -108,7 +145,12 @@ class Settings extends React.Component {
                             </Accordion.Toggle>
                             <Accordion.Collapse eventKey={1}>
                                 <Card.Body>
-                                    Image Orientation settings...
+                                    <Button
+                                        variant="primary"
+                                        onClick={this.onImageOrientationChange}
+                                    >
+                                        Flip 180
+                                    </Button>
                                 </Card.Body>
                             </Accordion.Collapse>
                         </Card>
@@ -118,7 +160,12 @@ class Settings extends React.Component {
                             </Accordion.Toggle>
                             <Accordion.Collapse eventKey={2}>
                                 <Card.Body>
-                                    Exposure settings...
+                                    <ExposureSetting
+                                        mode={this.state.settings.exposure.mode}
+                                        speed={this.state.settings.exposure.shutter_speed}
+                                        onShutterChange={this.onShutterChange}
+                                        onModeChange={this.onModeChange}
+                                    />
                                 </Card.Body>
                             </Accordion.Collapse>
                         </Card>

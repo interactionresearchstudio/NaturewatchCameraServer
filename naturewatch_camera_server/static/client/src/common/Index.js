@@ -2,7 +2,7 @@ import React from 'react';
 import {Container, Row, Col} from 'react-bootstrap';
 import Header from './Header'
 import CameraFeed from './CameraFeed'
-import Settings from './Settings';
+import Settings from '../settings/Settings';
 
 class Index extends React.Component {
     constructor(props) {
