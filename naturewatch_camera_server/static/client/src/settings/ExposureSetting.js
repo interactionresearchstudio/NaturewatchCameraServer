@@ -6,7 +6,6 @@ class ExposureSetting extends React.Component {
         super(props);
 
         this.cameraShutterSpeeds = {
-
             "1/30": 33333,
             "1/40": 25000,
             "1/50": 20000,
@@ -41,6 +40,23 @@ class ExposureSetting extends React.Component {
         }
     }
 
+    getIndexFromShutterSpeed(shutterSpeed) {
+        for (var i=0; i < Object.keys(this.cameraShutterSpeeds).length; i++) {
+            if (Object.values(this.cameraShutterSpeeds)[i] == shutterSpeed) {
+                return i;
+            }
+        }
+        return 0;
+    }
+
+    getShutterSpeedFromIndex(index) {
+        return Object.values(this.cameraShutterSpeeds)[index];
+    }
+
+    onShutterChange(e) {
+        this.props.onShutterChange(this.getShutterSpeedFromIndex(e.target.value));
+    }
+
     renderDetailedSettings() {
         if (this.props.mode !== "auto") {
             return (
@@ -55,7 +71,7 @@ class ExposureSetting extends React.Component {
                         min="0"
                         max={Object.keys(this.cameraShutterSpeeds).length}
                         step="1"
-                        value={this.props.shutterSpeed}
+                        value={this.getIndexFromShutterSpeed(this.props.shutterSpeed)}
                         onChange={this.props.onShutterChange}
                     />
                 </div>
