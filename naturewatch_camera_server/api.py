@@ -104,7 +104,7 @@ def construct_settings_object(camera_controller, change_detector):
         sensitivity = "less"
     elif change_detector.minWidth == current_app.user_config["min_width"]:
         sensitivity = "default"
-    elif change_detector.minWidth == current_app.user_config["min_width"]:
+    elif change_detector.minWidth == current_app.user_config["more_sensitivity"]:
         sensitivity = "more"
 
     settings = {

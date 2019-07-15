@@ -24,9 +24,22 @@ class Settings extends React.Component {
         axios.get('/api/settings')
             .then((res) => {
                 const settings = res.data;
-                this.setState({settings});
-                console.log("INFO: settings updated. ");
+                this.setState({settings: settings});
+                console.log("INFO: settings received.");
                 console.log(this.state.settings);
+            });
+    }
+
+    postSettings() {
+        console.log(this.state.settings);
+        axios.post('api/settings', this.state.settings)
+            .then((res) => {
+                console.log("INFO: settings sent.");
+                const settings = res.data;
+                this.setState({settings: settings}, () => {
+                    console.log("INFO: Updated settings");
+                    console.log(this.state.settings);
+                });
             });
     }
 
@@ -48,15 +61,22 @@ class Settings extends React.Component {
     onSensitivityChange(value) {
         console.log("INFO: Received sensitivity value");
         console.log(value);
-        /*
-        const sensitivity = value;
-        this.setState({
-            settings: {sensitivity}
-        });
-        console.log("INFO: Changed sensitivity.");
-        console.log(this.state.settings.sensitivity);
+        let currentSettings = this.state.settings;
 
-         */
+        console.log("Current settings: ");
+        console.log(currentSettings);
+
+        currentSettings.sensitivity = value;
+
+        console.log("Changed settings: ");
+        console.log(currentSettings);
+        this.setState({
+            settings: currentSettings
+        }, () => {
+            console.log("INFO: Changed sensitivity.");
+            console.log(this.state.settings);
+            this.postSettings();
+        });
     }
 
     render() {
