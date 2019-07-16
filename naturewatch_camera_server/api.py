@@ -85,6 +85,8 @@ def settings_handler():
             if settings["exposure"]["mode"] == "auto":
                 current_app.camera_controller.auto_exposure()
             elif settings["exposure"]["mode"] == "off":
+                if settings["exposure"]["shutter_speed"] == 0:
+                    settings["exposure"]["shutter_speed"] = 5000
                 current_app.camera_controller.set_exposure(settings["exposure"]["shutter_speed"],
                                                            settings["exposure"]["iso"])
         new_settings = construct_settings_object(current_app.camera_controller, current_app.change_detector)

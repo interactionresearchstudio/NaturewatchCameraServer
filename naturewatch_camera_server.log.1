@@ -12,9 +12,9 @@ Traceback (most recent call last):
     rv = self.dispatch_request()
   File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/venv/lib/python3.7/site-packages/flask/app.py", line 1799, in dispatch_request
     return self.view_functions[rule.endpoint](**req.view_args)
-  File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/naturewatch_camera_server/api.py", line 84, in settings_handler
-    if "mode" in settings["exposure"]:
-KeyError: 'exposure'
+  File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/naturewatch_camera_server/api.py", line 88, in settings_handler
+    current_app.camera_controller.set_exposure(settings["exposure"]["shutter_speed"],
+KeyError: 'shutter_speed'
 Exception on /api/settings [POST]
 Traceback (most recent call last):
   File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/venv/lib/python3.7/site-packages/flask/app.py", line 2292, in wsgi_app
@@ -29,9 +29,9 @@ Traceback (most recent call last):
     rv = self.dispatch_request()
   File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/venv/lib/python3.7/site-packages/flask/app.py", line 1799, in dispatch_request
     return self.view_functions[rule.endpoint](**req.view_args)
-  File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/naturewatch_camera_server/api.py", line 84, in settings_handler
-    if "mode" in settings["exposure"]:
-KeyError: 'exposure'
+  File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/naturewatch_camera_server/api.py", line 88, in settings_handler
+    current_app.camera_controller.set_exposure(settings["exposure"]["shutter_speed"],
+KeyError: 'shutter_speed'
 Exception on /api/settings [POST]
 Traceback (most recent call last):
   File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/venv/lib/python3.7/site-packages/flask/app.py", line 2292, in wsgi_app
@@ -46,9 +46,9 @@ Traceback (most recent call last):
     rv = self.dispatch_request()
   File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/venv/lib/python3.7/site-packages/flask/app.py", line 1799, in dispatch_request
     return self.view_functions[rule.endpoint](**req.view_args)
-  File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/naturewatch_camera_server/api.py", line 84, in settings_handler
-    if "mode" in settings["exposure"]:
-KeyError: 'exposure'
+  File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/naturewatch_camera_server/api.py", line 88, in settings_handler
+    current_app.camera_controller.set_exposure(settings["exposure"]["shutter_speed"],
+KeyError: 'shutter_speed'
 Exception on /api/settings [POST]
 Traceback (most recent call last):
   File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/venv/lib/python3.7/site-packages/flask/app.py", line 2292, in wsgi_app
@@ -63,9 +63,9 @@ Traceback (most recent call last):
     rv = self.dispatch_request()
   File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/venv/lib/python3.7/site-packages/flask/app.py", line 1799, in dispatch_request
     return self.view_functions[rule.endpoint](**req.view_args)
-  File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/naturewatch_camera_server/api.py", line 84, in settings_handler
-    if "mode" in settings["exposure"]:
-KeyError: 'exposure'
+  File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/naturewatch_camera_server/api.py", line 88, in settings_handler
+    current_app.camera_controller.set_exposure(settings["exposure"]["shutter_speed"],
+KeyError: 'shutter_speed'
 Exception on /api/settings [POST]
 Traceback (most recent call last):
   File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/venv/lib/python3.7/site-packages/flask/app.py", line 2292, in wsgi_app
@@ -80,9 +80,9 @@ Traceback (most recent call last):
     rv = self.dispatch_request()
   File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/venv/lib/python3.7/site-packages/flask/app.py", line 1799, in dispatch_request
     return self.view_functions[rule.endpoint](**req.view_args)
-  File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/naturewatch_camera_server/api.py", line 84, in settings_handler
-    if "mode" in settings["exposure"]:
-KeyError: 'exposure'
+  File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/naturewatch_camera_server/api.py", line 88, in settings_handler
+    current_app.camera_controller.set_exposure(settings["exposure"]["shutter_speed"],
+KeyError: 'shutter_speed'
 Exception on /api/settings [POST]
 Traceback (most recent call last):
   File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/venv/lib/python3.7/site-packages/flask/app.py", line 2292, in wsgi_app
@@ -97,9 +97,9 @@ Traceback (most recent call last):
     rv = self.dispatch_request()
   File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/venv/lib/python3.7/site-packages/flask/app.py", line 1799, in dispatch_request
     return self.view_functions[rule.endpoint](**req.view_args)
-  File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/naturewatch_camera_server/api.py", line 84, in settings_handler
-    if "mode" in settings["exposure"]:
-KeyError: 'exposure'
+  File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/naturewatch_camera_server/api.py", line 88, in settings_handler
+    current_app.camera_controller.set_exposure(settings["exposure"]["shutter_speed"],
+KeyError: 'shutter_speed'
 Exception on /api/settings [POST]
 Traceback (most recent call last):
   File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/venv/lib/python3.7/site-packages/flask/app.py", line 2292, in wsgi_app
@@ -114,6 +114,6 @@ Traceback (most recent call last):
     rv = self.dispatch_request()
   File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/venv/lib/python3.7/site-packages/flask/app.py", line 1799, in dispatch_request
     return self.view_functions[rule.endpoint](**req.view_args)
-  File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/naturewatch_camera_server/api.py", line 84, in settings_handler
-    if "mode" in settings["exposure"]:
-KeyError: 'exposure'
+  File "/Users/mikevanis/Naturewatch/NaturewatchCameraServer/naturewatch_camera_server/api.py", line 88, in settings_handler
+    current_app.camera_controller.set_exposure(settings["exposure"]["shutter_speed"],
+KeyError: 'shutter_speed'

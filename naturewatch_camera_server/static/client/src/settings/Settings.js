@@ -11,6 +11,7 @@ class Settings extends React.Component {
         this.onSensitivityChange = this.onSensitivityChange.bind(this);
         this.onImageOrientationChange = this.onImageOrientationChange.bind(this);
         this.onShutterChange = this.onShutterChange.bind(this);
+        this.onShutterChangeEnd = this.onShutterChangeEnd.bind(this);
         this.onModeChange = this.onModeChange.bind(this);
 
         this.state = {
@@ -96,13 +97,28 @@ class Settings extends React.Component {
         this.setState({
             settings: currentSettings
         }, () => {
-            console.log("INFO: Changed orientation.")
+            console.log("INFO: Changed orientation.");
             this.postSettings();
         });
     }
 
-    onShutterChange(e) {
+    onShutterChange(val) {
+        let currentSettings = this.state.settings;
+        currentSettings.exposure.shutter_speed = val;
+        this.setState({
+            settings: currentSettings
+        });
+    }
 
+    onShutterChangeEnd(val) {
+        let currentSettings = this.state.settings;
+        currentSettings.exposure.shutter_speed = val;
+        this.setState({
+            settings: currentSettings
+        }, () => {
+            console.log("INFO: Changed shutter speed.");
+            this.postSettings();
+        });
     }
 
     onModeChange(value) {
@@ -167,6 +183,7 @@ class Settings extends React.Component {
                                         mode={this.state.settings.exposure.mode}
                                         shutterSpeed={this.state.settings.exposure.shutter_speed}
                                         onShutterChange={this.onShutterChange}
+                                        onShutterChangeEnd={this.onShutterChangeEnd}
                                         onModeChange={this.onModeChange}
                                     />
                                 </Card.Body>

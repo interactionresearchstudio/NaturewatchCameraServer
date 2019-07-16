@@ -5,6 +5,9 @@ class ExposureSetting extends React.Component {
     constructor(props) {
         super(props);
 
+        this.onShutterChange = this.onShutterChange.bind(this);
+        this.onShutterChangeEnd = this.onShutterChangeEnd.bind(this);
+
         this.cameraShutterSpeeds = {
             "1/30": 33333,
             "1/40": 25000,
@@ -31,18 +34,19 @@ class ExposureSetting extends React.Component {
         };
     }
 
-    renderShutterSpeedFraction(index) {
+    renderShutterSpeedFraction(shutterSpeed) {
         if (this.props.mode === "auto") {
             return "auto";
         }
         else {
-            return Object.keys(this.cameraShutterSpeeds)[index];
+
+            return Object.keys(this.cameraShutterSpeeds)[this.getIndexFromShutterSpeed(shutterSpeed)];
         }
     }
 
     getIndexFromShutterSpeed(shutterSpeed) {
         for (var i=0; i < Object.keys(this.cameraShutterSpeeds).length; i++) {
-            if (Object.values(this.cameraShutterSpeeds)[i] == shutterSpeed) {
+            if (Object.values(this.cameraShutterSpeeds)[i] === shutterSpeed) {
                 return i;
             }
         }
@@ -53,8 +57,12 @@ class ExposureSetting extends React.Component {
         return Object.values(this.cameraShutterSpeeds)[index];
     }
 
-    onShutterChange(e) {
-        this.props.onShutterChange(this.getShutterSpeedFromIndex(e.target.value));
+    onShutterChange(event) {
+        this.props.onShutterChange(this.getShutterSpeedFromIndex(event.target.value));
+    }
+
+    onShutterChangeEnd(event) {
+        this.props.onShutterChangeEnd(this.getShutterSpeedFromIndex(event.target.value));
     }
 
     renderDetailedSettings() {
@@ -69,10 +77,12 @@ class ExposureSetting extends React.Component {
                         type="range"
                         id="shutter-speed"
                         min="0"
-                        max={Object.keys(this.cameraShutterSpeeds).length}
+                        max={Object.keys(this.cameraShutterSpeeds).length-1}
                         step="1"
                         value={this.getIndexFromShutterSpeed(this.props.shutterSpeed)}
-                        onChange={this.props.onShutterChange}
+                        onChange={this.onShutterChange}
+                        onMouseUp={this.onShutterChangeEnd}
+                        onTouchEnd={this.onShutterChangeEnd}
                     />
                 </div>
             );
