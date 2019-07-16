@@ -3,12 +3,18 @@ import {Container, Row, Col} from 'react-bootstrap';
 import Header from './Header'
 import CameraFeed from './CameraFeed'
 import Settings from '../settings/Settings';
+import SessionButton from './SessionButton';
 
 class Index extends React.Component {
     constructor(props) {
         super(props);
+
+        this.onVideoSessionClick = this.onVideoSessionClick.bind(this);
+        this.onPhotoSessionClick = this.onPhotoSessionClick.bind(this);
+
         this.state = {
-            feedStatus: "active"
+            feedStatus: "active",
+            sessionStatus: "inactive"
         };
     }
     componentDidMount() {
@@ -32,6 +38,32 @@ class Index extends React.Component {
         }
     }
 
+    getSessionButtonText(type) {
+        // Deal with terminology...
+        if (type === "photo") type = "image";
+        let session = this.state.sessionStatus;
+        if (session === "photo") type = "image";
+
+        if (session === type) {
+            return "Stop " + type + " Capture";
+        }
+        else {
+            return "Start " + type + " Capture";
+        }
+    }
+
+    onVideoSessionClick() {
+
+    }
+
+    onPhotoSessionClick() {
+        if (this.state.sessionStatus === "inactive") {
+            this.setState({
+                sessionStatus: "photo"
+            })
+        }
+    }
+
     render() {
         return(
             <div className="index">
@@ -47,6 +79,16 @@ class Index extends React.Component {
                             {this.captureStatus()}
                         </Col>
                         <Col sm={4}>
+                            <SessionButton
+                                type={"video"}
+                                onButtonClick={this.onSessionButtonClick}
+                                sessionStatus={this.state.sessionStatus}
+                            />
+                            <SessionButton
+                                type={"photo"}
+                                onButtonClick={this.onSessionButtonClick}
+                                sessionStatus={this.state.sessionStatus}
+                            />
                             <Settings/>
                         </Col>
                     </Row>
