@@ -9,8 +9,7 @@ class Index extends React.Component {
     constructor(props) {
         super(props);
 
-        this.onVideoSessionClick = this.onVideoSessionClick.bind(this);
-        this.onPhotoSessionClick = this.onPhotoSessionClick.bind(this);
+        this.onSessionButtonClick = this.onSessionButtonClick.bind(this);
 
         this.state = {
             feedStatus: "active",
@@ -52,15 +51,19 @@ class Index extends React.Component {
         }
     }
 
-    onVideoSessionClick() {
-
-    }
-
-    onPhotoSessionClick() {
+    onSessionButtonClick(type) {
         if (this.state.sessionStatus === "inactive") {
             this.setState({
-                sessionStatus: "photo"
-            })
+                sessionStatus: type
+            }, () => {
+                console.log(this.state.sessionStatus);
+            });
+        } else {
+            this.setState({
+                sessionStatus: "inactive"
+            }, () => {
+                console.log(this.state.sessionStatus);
+            });
         }
     }
 
