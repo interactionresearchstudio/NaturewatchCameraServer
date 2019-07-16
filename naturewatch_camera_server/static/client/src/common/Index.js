@@ -1,5 +1,6 @@
 import React from 'react';
 import {Container, Row, Col} from 'react-bootstrap';
+import IdleTimer from 'react-idle-timer';
 import Header from './Header'
 import CameraFeed from './CameraFeed'
 import Settings from '../settings/Settings';
@@ -9,24 +10,19 @@ class Index extends React.Component {
     constructor(props) {
         super(props);
 
+        this.idleTimer = null;
+
         this.onSessionButtonClick = this.onSessionButtonClick.bind(this);
+        this.onIdle = this.onIdle.bind(this);
 
         this.state = {
             feedStatus: "active",
             sessionStatus: "inactive"
         };
     }
-    componentDidMount() {
-        setTimeout(() => {
-            console.log("INFO: Feed status timeout.");
-            this.setState({
-                feedStatus: "inactive"
-            });
-        }, 60000);
-    }
 
     captureStatus() {
-        if (this.state.feedStatus === "inactive") {
+        if (this.state.sessionStatus === "inactive") {
             return (
                 <p className="feed-status">Capture is <u>off</u></p>
             );
@@ -67,6 +63,13 @@ class Index extends React.Component {
         }
     }
 
+    onIdle() {
+        console.log("INFO: Feed status timeout.");
+        this.setState({
+            feedStatus: "inactive"
+        });
+    }
+
     render() {
         return(
             <div className="index">
@@ -96,6 +99,13 @@ class Index extends React.Component {
                         </Col>
                     </Row>
                 </Container>
+                <IdleTimer
+                    ref={ref => { this.idleTimer = ref }}
+                    element={document}
+                    onIdle={this.onIdle}
+		            debounce={250}
+                    timeout={1000 * 60}
+                />
             </div>
         );
     }

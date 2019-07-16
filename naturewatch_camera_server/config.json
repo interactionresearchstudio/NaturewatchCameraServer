@@ -20,5 +20,6 @@
     "iso": 800,
     "shutter_speed": 8000,
     "log_level": "DEBUG",
-    "photos_path": "static/data/photos/"
+    "photos_path": "static/data/photos/",
+    "feed_timeout_s": 60
 }
