@@ -22,7 +22,7 @@ class CameraFeed extends React.Component {
     inactiveFeed() {
         return (
            <div id="inactive-feed">
-               <span><h2>Preview paused <br/>to save power</h2></span>
+               <span onClick={this.props.onClick}><h2>Preview paused <br/>to save power. Tap to refresh.</h2></span>
            </div>
         )
     }

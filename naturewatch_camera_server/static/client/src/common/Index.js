@@ -14,6 +14,7 @@ class Index extends React.Component {
 
         this.onSessionButtonClick = this.onSessionButtonClick.bind(this);
         this.onIdle = this.onIdle.bind(this);
+        this.handleFeedRefresh = this.handleFeedRefresh.bind(this);
 
         this.state = {
             feedStatus: "active",
@@ -70,6 +71,13 @@ class Index extends React.Component {
         });
     }
 
+    handleFeedRefresh() {
+        console.log("INFO: Feed refreshed.");
+        this.setState({
+            feedStatus: "active"
+        });
+    }
+
     render() {
         return(
             <div className="index">
@@ -81,7 +89,10 @@ class Index extends React.Component {
                     </Row>
                     <Row>
                         <Col sm={8}>
-                            <CameraFeed status={this.state.feedStatus}/>
+                            <CameraFeed
+                                status={this.state.feedStatus}
+                                onClick={this.handleFeedRefresh}
+                            />
                             {this.captureStatus()}
                         </Col>
                         <Col sm={4}>
