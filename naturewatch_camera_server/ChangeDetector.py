@@ -144,6 +144,11 @@ class ChangeDetector(Thread):
         self.mode = "photo"
         self.session_start_time = time.time()
 
+    def start_video_session(self):
+        self.logger.info('Starting Video Capture')
+        self.mode = "video"
+        self.session_start_time = time.time()
+
     def stop_session(self):
         self.logger.info('Ending photo capturing')
         self.mode = "inactive"
@@ -154,6 +159,10 @@ class ChangeDetector(Thread):
             if self.detect_change_contours(self.camera_controller.get_image()) is True:
                 self.logger.info("ChangeDetector: Detected motion. Taking photo...")
                 self.file_saver.save_image(self.camera_controller.get_splitter_image())
+        elif self.mode == "video":
+            if self.detect_change_contours(self.camera_controller.get_image()) is True:
+                self.logger.info("ChangeDetector: Detected motion. Capturing Video...")
+                self.file_saver.save_image(self.camera_controller.get_stream())
 
     @staticmethod
     def safe_width(width):

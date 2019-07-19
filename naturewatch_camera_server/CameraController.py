@@ -30,6 +30,7 @@ class CameraController(threading.Thread):
         self.picamera_capture = None
         self.picamera_stream = None
         self.camera = None
+        self.circularStream = None
         self.rotated_camera = False
 
         self.logger = logger
@@ -129,6 +130,10 @@ class CameraController(threading.Thread):
         r, buf = cv2.imencode(".jpg", self.get_image())
         return buf
 
+    #Get video stream
+    def get_stream(self):
+        return self.circularStream;
+
     # Get splitter image
     def get_splitter_image(self):
         self.logger.info("Requested splitter image.")
@@ -172,10 +177,9 @@ class CameraController(threading.Thread):
                                                                                      self.safe_height(self.height)))
                 self.picamera_splitter_stream = self.camera.capture_continuous(self.picamera_splitter_capture,
                                                                                format="bgr", use_video_port=True)
-                self.picamera_stream = self.camera.capture_continuous(self.picamera_capture, format="bgr",
-                                                                      use_video_port=True, splitter_port=2,
-                                                                      resize=(self.safe_width(self.width),
-                                                                              self.safe_height(self.height)))
+                self.circularStream = picamera.PiCameraCircularIO(self.camera,seconds=self.config["video_duration_before_motion"] + self.config["video_duration_after_motion"])
+                self.camera.start_recording(self.circularStream, format='h264')
+                self.logger.info('Camera initialised with a resolution of %s and a framerate of %s',self.camera.resolution, self.camera.framerate)
             else:
                 self.camera.resolution = (self.safe_width(self.width), self.safe_height(self.height))
                 self.picamera_capture = picamera.array.PiRGBArray(self.camera)

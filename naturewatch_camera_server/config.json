@@ -21,5 +21,7 @@
     "shutter_speed": 8000,
     "log_level": "DEBUG",
     "photos_path": "static/data/photos/",
-    "feed_timeout_s": 60
+    "feed_timeout_s": 60,
+    "video_duration_before_motion": 5,
+    "video_duration_after_motion": 10
 }
