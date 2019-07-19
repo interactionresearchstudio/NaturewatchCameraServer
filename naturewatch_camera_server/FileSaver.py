@@ -4,6 +4,13 @@ import cv2
 import io
 import logging
 import os
+try:
+    import picamera
+    import picamera.array
+    picamera_exists = True
+except ImportError:
+    picamera = None
+    picamera_exists = False
 
 
 class FileSaver(Thread):
@@ -52,6 +59,6 @@ class FileSaver(Thread):
                     stream.seek(frame.position)
                     break
 
-            with io.open("videos/" + filename, 'wb') as output:
+            with io.open(os.path.join(self.config["videos_path"], filename), 'wb') as output:
                 output.write(stream.read())
                 self.logging.info('"FileSaver: Done writing video ' + filename)
