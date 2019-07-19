@@ -12,7 +12,6 @@ class ChangeDetector(Thread):
 
     def __init__(self, camera_controller, config, logger):
         super(ChangeDetector, self).__init__()
-
         self.config = config
         self.daemon = True
         self.cancelled = False
@@ -38,6 +37,8 @@ class ChangeDetector(Thread):
         self.inactiveColour = (100, 100, 100)
         self.isMinActive = False
         self.currentImage = None
+
+        self.logger.info("Change detector set up")
 
     def run(self):
         """
@@ -90,7 +91,7 @@ class ChangeDetector(Thread):
 
         if self.avg is None:
             self.avg = gray.copy().astype("float")
-            return img
+            return False
 
         # add to accumulation model and find the change
         cv2.accumulateWeighted(gray, self.avg, 0.5)
@@ -99,19 +100,18 @@ class ChangeDetector(Thread):
         # threshold, dilate and find contours
         thresh = cv2.threshold(frame_delta, self.config["delta_threshold"], 255, cv2.THRESH_BINARY)[1]
         thresh = cv2.dilate(thresh, None, iterations=2)
-        _, cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         # find largest contour
         largest_contour = self.get_largest_contour(cnts)
 
         if largest_contour is None:
-            return img
+            return False
 
         (x, y, w, h) = cv2.boundingRect(largest_contour)
 
         # if the contour is too small, return false
         if w > self.maxWidth or w < self.minWidth or h > self.maxHeight or h < self.minHeight:
-            # return img
             return False
         else:
             if time.time() - self.lastPhotoTime >= self.config['min_photo_interval_s']:
@@ -151,7 +151,7 @@ class ChangeDetector(Thread):
 
     def update(self):
         if self.mode == "photo":
-            if self.detect_change_contours(self.camera_controller.get_image()):
+            if self.detect_change_contours(self.camera_controller.get_image()) is True:
                 self.logger.info("ChangeDetector: Detected motion. Taking photo...")
                 self.file_saver.save_image(self.camera_controller.get_splitter_image())
 

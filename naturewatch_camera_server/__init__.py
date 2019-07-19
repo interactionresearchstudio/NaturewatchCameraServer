@@ -23,11 +23,11 @@ def create_app():
     flask_app.register_blueprint(static_page)
 
     # Setup logger
-    handler = RotatingFileHandler('naturewatch_camera_server.log', maxBytes=10000, backupCount=1)
-    #handler = logging.StreamHandler()
+    flask_app.logger = logging.getLogger(__name__)
+    handler = logging.StreamHandler()
     handler.setLevel(logging.INFO)
     flask_app.logger.addHandler(handler)
-
+    flask_app.logger.setLevel(logging.DEBUG)
     # Load configuration json
     module_path = os.path.abspath(os.path.dirname(__file__))
     flask_app.user_config = json.load(open(os.path.join(module_path, "./config.json")))
@@ -38,9 +38,4 @@ def create_app():
     flask_app.change_detector = ChangeDetector(flask_app.camera_controller, flask_app.user_config, flask_app.logger)
 
     return flask_app
-
-
-if __name__ == '__main__':
-    app = create_app()
-    app.camera_controller.start()
-    app.run(debug=True, threaded=True)
+    

@@ -27,7 +27,7 @@ class FileSaver(Thread):
         timestamp = datetime.datetime.now()
         filename = timestamp.strftime('%Y-%m-%d-%H-%M-%S')
         filename = filename + ".jpg"
-
+        self.logging.info('saving file')
         try:
             cv2.imwrite(os.path.join(self.config["photos_path"], filename), image)
             return filename
