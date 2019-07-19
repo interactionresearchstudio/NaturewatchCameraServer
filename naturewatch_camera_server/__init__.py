@@ -32,7 +32,9 @@ def create_app():
     module_path = os.path.abspath(os.path.dirname(__file__))
     flask_app.user_config = json.load(open(os.path.join(module_path, "./config.json")))
     flask_app.user_config["photos_path"] = os.path.join(module_path, flask_app.user_config["photos_path"])
-
+    if os.path.isdir(flask_app.user_config["photos_path"]) is False:
+        os.mkdir(flask_app.user_config["photos_path"])
+        flask_app.logger.warning("Photos directory does not exist, creating path")
     # Instantiate classes
     flask_app.camera_controller = CameraController(flask_app.logger, use_splitter_port=True)
     flask_app.change_detector = ChangeDetector(flask_app.camera_controller, flask_app.user_config, flask_app.logger)
