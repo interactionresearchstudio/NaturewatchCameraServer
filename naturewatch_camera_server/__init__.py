@@ -17,7 +17,7 @@ def create_app():
     Create flask app
     :return: Flask app object
     """
-    flask_app = Flask(__name__)
+    flask_app = Flask(__name__, static_folder="static/client/build")
     flask_app.register_blueprint(api, url_prefix='/api')
     flask_app.register_blueprint(data, url_prefix='/data')
     flask_app.register_blueprint(static_page)
@@ -28,16 +28,19 @@ def create_app():
     handler.setLevel(logging.INFO)
     flask_app.logger.addHandler(handler)
     flask_app.logger.setLevel(logging.DEBUG)
+
     # Load configuration json
     module_path = os.path.abspath(os.path.dirname(__file__))
     flask_app.user_config = json.load(open(os.path.join(module_path, "./config.json")))
     flask_app.user_config["photos_path"] = os.path.join(module_path, flask_app.user_config["photos_path"])
+
+    # Create photos directory if it doesn't exist
     if os.path.isdir(flask_app.user_config["photos_path"]) is False:
         os.mkdir(flask_app.user_config["photos_path"])
         flask_app.logger.warning("Photos directory does not exist, creating path")
+
     # Instantiate classes
     flask_app.camera_controller = CameraController(flask_app.logger, use_splitter_port=True)
     flask_app.change_detector = ChangeDetector(flask_app.camera_controller, flask_app.user_config, flask_app.logger)
 
     return flask_app
-    

@@ -1,7 +1,7 @@
-from flask import Blueprint, send_from_directory
+from flask import Blueprint, Response, send_from_directory, current_app
 import os
 
-static_page = Blueprint('static_page', __name__, static_folder='static')
+static_page = Blueprint('static_page', __name__)
 
 
 @static_page.route('/', defaults={'path': ''})
@@ -11,7 +11,9 @@ def serve(path):
     Static root endpoint
     :return: index.html or file requested
     """
-    if path != "" and os.path.exists('static' + path):
-        return send_from_directory('static', path)
+    if path != "" and os.path.exists(os.path.join(current_app.static_folder, path)):
+        return send_from_directory(current_app.static_folder, path)
+    elif path == "":
+        return send_from_directory(current_app.static_folder, 'index.html')
     else:
-        return send_from_directory('static', 'index.html')
+        return Response("Page not found. Please check the URL!", status=404)

@@ -1,6 +1,7 @@
 import React from 'react';
 import {Container, Row, Col} from 'react-bootstrap';
 import IdleTimer from 'react-idle-timer';
+import axios from 'axios';
 import Header from './Header'
 import CameraFeed from './CameraFeed'
 import Settings from '../settings/Settings';
@@ -50,17 +51,27 @@ class Index extends React.Component {
 
     onSessionButtonClick(type) {
         if (this.state.sessionStatus === "inactive") {
-            this.setState({
-                sessionStatus: type
-            }, () => {
-                console.log(this.state.sessionStatus);
-            });
+            axios.post('/api/session/start/' + type)
+                .then(() => {
+                    this.setState({
+                        sessionStatus: type
+                    }, () => {
+                        console.log(this.state.sessionStatus);
+                    });
+                }).catch(() => {
+                    console.log("ERROR: POST request failed whilst opening session.");
+                });
         } else {
-            this.setState({
-                sessionStatus: "inactive"
-            }, () => {
-                console.log(this.state.sessionStatus);
-            });
+            axios.post('/api/session/stop')
+                .then(() => {
+                    this.setState({
+                        sessionStatus: "inactive"
+                    }, () => {
+                        console.log(this.state.sessionStatus);
+                    });
+                }).catch(() => {
+                    console.log("ERROR: POST request failed whilst closing session.");
+                });
         }
     }
 
