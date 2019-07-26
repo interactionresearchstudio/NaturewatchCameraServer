@@ -143,18 +143,19 @@ class ChangeDetector(Thread):
         self.logger.info('Starting photo capturing')
         self.mode = "photo"
         self.session_start_time = time.time()
-        self.camera_controller.start_circular_stream()
+        #self.camera_controller.start_circular_stream()
 
     def start_video_session(self):
         self.logger.info('Starting Video Capture')
         self.mode = "video"
         self.session_start_time = time.time()
-        self.camera_controller.start_circular_stream()
+        #self.camera_controller.start_circular_stream()
 
     def stop_session(self):
         self.logger.info('Ending photo capturing')
         self.mode = "inactive"
         self.session_start_time = time.time()
+        #self.camera_controller.stop_circular_stream()
 
     def update(self):
         if self.mode == "photo":
@@ -164,9 +165,9 @@ class ChangeDetector(Thread):
         elif self.mode == "video":
             if self.detect_change_contours(self.camera_controller.get_image()) is True:
                 self.logger.info("ChangeDetector: Detected motion. Capturing Video...")
-                self.camera_controller.wait_recording(self.config["video_duration_after_motion"])
+               # self.camera_controller.wait_recording(self.config["video_duration_after_motion"])
                 self.logger.info("Video capture completed")
-                self.file_saver.save_video(self.camera_controller.get_stream())
+                #self.file_saver.save_video(self.camera_controller.get_stream())
             self.camera_controller.wait_recording(1)
 
     @staticmethod

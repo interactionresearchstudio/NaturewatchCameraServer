@@ -53,12 +53,14 @@ class FileSaver(Thread):
         timestamp = datetime.datetime.now()
         filename = timestamp.strftime('%Y-%m-%d-%H-%M-%S')
         filename = filename + ".h264"
+        """
         with stream.lock:
             for frame in stream.frames:
                 if frame.frame_type == picamera.PiVideoFrameType.sps_header:
                     stream.seek(frame.position)
                     break
-
             with io.open(os.path.join(self.config["videos_path"], filename), 'wb') as output:
                 output.write(stream.read())
-                self.logging.info('"FileSaver: Done writing video ' + filename)
+        """
+        stream.copy_to(os.path.join(self.config["videos_path"], filename))
+        self.logging.info('"FileSaver: Done writing video ' + filename)

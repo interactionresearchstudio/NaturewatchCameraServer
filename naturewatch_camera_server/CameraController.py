@@ -3,6 +3,8 @@ import cv2
 import imutils
 import time
 import logging
+import io
+import numpy as np
 try:
     import picamera
     import picamera.array
@@ -139,6 +141,10 @@ class CameraController(threading.Thread):
         if picamera_exists:
             self.camera.start_recording(self.circularStream, format='h264')
 
+    def stop_circular_stream(self):
+        if picamera_exists:
+            self.camera.stop_recording()
+
     def wait_recording(self,delay):
         if picamera_exists:
             return self.camera.wait_recording(delay)
@@ -153,16 +159,19 @@ class CameraController(threading.Thread):
                 #self.picamera_splitter_capture.truncate(0)
                 #self.picamera_splitter_capture.seek(0)
                 #self.circularStream.seek(0)
-                s = None
-                for frame in self.circularStream.frames:
-                    s = frame
-                    break
+                stream = io.BytesIO()
+                self.camera.capture(stream, format='jpeg', use_video_port=True)
+                stream.seek(0)
+                data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+                # "Decode" the image from the array, preserving colour
+                s = cv2.imdecode(data, 1)
 
-                if s.array is not None:
+                if s is not None:
                     if self.rotated_camera is True:
-                        return imutils.rotate(s.array.copy(), angle=180)
+                        #return imutils.rotate(s.array.copy(), angle=180)
+                        return imutils.rotate(s.copy(), angle=180)
                     else:
-                        return s.array.copy()
+                        return s.copy()
                 else:
                     return None
 
@@ -183,22 +192,19 @@ class CameraController(threading.Thread):
                 self.camera.close()
 
             self.camera = picamera.PiCamera()
-            self.camera.framerate = 30
+            self.camera.framerate = 25
             picamera.PiCamera.CAPTURE_TIMEOUT = 60
 
             if self.use_splitter_port is True:
-                #Splitter = HiRes, Capture = LoRes
                 self.camera.resolution = (self.safe_width(self.splitter_width), self.safe_height(self.splitter_height))
-                #self.picamera_splitter_capture = picamera.array.PiRGBArray(self.camera)
                 self.picamera_capture = picamera.array.PiRGBArray(self.camera, size=(self.safe_width(self.width),
                                                                                      self.safe_height(self.height)))
-               # self.picamera_splitter_stream = self.camera.capture_continuous(self.picamera_splitter_capture, format="bgr", use_video_port=True)
                 self.picamera_stream = self.camera.capture_continuous(self.picamera_capture, format="bgr",
                                                                       use_video_port=True, splitter_port=2,
                                                                       resize=(self.safe_width(self.width),
                                                                               self.safe_height(self.height)))
                 self.circularStream = picamera.PiCameraCircularIO(self.camera,seconds=self.config["video_duration_before_motion"] + self.config["video_duration_after_motion"])
-#                self.camera.start_recording(self.circularStream, format='h264')
+                self.camera.start_recording(self.circularStream, format='h264')
                 self.logger.info('Camera initialised with a resolution of %s and a framerate of %s',self.camera.resolution, self.camera.framerate)
 
             else:
