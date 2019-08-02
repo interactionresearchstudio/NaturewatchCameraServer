@@ -60,7 +60,7 @@ class FileSaver(Thread):
         self.logging.info('FileSaver: Done writing video ' + filename)
         input_video = os.path.join(self.config["videos_path"], filename)
         output_video = os.path.join(self.config["videos_path"], filenameMp4)
-        call(["MP4Box", "-fps", "25", "-add", input_video, output_video])
+        call(["MP4Box", "-fps", str(self.config["frame_rate"]), "-add", input_video, output_video])
         os.remove(os.path.join(self.config["videos_path"], filename))
         self.logging.info('Removed ' + filename)
 

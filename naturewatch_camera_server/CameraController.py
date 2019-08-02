@@ -189,7 +189,7 @@ class CameraController(threading.Thread):
                 self.camera.close()
 
             self.camera = picamera.PiCamera()
-            self.camera.framerate = 25
+            self.camera.framerate = self.config["frame_rate"]
             picamera.PiCamera.CAPTURE_TIMEOUT = 60
 
             if self.use_splitter_port is True:

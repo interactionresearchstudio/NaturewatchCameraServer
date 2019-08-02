@@ -3,7 +3,7 @@
     "cv_height": 300,
     "img_width": 3280,
     "img_height": 2464,
-    "frame_rate": 10,
+    "frame_rate": 30,
     "use_video_port": false,
     "camera_warmup": 2.5,
     "stream_delay": 0.2,
