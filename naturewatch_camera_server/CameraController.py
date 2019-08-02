@@ -22,11 +22,14 @@ class CameraController(threading.Thread):
         self._stop_event = threading.Event()
         self.cancelled = False
 
-        self.width = width
-        self.height = height
+        self.logger = logger
+        self.config = config
+
+        self.width = self.config["cv_width"]
+        self.height = self.config["cv_height"]
         self.use_splitter_port = use_splitter_port
-        self.splitter_width = splitter_width
-        self.splitter_height = splitter_height
+        self.splitter_width = self.config["img_width"]
+        self.splitter_height = self.config["img_height"]
         self.picamera_splitter_capture = None
         self.picamera_splitter_stream = None
         self.picamera_capture = None
@@ -34,9 +37,6 @@ class CameraController(threading.Thread):
         self.camera = None
         self.circularStream = None
         self.rotated_camera = False
-
-        self.logger = logger
-        self.config = config
 
         if picamera_exists:
             # Use pi camera
