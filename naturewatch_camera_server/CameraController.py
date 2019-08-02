@@ -156,9 +156,6 @@ class CameraController(threading.Thread):
         self.logger.info("Requested splitter image.")
         if self.use_splitter_port:
             if picamera_exists:
-                #self.picamera_splitter_capture.truncate(0)
-                #self.picamera_splitter_capture.seek(0)
-                #self.circularStream.seek(0)
                 stream = io.BytesIO()
                 self.camera.capture(stream, format='jpeg', use_video_port=True)
                 stream.seek(0)
@@ -203,7 +200,7 @@ class CameraController(threading.Thread):
                                                                       use_video_port=True, splitter_port=2,
                                                                       resize=(self.safe_width(self.width),
                                                                               self.safe_height(self.height)))
-                self.circularStream = picamera.PiCameraCircularIO(self.camera,seconds=self.config["video_duration_before_motion"] + self.config["video_duration_after_motion"])
+                self.circularStream = picamera.PiCameraCircularIO(self.camera,seconds=self.config["video_duration_before_motion"] + self.config["video_duration_after_motion"])      
                 self.camera.start_recording(self.circularStream, format='h264')
                 self.logger.info('Camera initialised with a resolution of %s and a framerate of %s',self.camera.resolution, self.camera.framerate)
 
