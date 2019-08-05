@@ -1,5 +1,4 @@
 from threading import Thread
-import datetime
 import cv2
 import io
 import logging
@@ -26,14 +25,14 @@ class FileSaver(Thread):
 
         self.config = config
 
-    def save_image(self, image):
+    def save_image(self, image,timestamp):
         """
         Save image to disk
         :param image: numpy array image
         :return: filename
         """
-        timestamp = datetime.datetime.now()
-        filename = timestamp.strftime('%Y-%m-%d-%H-%M-%S')
+
+        filename = timestamp
         filename = filename + ".jpg"
         self.logging.info('saving file')
         try:
@@ -44,15 +43,32 @@ class FileSaver(Thread):
             self.logging.exception(e)
             pass
 
-    def save_video(self, stream):
+    def save_thumb(self,image,timestamp,format):
+
+        filename = "thumb_"
+        filename = filename + timestamp
+        filename = filename + ".jpg"
+        self.logging.info('saving thumb')
+        try:
+            if format is "photo":
+                cv2.imwrite(os.path.join(self.config["photos_path"], filename), image)
+            else:
+                cv2.imwrite(os.path.join(self.config["videos_path"], filename), image)
+            return filename
+        except Exception as e:
+            self.logging.error('FileSaver: save_photo() error: ')
+            self.logging.exception(e)
+            pass
+
+
+    def save_video(self, stream,timestamp):
         """
         Save raw video stream to disk
         :param stream: raw picamera stream object
         :return: none
         """
         self.logging.info('FileSaver: Writing video...')
-        timestamp = datetime.datetime.now()
-        filename = timestamp.strftime('%Y-%m-%d-%H-%M-%S')
+        filename = timestamp
         filenameMp4 = filename
         filename = filename + ".h264"
         filenameMp4 = filenameMp4 + ".mp4"

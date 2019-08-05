@@ -155,15 +155,21 @@ class ChangeDetector(Thread):
 
     def update(self):
         if self.mode == "photo":
-            if self.detect_change_contours(self.camera_controller.get_image()) is True:
+            img = self.camera_controller.get_image()
+            if self.detect_change_contours(img) is True:
+                timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
                 self.logger.info("ChangeDetector: Detected motion. Taking photo...")
-                self.file_saver.save_image(self.camera_controller.get_splitter_image())
+                self.file_saver.save_image(self.camera_controller.get_splitter_image(),timestamp)
+                self.file_saver.save_thumb(img,timestamp,self.mode)
         elif self.mode == "video":
-            if self.detect_change_contours(self.camera_controller.get_image()) is True:
+            img = self.camera_controller.get_image()
+            if self.detect_change_contours(img) is True:
+                timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
                 self.logger.info("ChangeDetector: Detected motion. Capturing Video...")
                 self.camera_controller.wait_recording(self.config["video_duration_after_motion"])
                 self.logger.info("Video capture completed")
-                self.file_saver.save_video(self.camera_controller.get_stream())
+                self.file_saver.save_thumb(img,timestamp,self.mode)
+                self.file_saver.save_video(self.camera_controller.get_stream(),timestamp)
                 self.camera_controller.clear_buffer()
                 self.lastPhotoTime = time.time()
                 self.logger.info("Video timer reset")
