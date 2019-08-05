@@ -62,4 +62,5 @@ def delete_video(filename):
 def construct_directory_list(path):
     files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
     files = [f for f in files if f.lower().endswith(('.jpg', '.mp4'))]
+    files = [f for f in files if not f.lower().startswith('thumb_')]
     return files
