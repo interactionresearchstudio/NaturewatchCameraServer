@@ -4,6 +4,14 @@ import cv2
 import io
 import logging
 import os
+from subprocess import call
+try:
+    import picamera
+    import picamera.array
+    picamera_exists = True
+except ImportError:
+    picamera = None
+    picamera_exists = False
 
 
 class FileSaver(Thread):
@@ -45,13 +53,16 @@ class FileSaver(Thread):
         self.logging.info('FileSaver: Writing video...')
         timestamp = datetime.datetime.now()
         filename = timestamp.strftime('%Y-%m-%d-%H-%M-%S')
+        filenameMp4 = filename
         filename = filename + ".h264"
-        with stream.lock:
-            for frame in stream.frames:
-                if frame.frame_type == picamera.PiVideoFrameType.sps_header:
-                    stream.seek(frame.position)
-                    break
+        filenameMp4 = filenameMp4 + ".mp4"
+        stream.copy_to(os.path.join(self.config["videos_path"], filename),seconds = self.config["video_duration_before_motion"] + self.config["video_duration_after_motion"])
+        self.logging.info('FileSaver: Done writing video ' + filename)
+        input_video = os.path.join(self.config["videos_path"], filename)
+        output_video = os.path.join(self.config["videos_path"], filenameMp4)
+        call(["MP4Box", "-fps", str(self.config["frame_rate"]), "-add", input_video, output_video])
+        os.remove(os.path.join(self.config["videos_path"], filename))
+        self.logging.info('Removed ' + filename)
 
-            with io.open("videos/" + filename, 'wb') as output:
-                output.write(stream.read())
-                self.logging.info('"FileSaver: Done writing video ' + filename)
+
+
