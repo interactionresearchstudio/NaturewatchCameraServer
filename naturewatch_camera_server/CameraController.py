@@ -151,6 +151,10 @@ class CameraController(threading.Thread):
         else:
             return None
 
+    def clear_buffer(self):
+        if picamera_exists:
+            self.circularStream.clear()
+
     # Get splitter image
     def get_splitter_image(self):
         self.logger.info("Requested splitter image.")

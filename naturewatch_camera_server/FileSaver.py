@@ -56,7 +56,7 @@ class FileSaver(Thread):
         filenameMp4 = filename
         filename = filename + ".h264"
         filenameMp4 = filenameMp4 + ".mp4"
-        stream.copy_to(os.path.join(self.config["videos_path"], filename))
+        stream.copy_to(os.path.join(self.config["videos_path"], filename),seconds = self.config["video_duration_before_motion"] + self.config["video_duration_after_motion"])
         self.logging.info('FileSaver: Done writing video ' + filename)
         input_video = os.path.join(self.config["videos_path"], filename)
         output_video = os.path.join(self.config["videos_path"], filenameMp4)

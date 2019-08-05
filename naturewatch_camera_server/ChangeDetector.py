@@ -164,6 +164,10 @@ class ChangeDetector(Thread):
                 self.camera_controller.wait_recording(self.config["video_duration_after_motion"])
                 self.logger.info("Video capture completed")
                 self.file_saver.save_video(self.camera_controller.get_stream())
+                self.camera_controller.clear_buffer()
+                self.lastPhotoTime = time.time()
+                self.logger.info("Video timer reset")
+
         #self.camera_controller.wait_recording(1)
 
     @staticmethod
