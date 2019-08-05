@@ -3,6 +3,8 @@ import cv2
 import imutils
 import time
 import logging
+import io
+import numpy as np
 try:
     import picamera
     import picamera.array
@@ -14,25 +16,27 @@ except ImportError:
 
 class CameraController(threading.Thread):
 
-    def __init__(self, logger, width=320, height=240, use_splitter_port=False, splitter_width=1920,
+    def __init__(self, logger,config, width=320, height=240, use_splitter_port=False, splitter_width=1920,
                  splitter_height=1080):
         threading.Thread.__init__(self)
         self._stop_event = threading.Event()
         self.cancelled = False
 
-        self.width = width
-        self.height = height
+        self.logger = logger
+        self.config = config
+
+        self.width = self.config["cv_width"]
+        self.height = self.config["cv_height"]
         self.use_splitter_port = use_splitter_port
-        self.splitter_width = splitter_width
-        self.splitter_height = splitter_height
+        self.splitter_width = self.config["img_width"]
+        self.splitter_height = self.config["img_height"]
         self.picamera_splitter_capture = None
         self.picamera_splitter_stream = None
         self.picamera_capture = None
         self.picamera_stream = None
         self.camera = None
+        self.circularStream = None
         self.rotated_camera = False
-
-        self.logger = logger
 
         if picamera_exists:
             # Use pi camera
@@ -129,19 +133,46 @@ class CameraController(threading.Thread):
         r, buf = cv2.imencode(".jpg", self.get_image())
         return buf
 
+    #Get video stream
+    def get_stream(self):
+        return self.circularStream;
+
+    def start_circular_stream(self):
+        if picamera_exists:
+            self.camera.start_recording(self.circularStream, format='h264')
+
+    def stop_circular_stream(self):
+        if picamera_exists:
+            self.camera.stop_recording()
+
+    def wait_recording(self,delay):
+        if picamera_exists:
+            return self.camera.wait_recording(delay)
+        else:
+            return None
+
+    def clear_buffer(self):
+        if picamera_exists:
+            self.circularStream.clear()
+
     # Get splitter image
     def get_splitter_image(self):
         self.logger.info("Requested splitter image.")
         if self.use_splitter_port:
             if picamera_exists:
-                self.picamera_splitter_capture.truncate(0)
-                self.picamera_splitter_capture.seek(0)
-                s = self.picamera_splitter_stream.__next__()
-                if s.array is not None:
+                stream = io.BytesIO()
+                self.camera.capture(stream, format='jpeg', use_video_port=True)
+                stream.seek(0)
+                data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+                # "Decode" the image from the array, preserving colour
+                s = cv2.imdecode(data, 1)
+
+                if s is not None:
                     if self.rotated_camera is True:
-                        return imutils.rotate(s.array.copy(), angle=180)
+                        #return imutils.rotate(s.array.copy(), angle=180)
+                        return imutils.rotate(s.copy(), angle=180)
                     else:
-                        return s.array.copy()
+                        return s.copy()
                 else:
                     return None
 
@@ -162,20 +193,21 @@ class CameraController(threading.Thread):
                 self.camera.close()
 
             self.camera = picamera.PiCamera()
-            self.camera.framerate = 30
+            self.camera.framerate = self.config["frame_rate"]
             picamera.PiCamera.CAPTURE_TIMEOUT = 60
 
             if self.use_splitter_port is True:
                 self.camera.resolution = (self.safe_width(self.splitter_width), self.safe_height(self.splitter_height))
-                self.picamera_splitter_capture = picamera.array.PiRGBArray(self.camera)
                 self.picamera_capture = picamera.array.PiRGBArray(self.camera, size=(self.safe_width(self.width),
                                                                                      self.safe_height(self.height)))
-                self.picamera_splitter_stream = self.camera.capture_continuous(self.picamera_splitter_capture,
-                                                                               format="bgr", use_video_port=True)
                 self.picamera_stream = self.camera.capture_continuous(self.picamera_capture, format="bgr",
                                                                       use_video_port=True, splitter_port=2,
                                                                       resize=(self.safe_width(self.width),
                                                                               self.safe_height(self.height)))
+                self.circularStream = picamera.PiCameraCircularIO(self.camera,seconds=self.config["video_duration_before_motion"] + self.config["video_duration_after_motion"])      
+                self.camera.start_recording(self.circularStream, format='h264')
+                self.logger.info('Camera initialised with a resolution of %s and a framerate of %s',self.camera.resolution, self.camera.framerate)
+
             else:
                 self.camera.resolution = (self.safe_width(self.width), self.safe_height(self.height))
                 self.picamera_capture = picamera.array.PiRGBArray(self.camera)

@@ -142,6 +142,8 @@ def start_session_handler(session_type):
     """
     if session_type == "photo":
         current_app.change_detector.start_photo_session()
+    elif session_type == "video":
+        current_app.change_detector.start_video_session()
 
     session_status = {
         "mode": current_app.change_detector.mode,

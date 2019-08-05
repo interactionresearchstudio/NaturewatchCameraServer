@@ -20,7 +20,7 @@ class ChangeDetector(Thread):
 
         self.logger = logger
 
-        self.file_saver = FileSaver(self.config)
+        self.file_saver = FileSaver(self.config, logger=self.logger)
 
         self.minWidth = self.config["min_width"]
         self.maxWidth = self.config["max_width"]
@@ -84,7 +84,6 @@ class ChangeDetector(Thread):
         :param img: current image
         :return: True if it's time to capture
         """
-
         # convert to gray
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
@@ -144,6 +143,11 @@ class ChangeDetector(Thread):
         self.mode = "photo"
         self.session_start_time = time.time()
 
+    def start_video_session(self):
+        self.logger.info('Starting Video Capture')
+        self.mode = "video"
+        self.session_start_time = time.time()
+
     def stop_session(self):
         self.logger.info('Ending photo capturing')
         self.mode = "inactive"
@@ -154,6 +158,17 @@ class ChangeDetector(Thread):
             if self.detect_change_contours(self.camera_controller.get_image()) is True:
                 self.logger.info("ChangeDetector: Detected motion. Taking photo...")
                 self.file_saver.save_image(self.camera_controller.get_splitter_image())
+        elif self.mode == "video":
+            if self.detect_change_contours(self.camera_controller.get_image()) is True:
+                self.logger.info("ChangeDetector: Detected motion. Capturing Video...")
+                self.camera_controller.wait_recording(self.config["video_duration_after_motion"])
+                self.logger.info("Video capture completed")
+                self.file_saver.save_video(self.camera_controller.get_stream())
+                self.camera_controller.clear_buffer()
+                self.lastPhotoTime = time.time()
+                self.logger.info("Video timer reset")
+
+        #self.camera_controller.wait_recording(1)
 
     @staticmethod
     def safe_width(width):
