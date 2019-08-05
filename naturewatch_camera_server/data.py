@@ -13,6 +13,12 @@ def get_photos():
     return Response(json.dumps(photos_list), mimetype='application/json')
 
 
+@data.route('/videos')
+def get_videos():
+    videos_list = construct_directory_list(current_app.user_config["videos_path"])
+    return Response(json.dumps(videos_list), mimetype='application/json')
+
+
 @data.route('/photos/<filename>')
 def get_photo(filename):
     file_path = current_app.user_config["photos_path"] + filename
@@ -33,6 +39,27 @@ def delete_photo(filename):
             return Response('{"ERROR": "' + filename + '"}', status=500, mimetype='application/json')
 
 
+@data.route('/videos/<filename>')
+def get_video(filename):
+    file_path = current_app.user_config["videos_path"] + filename
+    if os.path.isfile(os.path.join(file_path)):
+        return send_from_directory(os.path.join('static/data/videos'), filename, mimetype="video/mp4")
+    else:
+        return Response("{'NOT_FOUND':'" + filename + "'}", status=404, mimetype='application/json')
+
+
+@data.route('/videos/<filename>', methods=["DELETE"])
+def delete_video(filename):
+    file_path = current_app.user_config["videos_path"] + filename
+    if os.path.isfile(os.path.join(file_path)):
+        os.remove(file_path)
+        if os.path.isfile(os.path.join(file_path)) is False:
+            return Response('{"SUCCESS": "' + filename + '"}', status=200, mimetype='application/json')
+        else:
+            return Response('{"ERROR": "' + filename + '"}', status=500, mimetype='application/json')
+
+
 def construct_directory_list(path):
     files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
+    files = [f for f in files if f.lower().endswith(('.jpg', '.mp4'))]
     return files

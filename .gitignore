@@ -1,5 +1,6 @@
 .idea/
 *.jpg
+*.mp4
 *.pyc
 .DS_Store
 */.DS_Store
