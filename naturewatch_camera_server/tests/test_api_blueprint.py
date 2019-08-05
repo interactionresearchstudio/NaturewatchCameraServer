@@ -139,3 +139,17 @@ def test_session_stop(test_client):
     response_dict = json.loads(response.data.decode('utf8'))
     assert "time_started" in response_dict
     assert response_dict["mode"] == "inactive"
+
+
+def test_time(test_client):
+    """
+    GIVEN a Flask application
+    WHEN '/api/time/<time_string>' is sent a bad time
+    THEN system time should not be updated
+    """
+    response = test_client.post('/api/time/1234')
+    assert response.status_code == 400
+    response_dict = json.loads(response.data.decode('utf8'))
+    assert "ERROR" in response_dict
+    assert response_dict["ERROR"] == "1234"
+

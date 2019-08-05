@@ -2,6 +2,7 @@ import pytest
 import sys
 import json
 import time
+import datetime
 import os
 from naturewatch_camera_server import create_app
 from naturewatch_camera_server.FileSaver import FileSaver
@@ -26,7 +27,8 @@ def test_client():
         time.sleep(1)
 
     for x in range(2):
-        filename = file_saver.save_image(app.camera_controller.get_image())
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+        filename = file_saver.save_image(app.camera_controller.get_image(), timestamp)
         photos_list.append(filename)
         time.sleep(1)
 
@@ -79,4 +81,3 @@ def test_delete_photo(test_client):
     response_dict = json.loads(response.data.decode('utf8'))
     assert response_dict["SUCCESS"] == photos_list[0]
     del photos_list[0]
-
