@@ -41,7 +41,10 @@ def create_app():
     flask_app.user_config["videos_path"] = os.path.join(module_path, flask_app.user_config["videos_path"])
     if os.path.isdir(flask_app.user_config["videos_path"]) is False:
         os.mkdir(flask_app.user_config["videos_path"])
-        flask_app.logger.warning("Videos directory does not exist, creating path") 
+        flask_app.logger.warning("Videos directory does not exist, creating path")
+
+    # Create marker for time updates through the client
+    flask_app.is_time_set = False
 
     # Instantiate classes
     flask_app.camera_controller = CameraController(flask_app.logger,flask_app.user_config, use_splitter_port=True)
