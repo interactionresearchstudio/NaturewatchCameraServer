@@ -54,7 +54,6 @@ def test_photos(test_client):
     assert response.status_code == 200
     response_list = json.loads(response.data.decode('utf8'))
     assert isinstance(response_list, list)
-    print(response_list)
     for f in photos_list:
         assert f in response_list
 

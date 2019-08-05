@@ -1,5 +1,6 @@
 import React from 'react';
 import {Container, Row, Col} from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import IdleTimer from 'react-idle-timer';
 import axios from 'axios';
 import Header from './Header'
@@ -118,6 +119,7 @@ class Index extends React.Component {
                                 sessionStatus={this.state.sessionStatus}
                             />
                             <Settings/>
+                            <Link to="/gallery" className="btn btn-secondary">Gallery</Link>
                         </Col>
                     </Row>
                 </Container>
