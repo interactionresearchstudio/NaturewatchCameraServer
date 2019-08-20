@@ -14,10 +14,16 @@ class GalleryComponent extends React.Component {
 
         this.handleBackButton = this.handleBackButton.bind(this);
         this.onContentTypeChange = this.onContentTypeChange.bind(this);
+        this.onSelectStart = this.onSelectStart.bind(this);
+        this.onDelete = this.onDelete.bind(this);
+        this.onDeleteAll = this.onDeleteAll.bind(this);
+        this.onClearSelection = this.onClearSelection.bind(this);
+        this.onContentSelect = this.onContentSelect.bind(this);
 
         this.state = {
             content: [],
-            showingVideos: false
+            showingVideos: false,
+            isSelectActive: false
         }
 
     }
@@ -35,7 +41,8 @@ class GalleryComponent extends React.Component {
                     photoArray.push({
                         src: '/data/photos/' + photo,
                         thumbnail: '/data/photos/thumb_' + photo,
-                        index: i
+                        index: i,
+                        selected: false
                     });
                     i++;
                 });
@@ -56,7 +63,8 @@ class GalleryComponent extends React.Component {
                     videoArray.push({
                         src: '/data/videos/' + video,
                         thumbnail: '/data/videos/thumb_' + video.substr(0, video.lastIndexOf('.')) + '.jpg',
-                        index: i
+                        index: i,
+                        selected: false
                     });
                     i++;
                 });
@@ -86,6 +94,48 @@ class GalleryComponent extends React.Component {
         }
     }
 
+    onSelectStart() {
+        this.setState({
+            isSelectActive: true
+        });
+    }
+
+    onDelete() {
+
+    }
+
+    onDeleteAll() {
+
+    }
+
+    onClearSelection() {
+        this.setState({
+            isSelectActive: false
+        }, () => {
+            if (this.state.showingVideos) {
+                this.getVideos();
+            } else {
+                this.getPhotos();
+            }
+        })
+    }
+
+    onContentSelect(clickedItem) {
+        console.log(clickedItem.index);
+        let tempContent = this.state.content;
+        for (let i=0; i<tempContent.length; i++) {
+            if (tempContent[i].index === clickedItem.index) {
+                tempContent[i].selected = !tempContent[i].selected;
+                break;
+            }
+        }
+        this.setState({
+            content: tempContent
+        }, () => {
+            console.log(this.state.content);
+        });
+    }
+
     render() {
         return (
             <Container>
@@ -104,11 +154,21 @@ class GalleryComponent extends React.Component {
                         <Link to="/" className="btn btn-secondary">Back</Link>
                     </Col>
                     <Col xs={6}>
-                        <ContentSelect/>
+                        <ContentSelect
+                            onSelectStart={this.onSelectStart}
+                            onDelete={this.onDelete}
+                            onDeleteAll={this.onDeleteAll}
+                            onClearSelection={this.onClearSelection}
+                            isSelectActive={this.state.isSelectActive}
+                        />
                     </Col>
                 </Row>
                 <Row>
-                    <GalleryGrid content={this.state.content}/>
+                    <GalleryGrid
+                        content={this.state.content}
+                        onContentClick={this.onContentSelect}
+                        isSelectActive={this.state.isSelectActive}
+                    />
                 </Row>
             </Container>
         );

@@ -17,12 +17,16 @@ class GalleryGrid extends React.Component {
     }
 
     handleThumbnailClick(item) {
-        this.setState({
-            activeContent: item.src,
-            isModalShowing: true
-        }, () => {
-            console.log("Updated active content with value " + item.src);
-        });
+        if (this.props.isSelectActive) {
+            this.props.onContentClick(item);
+        } else {
+            this.setState({
+                activeContent: item.src,
+                isModalShowing: true
+            }, () => {
+                console.log("Updated active content with value " + item.src);
+            });
+        }
     }
 
     handleModalExit() {
@@ -38,9 +42,24 @@ class GalleryGrid extends React.Component {
                 <LazyLoad>
                     <img alt="Captured by Naturewatch Camera" src={item.thumbnail} onClick={this.handleThumbnailClick.bind(this, item)}/>
                 </LazyLoad>
+                {this.renderSelectIcon(item)}
             </div>
         );
 
+    }
+
+    renderSelectIcon(item) {
+        if (this.props.isSelectActive) {
+            if (item.selected) {
+                return (
+                    <p>Selected</p>
+                );
+            } else {
+                return (
+                    <p>Not selected</p>
+                );
+            }
+        }
     }
 
     renderModal() {
@@ -90,7 +109,9 @@ class GalleryGrid extends React.Component {
 }
 
 GalleryGrid.propTypes = {
-    content: PropTypes.arrayOf(PropTypes.object).isRequired
+    content: PropTypes.arrayOf(PropTypes.object).isRequired,
+    onContentClick: PropTypes.func.isRequired,
+    isSelectActive: PropTypes.bool.isRequired
 };
 
 export default GalleryGrid;
