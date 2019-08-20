@@ -101,3 +101,11 @@ input:checked + .slider:before {
 .content-select {
     float: right;
 }
+
+/* --------- Gallery */
+
+.gallery-thumbnail img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}

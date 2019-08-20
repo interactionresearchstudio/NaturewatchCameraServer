@@ -1,48 +1,89 @@
 import React from 'react';
 import {Container, Row, Col} from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-import Gallery from 'react-grid-gallery';
+//import Gallery from 'react-grid-gallery';
 import axios from 'axios';
 import Header from '../common/Header';
 import ContentTypeSelector from './ContentTypeSelector';
 import ContentSelect from './ContentSelect';
+import GalleryGrid from './GalleryGrid';
 
 class GalleryComponent extends React.Component {
     constructor(props, context) {
         super(props, context);
 
         this.handleBackButton = this.handleBackButton.bind(this);
+        this.onContentTypeChange = this.onContentTypeChange.bind(this);
 
         this.state = {
-            photos: [],
-            videos: [],
+            content: [],
             showingVideos: false
         }
 
     }
 
     componentDidMount() {
+        this.getPhotos();
+    }
+
+    getPhotos() {
         axios.get('/data/photos')
             .then((res) => {
-                var photoArray = [];
+                let photoArray = [];
+                let i = 0;
                 res.data.forEach((photo) => {
                     photoArray.push({
                         src: '/data/photos/' + photo,
-                        thumbnail: '/data/photos/' + photo,
-                        thumbnailWidth: 100,
-                        thumbnailHeight: 100
+                        thumbnail: '/data/photos/thumb_' + photo,
+                        index: i
                     });
+                    i++;
                 });
                 this.setState( {
-                    photos: photoArray
+                    content: photoArray
                 }, () => {
-                    console.log(this.state.photos)
+                    console.log(this.state.content)
                 });
         });
     }
 
+    getVideos() {
+        axios.get('/data/videos')
+            .then((res) => {
+                let videoArray = [];
+                let i = 0;
+                res.data.forEach((video) => {
+                    videoArray.push({
+                        src: '/data/videos/' + video,
+                        thumbnail: '/data/videos/thumb_' + video.substr(0, video.lastIndexOf('.')) + '.jpg',
+                        index: i
+                    });
+                    i++;
+                });
+                this.setState( {
+                    content: videoArray
+                }, () => {
+                    console.log(this.state.content)
+                });
+            });
+    }
+
     handleBackButton() {
         this.context.router.history.push('/');
+    }
+
+    onContentTypeChange() {
+        if (this.state.showingVideos) {
+            this.getPhotos();
+            this.setState({
+                showingVideos: false
+            });
+        } else {
+            this.getVideos();
+            this.setState({
+                showingVideos: true
+            });
+        }
     }
 
     render() {
@@ -55,7 +96,7 @@ class GalleryComponent extends React.Component {
                 </Row>
                 <Row>
                     <Col>
-                        <ContentTypeSelector/>
+                        <ContentTypeSelector onToggle={this.onContentTypeChange}/>
                     </Col>
                 </Row>
                 <Row>
@@ -67,7 +108,7 @@ class GalleryComponent extends React.Component {
                     </Col>
                 </Row>
                 <Row>
-                    <Gallery images={this.state.photos}/>
+                    <GalleryGrid content={this.state.content}/>
                 </Row>
             </Container>
         );

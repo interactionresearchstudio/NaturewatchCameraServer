@@ -13,7 +13,7 @@ def serve(path):
     """
     if path != "" and os.path.exists(os.path.join(current_app.static_folder, path)):
         return send_from_directory(current_app.static_folder, path)
-    elif path == "":
+    elif path == "" or "gallery" in path:
         return send_from_directory(current_app.static_folder, 'index.html')
     else:
         return Response("Page not found. Please check the URL!", status=404)

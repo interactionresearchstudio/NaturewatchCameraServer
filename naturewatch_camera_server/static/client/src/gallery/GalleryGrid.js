@@ -1,21 +1,96 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import {Modal, Button} from 'react-bootstrap';
+import LazyLoad from 'react-lazy-load';
 
 class GalleryGrid extends React.Component {
-    renderItems() {
-        return this.props.items.map((item, i) => {
-            return (
+    constructor(props) {
+        super(props);
 
-            );
+        this.handleThumbnailClick = this.handleThumbnailClick.bind(this);
+        this.handleModalExit = this.handleModalExit.bind(this);
+
+        this.state = {
+            activeContent: "",
+            isModalShowing: false
+        };
+    }
+
+    handleThumbnailClick(item) {
+        this.setState({
+            activeContent: item.src,
+            isModalShowing: true
+        }, () => {
+            console.log("Updated active content with value " + item.src);
         });
+    }
+
+    handleModalExit() {
+        this.setState({
+            activeContent: "",
+            isModalShowing: false
+        });
+    }
+
+    renderItem(item) {
+        return (
+            <div key={item.thumbnail} className="gallery-thumbnail">
+                <LazyLoad>
+                    <img alt="Captured by Naturewatch Camera" src={item.thumbnail} onClick={this.handleThumbnailClick.bind(this, item)}/>
+                </LazyLoad>
+            </div>
+        );
+
+    }
+
+    renderModal() {
+        return (
+            <Modal
+                show={this.state.isModalShowing}
+                size="lg"
+                aria-labelledby="contained-modal-title-vcenter"
+                centered
+            >
+                <Modal.Body>
+                    {this.renderModalContent()}
+                </Modal.Body>
+                <Modal.Footer>
+                    <p>Press and hold photo to download.</p>
+                    <Button variant="primary" onClick={this.handleModalExit}>
+                        Close
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+        );
+    }
+
+    renderModalContent() {
+        if (this.state.activeContent.endsWith(".mp4")) {
+            return (
+                <video controls>
+                    <source src={this.state.activeContent} type="video/mp4"/>
+                    Your browser does not support the video tag.
+                </video>
+            );
+        } else {
+            return (
+                <img alt="" src={this.state.activeContent}/>
+            );
+        }
     }
 
     render() {
         return (
             <div className="gallery-grid">
-                {this.renderItems()}
+                {this.props.content.map(item => this.renderItem(item))}
+                {this.renderModal()}
             </div>
         );
     }
 }
+
+GalleryGrid.propTypes = {
+    content: PropTypes.arrayOf(PropTypes.object).isRequired
+};
 
 export default GalleryGrid;

@@ -141,7 +141,7 @@ def test_session_stop(test_client):
     assert response_dict["mode"] == "inactive"
 
 
-def test_time(test_client):
+def test_incorrect_time(test_client):
     """
     GIVEN a Flask application
     WHEN '/api/time/<time_string>' is sent a bad time
