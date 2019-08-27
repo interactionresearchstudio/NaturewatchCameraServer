@@ -69,6 +69,7 @@ class GalleryGrid extends React.Component {
                 size="lg"
                 aria-labelledby="contained-modal-title-vcenter"
                 centered
+                className="modal-gallery-content"
             >
                 <Modal.Body>
                     {this.renderModalContent()}
