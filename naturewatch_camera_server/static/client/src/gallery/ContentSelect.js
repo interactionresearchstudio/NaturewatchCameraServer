@@ -21,9 +21,9 @@ class ContentSelect extends React.Component {
     renderDeleteButtons() {
         return(
             <ButtonGroup aria-label="delete">
-                <Button variant="secondary" onClick={this.props.onDeleteAll}>Delete All</Button>
-                <Button variant="secondary" onClick={this.props.onDelete}>Delete</Button>
-                <Button variant="secondary" onClick={this.props.onClearSelection}>Cancel</Button>
+                <Button variant="primary" onClick={this.props.onDeleteAll}>Delete All</Button>
+                <Button variant="primary" onClick={this.props.onDelete}>Delete</Button>
+                <Button variant="primary" onClick={this.props.onClearSelection}>Cancel</Button>
             </ButtonGroup>
         );
     }

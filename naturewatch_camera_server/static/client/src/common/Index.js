@@ -17,10 +17,13 @@ class Index extends React.Component {
         this.onSessionButtonClick = this.onSessionButtonClick.bind(this);
         this.onIdle = this.onIdle.bind(this);
         this.handleFeedRefresh = this.handleFeedRefresh.bind(this);
+        this.onSettingsOpen = this.onSettingsOpen.bind(this);
+        this.onSettingsClose = this.onSettingsClose.bind(this);
 
         this.state = {
             feedStatus: "active",
-            sessionStatus: "inactive"
+            sessionStatus: "inactive",
+            isSettingsOpen: false
         };
     }
 
@@ -90,6 +93,14 @@ class Index extends React.Component {
         });
     }
 
+    onSettingsOpen() {
+        this.setState({isSettingsOpen: true});
+    }
+
+    onSettingsClose() {
+        this.setState({isSettingsOpen: false});
+    }
+
     render() {
         return(
             <div className="index">
@@ -108,7 +119,7 @@ class Index extends React.Component {
                             {this.captureStatus()}
                         </Col>
                         <Col sm={4}>
-                            <Row>
+                            {!this.state.isSettingsOpen && <Row>
                                 <Col xs={6}>
                                     <SessionButton
                                         type={"video"}
@@ -123,9 +134,13 @@ class Index extends React.Component {
                                         sessionStatus={this.state.sessionStatus}
                                     />
                                 </Col>
-                            </Row>
-                            <Settings/>
-                            <Link to="/gallery" className="btn btn-secondary">Gallery</Link>
+                            </Row>}
+                            <Settings
+                                isOpen={this.state.isSettingsOpen}
+                                onOpen={this.onSettingsOpen}
+                                onClose={this.onSettingsClose}
+                            />
+                            {!this.state.isSettingsOpen && <Link to="/gallery" className="btn btn-secondary">Gallery</Link>}
                         </Col>
                     </Row>
                 </Container>

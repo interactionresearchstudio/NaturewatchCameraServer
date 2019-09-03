@@ -195,11 +195,13 @@ class GalleryComponent extends React.Component {
                     </Col>
                 </Row>
                 <Row>
-                    <GalleryGrid
-                        content={this.state.content}
-                        onContentClick={this.onContentSelect}
-                        isSelectActive={this.state.isSelectActive}
-                    />
+                    <Col>
+                        <GalleryGrid
+                            content={this.state.content}
+                            onContentClick={this.onContentSelect}
+                            isSelectActive={this.state.isSelectActive}
+                        />
+                    </Col>
                 </Row>
             </Container>
         );

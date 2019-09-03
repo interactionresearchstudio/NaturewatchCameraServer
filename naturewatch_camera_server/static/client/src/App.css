@@ -18,10 +18,12 @@
     border-radius: 0;
 }
 
+/* Remove all focus blocks. FYI this is bad for desktop accessibility and keyboard users. */
 textarea:focus,
 textarea.form-control:focus,
 input.form-control:focus,
 input[type=text]:focus,
+input[type=radio]:focus,
 input[type=password]:focus,
 input[type=email]:focus,
 input[type=number]:focus,
@@ -29,8 +31,10 @@ input[type=number]:focus,
 [type=password].form-control:focus,
 [type=email].form-control:focus,
 [type=tel].form-control:focus,
-[contenteditable].form-control:focus {
-    box-shadow: inset 0 -1px 0 #ddd !important;
+[contenteditable].form-control:focus,
+button,
+label {
+    box-shadow: inset 0 0 0 #ddd !important;
     outline: none !important;
 }
 
@@ -51,8 +55,9 @@ button.startsession {
     -webkit-border-radius: 0;
     -moz-border-radius: 0;
     border-radius: 0;
-    width: 120px;
+    width: 100%;
     height: 120px;
+    font-weight: bold;
 }
 
 button.startsession.active {
@@ -71,7 +76,7 @@ button.startsession:disabled {
 /* --------- Settings */
 
 .settings {
-    margin-top: 100px;
+    margin-top: 30px;
     margin-bottom: 10px;
 }
 
@@ -98,7 +103,7 @@ button.startsession:disabled {
     margin-bottom: 10px;
 }
 
-.settings .card .btn-primary {
+.settings .card .btn-primary, .content-select .btn-group .btn-primary {
     border: 2px solid #33cc66 !important;
     background-color: white;
     color: #33cc66;
@@ -108,17 +113,20 @@ button.startsession:disabled {
     width: 100%;
 }
 
-.settings .card .btn-primary.active, .settings .card .btn-primary:active {
-    background-color: #33cc66;
+.settings .card .btn-primary.active, .settings .card .btn-primary:active, .content-select .btn-primary:active {
+    background-color: #33cc66 !important;
     color: white;
 }
 
 .settings .card-header {
     background-color: #a7bfbd;
+    color: white;
     border: 0;
     -webkit-border-radius: 0;
     -moz-border-radius: 0;
     border-radius: 0;
+    text-align: center;
+    padding: 6px 12px;
 }
 
 .settings .accordion {
@@ -139,12 +147,16 @@ button.startsession:disabled {
     border-radius: 0;
 }
 
+.settings #shutter-speed {
+    width: 100%;
+}
+
 /* --------- Feed */
 
 .feed {
     width: 100%;
     text-align: center;
-    background: gray;
+    background: #a7bfbd
 }
 
 .feed img {
@@ -154,6 +166,12 @@ button.startsession:disabled {
 .feed span {
     display: inline-block;
     vertical-align: middle;
+    padding: 80px 10px;
+}
+
+.feed span h2{
+    font-size: 20px;
+    font-weight: bold;
 }
 
 .feed-status {
@@ -237,12 +255,34 @@ input:checked + .slider:before {
 
 /* --------- Gallery */
 
+.gallery-grid {
+    margin-top: 20px;
+}
+
 .gallery-thumbnail img {
-    width: 100px;
+    width: 100%;
     height: 100px;
     object-fit: cover;
+}
+
+.gallery-thumbnail {
+    position: relative;
 }
 
 .modal-gallery-content img, .modal-gallery-content video {
     width: 100%;
 }
+
+.MuiSvgIcon-root {
+    width: 14px !important;
+    height: 14px !important;
+    color: blue;
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    background: white;
+    -webkit-border-radius: 7px;
+    -moz-border-radius: 7px;
+    border-radius: 7px;
+}
+
