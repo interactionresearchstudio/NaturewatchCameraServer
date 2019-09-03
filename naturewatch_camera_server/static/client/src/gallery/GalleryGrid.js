@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {Modal, Button} from 'react-bootstrap';
 import LazyLoad from 'react-lazy-load';
-import {CheckCircle} from '@material-ui/icons'
+import {CheckCircle, Cancel} from '@material-ui/icons'
 import {GridList, GridListTile} from "@material-ui/core";
 
 class GalleryGrid extends React.Component {
@@ -72,14 +72,15 @@ class GalleryGrid extends React.Component {
                 aria-labelledby="contained-modal-title-vcenter"
                 centered
                 className="modal-gallery-content"
+                onHide={this.handleModalExit}
             >
                 <Modal.Body>
                     {this.renderModalContent()}
                 </Modal.Body>
                 <Modal.Footer>
-                    <p>Press and hold photo to download.</p>
+                    <p className="mr-auto">Press and hold photo to download.</p>
                     <Button variant="primary" onClick={this.handleModalExit}>
-                        Close
+                        <Cancel/>
                     </Button>
                 </Modal.Footer>
             </Modal>

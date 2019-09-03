@@ -151,6 +151,10 @@ button.startsession:disabled {
     width: 100%;
 }
 
+.settings label.shutter-speed-label {
+    margin-top: 5px;
+}
+
 /* --------- Feed */
 
 .feed {
@@ -176,6 +180,7 @@ button.startsession:disabled {
 
 .feed-status {
     text-align: right;
+    margin-top: 5px;
 }
 
 /* --------- Switch */
@@ -273,7 +278,7 @@ input:checked + .slider:before {
     width: 100%;
 }
 
-.MuiSvgIcon-root {
+.gallery-thumbnail .MuiSvgIcon-root {
     width: 14px !important;
     height: 14px !important;
     color: blue;
@@ -286,3 +291,25 @@ input:checked + .slider:before {
     border-radius: 7px;
 }
 
+.modal-footer button {
+    padding: 0;
+    background: none;
+}
+
+.modal-footer .MuiSvgIcon-root {
+    color: black;
+}
+
+.modal-footer p {
+    margin: 0;
+}
+
+.modal-body {
+    padding: 0;
+}
+
+.modal-content {
+    -webkit-border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
+}

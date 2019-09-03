@@ -69,7 +69,7 @@ class ExposureSetting extends React.Component {
         if (this.props.mode !== "auto") {
             return (
                 <div>
-                    <label htmlFor="shutter-speed">
+                    <label htmlFor="shutter-speed" className="shutter-speed-label">
                         Fixed Shutter Speed: <span>{this.renderShutterSpeedFraction(this.props.shutterSpeed)}</span>
                     </label>
                     <br/>
