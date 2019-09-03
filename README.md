@@ -6,11 +6,31 @@ This is a Python server script that captures a video stream from a Pi Camera and
 
 - Docker installed on Raspbian Stretch
 
+## Configuring Network
+
+Use the iotwifi docker container to handle Wifi setup
+
+	docker pull cjimti/iotwifi
+	
+Download wifi config files to allow the setup of the Access point's credentials 
+
+	# Download the default configuration file
+	$ wget https://raw.githubusercontent.com/interactionresearchstudio/NaturewatchCameraServer/wip/flask-server-AP/wificfg.json
+	
+Editing this file to change the SSID and Pass of the Access Point.
+
+Run the docker Container
+
+	$ docker run --d --privileged --net host \
+      	-v $(pwd)/wificfg.json:/cfg/wificfg.json \
+      	-v /etc/wpa_supplicant/wpa_supplicant.conf:/etc/wpa_supplicant/wpa_supplicant.conf \
+      	cjimti/iotwifi
+
 ## Running the server
 
 Build the docker container
-
-    docker build -t naturewatchcameraserver .
+	
+	docker build -t naturewatchcameraserver .
     
     
 Run the docker container
