@@ -6,6 +6,21 @@ This is a Python server script that captures a video stream from a Pi Camera and
 
 - Docker installed on Raspbian Stretch
 
+## Enable SSH (to be automated) 
+
+Add a blank file named `ssh` to the boot folder on the SD card
+
+## Set up OTG ethernet (to be automated) 
+
+Follow the guide created by gbaman to set up OTG ethernet over USB serial https://gist.github.com/gbaman/975e2db164b3ca2b51ae11e45e8fd40a
+
+## Enable Camera (to be automated)
+
+Enable the camera by entering `sudo raspi-config` and following the menu
+
+	Interfacing Options
+	P1 Camera
+
 ## Configuring Network
 
 Use the iotwifi docker container to handle Wifi setup
