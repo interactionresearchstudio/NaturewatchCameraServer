@@ -10,7 +10,7 @@ changedSettings = 0
 if os.path.isfile("/home/pi/firstboot") == False:
      fin = open("/boot/config.txt", "rt")
      data = fin.read()
-     data = data.replace('start_x=1','start_x=0')
+     data = data.replace('start_x=0','start_x=1')
      fin.close()
      fin = open("/boot/config.txt","wt")
      fin.write(data)
@@ -35,9 +35,9 @@ with open('/boot/_naturewatch-configuration.txt', 'r') as file:
     print(user_ssid)	
 if user_ssid == cred_ssid:
   print("user hasn't updated WiFi name")
-  if user_ssid == "NatureWatchCam" :
+  if user_ssid == "myNatureWatchCam" :
       unique_id = subprocess.check_output("sed -n 's/^Serial\s*: 0*//p' /proc/cpuinfo", shell=True)
-      cred_data["host_apd_cfg"]["ssid"] = "NatureWatchCam-" + unique_id.strip()
+      cred_data["host_apd_cfg"]["ssid"] = "myNatureWatchCam-" + unique_id.strip()
       changedSettings = 1
       print("Wifi Updated to unique name")
 else:

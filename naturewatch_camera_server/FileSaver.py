@@ -26,13 +26,39 @@ class FileSaver(Thread):
 
         self.config = config
 
+    def checkStorage(self):
+        # Disk information
+        description = self.getDfDescription()
+        disk_root = self.getDf()
+        out = disk_root[4].split('%')
+        return int(out[0])
+
+    def getDfDescription(self):
+        df = os.popen("df -h /")
+        i = 0
+        while True:
+            i = i + 1
+            line = df.readline()
+            if i==1:
+                return(line.split()[0:6])
+                                 
+    def getDf(self):
+        df = os.popen("df -h /")
+        i = 0
+        while True:
+            i = i + 1
+            line = df.readline()
+            if i==2:
+                return(line.split()[0:6])
+
+
     def save_image(self, image,timestamp):
         """
         Save image to disk
         :param image: numpy array image
         :return: filename
         """
-        if(checkStorage() < 99):
+        if self.checkStorage() < 99 :
             filename = timestamp
             filename = filename + ".jpg"
             self.logging.info('saving file')
@@ -70,7 +96,7 @@ class FileSaver(Thread):
         :param stream: raw picamera stream object
         :return: none
         """
-        if(checkStorage() < 99):
+        if self.checkStorage() < 99 :
             self.logging.info('FileSaver: Writing video...')
             filename = timestamp
             filenameMp4 = filename
@@ -87,41 +113,11 @@ class FileSaver(Thread):
             self.logging.error('not enough space to save video')
             return None
     
-    def download_all_video():
+    def download_all_video(self):
         timestamp = datetime.datetime.now()
         filename = "video_"+timestamp.strftime('%Y-%m-%d-%H-%M-%S')
-        call(["cp", "-r", self.config["videos_path"], "data/"+filename])
-        call(["zip","-r","filename","data/"+filename])
-        call(["rm","-rf",filename])
-
-    def checkStorage():
-
-        # Disk information
-        description = getDfDescription()
-        disk_root = getDf()
-        out = disk_root[4].split('%')
-        return out[0]
-
-    def getDfDescription():
-        df = os.popen("df -h /")
-        i = 0
-        while True:
-            i = i + 1
-            line = df.readline()
-            if i==1:
-                return(line.split()[0:6])
-                                 
-    def getDf():
-        df = os.popen("df -h /")
-        i = 0
-        while True:
-            i = i + 1
-            line = df.readline()
-            if i==2:
-                return(line.split()[0:6])
-
-
-
-
-
-
+        filename = filename.strip()
+        output_folder = os.path.join(self.config["data_path"], filename)
+        call(["cp", "-r", "data/videos/", output_folder])
+        call(["zip","-r",output_folder,output_folder])
+        #call(["rm","-rf",output_folder])

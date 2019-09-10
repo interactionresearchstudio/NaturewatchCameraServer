@@ -22,6 +22,7 @@
     "log_level": "DEBUG",
     "photos_path": "static/data/photos/",
     "videos_path": "static/data/videos/",
+    "data_path": "data/",
     "feed_timeout_s": 60,
     "video_duration_before_motion": 5,
     "video_duration_after_motion": 10

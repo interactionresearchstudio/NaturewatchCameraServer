@@ -6,6 +6,7 @@ import sys
 from logging.handlers import RotatingFileHandler
 from naturewatch_camera_server.CameraController import CameraController
 from naturewatch_camera_server.ChangeDetector import ChangeDetector
+from naturewatch_camera_server.FileSaver import FileSaver
 from flask import Flask
 from naturewatch_camera_server.api import api
 from naturewatch_camera_server.data import data
@@ -49,5 +50,6 @@ def create_app():
     # Instantiate classes
     flask_app.camera_controller = CameraController(flask_app.logger,flask_app.user_config, use_splitter_port=True)
     flask_app.change_detector = ChangeDetector(flask_app.camera_controller, flask_app.user_config, flask_app.logger)
+    flask_app.file_saver = FileSaver(flask_app.user_config, flask_app.logger)
 
     return flask_app
