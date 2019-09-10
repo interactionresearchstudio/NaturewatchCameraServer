@@ -63,6 +63,7 @@ class Settings extends React.Component {
                     onClick={() => this.setState({isOpen: false})}
                     aria-controls="collapse-settings"
                     aria-expanded="false"
+                    className="short"
                 >
                     Back
                 </Button>
@@ -139,7 +140,8 @@ class Settings extends React.Component {
                     variant="secondary"
                     onClick={() => this.setState({isOpen: !this.state.isOpen})}
                     aria-controls="collapse-settings"
-                    aria-expanded="true"
+                    aria-expanded={this.state.isOpen}
+                    className="settings-button"
                 >
                     Settings
                 </Button>

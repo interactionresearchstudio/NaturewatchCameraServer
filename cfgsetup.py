@@ -35,7 +35,7 @@ with open('/boot/_naturewatch-configuration.txt', 'r') as file:
     print(user_ssid)	
 if user_ssid == cred_ssid:
   print("user hasn't updated WiFi name")
-  if user_ssid == "NatureWatchCam":
+  if user_ssid == "NatureWatchCam" :
       unique_id = subprocess.check_output("sed -n 's/^Serial\s*: 0*//p' /proc/cpuinfo", shell=True)
       cred_data["host_apd_cfg"]["ssid"] = "NatureWatchCam-" + unique_id.strip()
       changedSettings = 1

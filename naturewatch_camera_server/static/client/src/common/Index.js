@@ -108,16 +108,22 @@ class Index extends React.Component {
                             {this.captureStatus()}
                         </Col>
                         <Col sm={4}>
-                            <SessionButton
-                                type={"video"}
-                                onButtonClick={this.onSessionButtonClick}
-                                sessionStatus={this.state.sessionStatus}
-                            />
-                            <SessionButton
-                                type={"photo"}
-                                onButtonClick={this.onSessionButtonClick}
-                                sessionStatus={this.state.sessionStatus}
-                            />
+                            <Row>
+                                <Col xs={6}>
+                                    <SessionButton
+                                        type={"video"}
+                                        onButtonClick={this.onSessionButtonClick}
+                                        sessionStatus={this.state.sessionStatus}
+                                    />
+                                </Col>
+                                <Col xs={6}>
+                                    <SessionButton
+                                        type={"photo"}
+                                        onButtonClick={this.onSessionButtonClick}
+                                        sessionStatus={this.state.sessionStatus}
+                                    />
+                                </Col>
+                            </Row>
                             <Settings/>
                             <Link to="/gallery" className="btn btn-secondary">Gallery</Link>
                         </Col>

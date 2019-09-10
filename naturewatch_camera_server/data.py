@@ -1,5 +1,6 @@
 from flask import Blueprint, Response, request, json, send_from_directory
 from flask import current_app
+from naturewatch_camera_server.FileSaver import FileSaver
 import time
 import json
 import os
@@ -27,7 +28,19 @@ def get_photo(filename):
     else:
         return Response("{'NOT_FOUND':'" + filename + "'}", status=404, mimetype='application/json')
 
+@data.route('/download/<filename>')
+def get_download(filename):
+    file_path = current_app.user_config["photos_path"] + filename
+    if os.path.isfile(os.path.join(file_path)):
+        return send_from_directory(os.path.join('static/data/photos'), filename, mimetype="application/zip")
+    else:
+        return Response("{'NOT_FOUND':'" + filename + "'}", status=404, mimetype='application/json')
 
+@data.route('/download/video')
+def download_all():
+    FileSaver.download_all_video()
+    return Response("{'NOT_FOUND':'" + filename + "'}", status=404, mimetype='application/json')
+    
 @data.route('/photos/<filename>', methods=["DELETE"])
 def delete_photo(filename):
     file_path = current_app.user_config["photos_path"] + filename

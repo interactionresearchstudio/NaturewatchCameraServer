@@ -1,7 +1,11 @@
+#TODO: create "getSpace" api call when filesaver is global 
+
+
 from flask import Blueprint, Response, request, json
 from flask import current_app
 import time
 import json
+import subprocess
 
 api = Blueprint('api', __name__)
 
@@ -164,3 +168,19 @@ def stop_session_handler():
         "time_started": current_app.change_detector.session_start_time
     }
     return Response(json.dumps(session_status), mimetype='application/json')
+
+
+@api.route('/time/<time_string>', methods=['POST'])
+def update_time(time_string):
+    if current_app.is_time_set is False:
+        if int(time_string) > int('1565013742'):
+            try:
+                subprocess.call(['date', '-s', '@' + time_string])
+                return Response('{"SUCCESS": "' + time_string + '"}', status=200, mimetype='application/json')
+            except OSError:
+                current_app.logger.error("Error running date subprocess")
+                return Response('{"ERROR": "' + time_string + '"}', status=500, mimetype='application/json')
+        else:
+            return Response('{"ERROR": "' + time_string + '"}', status=400, mimetype='application/json')
+    else:
+        return Response('{"NOT_MODIFIED": "' + time_string + '"}', status=304, mimetype='application/json')
