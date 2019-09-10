@@ -1,0 +1,27 @@
+version: "1"
+services:
+  naturewatchcameraserver:
+    build:
+      context: "."
+      dockerfile: Dockerfile
+    container_name: naturewatchcameraserver
+    links:
+      - iotwifi
+    ports:
+      - 80:5000
+    restart-policy:
+      condition: on-failure
+    volumes:
+      - /home/pi/data:/naturewatch_camera_server/static/data
+    devices:
+      - /dev/vcsm
+      - /dev/vchiq
+  iotwifi:
+    container_name: iot_wifi
+    image: cjimti/iotwifi
+    privileged: true
+    network_mode: "host"
+    volumes:
+      - /home/pi/wificfg.json:/cfg/wificfg.json
+      - /etc/wpa_supplicant/wpa_supplicant.conf:/etc/wpa_supplicant/wpa_supplicant.conf
+

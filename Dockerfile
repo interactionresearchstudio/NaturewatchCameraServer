@@ -6,7 +6,7 @@ COPY requirements.txt .
 RUN pip3 install -r requirements-pi.txt
 RUN apt-get update
 RUN apt-get install -y gpac
-RUN apt-get install zip
+RUN apt-get instally -y zip
 
 # Bundle source
 COPY naturewatch_camera_server naturewatch_camera_server
@@ -16,4 +16,3 @@ EXPOSE 5000
 
 # Run
 CMD ["python3", "-m", "naturewatch_camera_server"]
-

@@ -3,6 +3,7 @@ import axios from 'axios';
 import {Button, Collapse, Accordion, Card} from 'react-bootstrap';
 import SensitivitySetting from './SensitivitySetting';
 import ExposureSetting from './ExposureSetting';
+import PropTypes from "prop-types";
 
 class Settings extends React.Component {
     constructor(props, context) {
@@ -56,11 +57,11 @@ class Settings extends React.Component {
     }
 
     renderBackButton() {
-        if (this.state.isOpen) {
+        if (this.props.isOpen) {
             return (
                 <Button
                     variant="secondary"
-                    onClick={() => this.setState({isOpen: false})}
+                    onClick={this.props.onClose}
                     aria-controls="collapse-settings"
                     aria-expanded="false"
                     className="short"
@@ -69,6 +70,7 @@ class Settings extends React.Component {
                 </Button>
             )
         }
+        else return null;
     }
 
     onSensitivityChange(value) {
@@ -138,14 +140,18 @@ class Settings extends React.Component {
             <div className="settings">
                 <Button
                     variant="secondary"
-                    onClick={() => this.setState({isOpen: !this.state.isOpen})}
+                    onClick={this.props.onOpen}
                     aria-controls="collapse-settings"
+<<<<<<< HEAD
                     aria-expanded={this.state.isOpen}
+=======
+                    aria-expanded={this.props.isOpen}
+>>>>>>> wip/flask-server
                     className="settings-button"
                 >
                     Settings
                 </Button>
-                <Collapse in={this.state.isOpen}>
+                <Collapse in={this.props.isOpen}>
                     <Accordion>
                         <Card>
                             <Accordion.Toggle as={Card.Header} eventKey={0}>
@@ -198,5 +204,11 @@ class Settings extends React.Component {
         );
     }
 }
+
+Settings.propTypes = {
+    onOpen: PropTypes.func.isRequired,
+    onClose: PropTypes.func.isRequired,
+    isOpen: PropTypes.bool.isRequired
+};
 
 export default Settings;
