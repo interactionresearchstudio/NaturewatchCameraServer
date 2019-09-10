@@ -119,7 +119,11 @@ class Index extends React.Component {
                             {this.captureStatus()}
                         </Col>
                         <Col sm={4}>
+<<<<<<< HEAD
+                            <Row>
+=======
                             {!this.state.isSettingsOpen && <Row>
+>>>>>>> wip/flask-server
                                 <Col xs={6}>
                                     <SessionButton
                                         type={"video"}
@@ -134,6 +138,11 @@ class Index extends React.Component {
                                         sessionStatus={this.state.sessionStatus}
                                     />
                                 </Col>
+<<<<<<< HEAD
+                            </Row>
+                            <Settings/>
+                            <Link to="/gallery" className="btn btn-secondary">Gallery</Link>
+=======
                             </Row>}
                             <Settings
                                 isOpen={this.state.isSettingsOpen}
@@ -141,6 +150,7 @@ class Index extends React.Component {
                                 onClose={this.onSettingsClose}
                             />
                             {!this.state.isSettingsOpen && <Link to="/gallery" className="btn btn-secondary">Gallery</Link>}
+>>>>>>> wip/flask-server
                         </Col>
                     </Row>
                 </Container>
