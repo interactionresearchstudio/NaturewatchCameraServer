@@ -1,9 +1,10 @@
+version: "3"
 services:
   naturewatchcameraserver:
-    build:
-      context: "."
-      dockerfile: Dockerfile
     container_name: naturewatchcameraserver
+    build:
+      context: .
+      dockerfile: Dockerfile
     links:
       - iotwifi
     ports:
@@ -11,7 +12,7 @@ services:
     restart-policy:
       condition: on-failure
     volumes:
-      - /home/pi/data:/naturewatch_camera_server/static/data
+      - "/home/pi/data:/naturewatch_camera_server/static/data"
     devices:
       - /dev/vcsm
       - /dev/vchiq
