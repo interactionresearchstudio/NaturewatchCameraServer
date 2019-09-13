@@ -142,11 +142,7 @@ class Settings extends React.Component {
                     variant="secondary"
                     onClick={this.props.onOpen}
                     aria-controls="collapse-settings"
-<<<<<<< HEAD
-                    aria-expanded={this.state.isOpen}
-=======
                     aria-expanded={this.props.isOpen}
->>>>>>> wip/flask-server
                     className="settings-button"
                 >
                     Settings
