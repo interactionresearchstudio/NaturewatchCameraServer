@@ -9,8 +9,7 @@ services:
       - iotwifi
     ports:
       - "80:5000"
-    restart-policy:
-      condition: on-failure
+    restart: on-failure
     volumes:
       - "/home/pi/data:/naturewatch_camera_server/static/data"
     devices:
