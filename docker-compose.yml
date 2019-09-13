@@ -13,8 +13,8 @@ services:
     volumes:
       - "/home/pi/data:/naturewatch_camera_server/static/data"
     devices:
-      - /dev/vcsm
-      - /dev/vchiq
+      - "/dev/vcsm"
+      - "/dev/vchiq"
   iotwifi:
     container_name: iot_wifi
     image: cjimti/iotwifi
