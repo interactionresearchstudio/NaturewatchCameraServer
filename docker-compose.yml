@@ -21,6 +21,6 @@ services:
     privileged: true
     network_mode: "host"
     volumes:
-      - /home/pi/wificfg.json:/cfg/wificfg.json
-      - /etc/wpa_supplicant/wpa_supplicant.conf:/etc/wpa_supplicant/wpa_supplicant.conf
+      - "/home/pi/wificfg.json:/cfg/wificfg.json"
+      - "/etc/wpa_supplicant/wpa_supplicant.conf:/etc/wpa_supplicant/wpa_supplicant.conf"
 
