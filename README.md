@@ -10,6 +10,17 @@ This is a Python server script that captures a video stream from a Pi Camera and
 
 Add a blank file named `ssh` to the boot folder on the SD card
 
+## Disable wpa_supplicant on Raspberry Pi
+
+	# prevent wpa_supplicant from starting on boot
+	$ sudo systemctl mask wpa_supplicant.service
+
+	# rename wpa_supplicant on the host to ensure that it is not used.
+	sudo mv /sbin/wpa_supplicant /sbin/no_wpa_supplicant
+
+	# kill any running processes named wpa_supplicant
+	$ sudo pkill wpa_supplicant
+
 ## Set up OTG ethernet (to be automated) 
 
 Follow the guide created by gbaman to set up OTG ethernet over USB serial https://gist.github.com/gbaman/975e2db164b3ca2b51ae11e45e8fd40a
