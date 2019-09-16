@@ -40,7 +40,7 @@ Editing this file to change the SSID and Pass of the Access Point.
 
 Run the docker Container
 
-	$ docker run --d --privileged --net host \
+	$ docker run -d --privileged --net host \
       	-v $(pwd)/wificfg.json:/cfg/wificfg.json \
       	-v /etc/wpa_supplicant/wpa_supplicant.conf:/etc/wpa_supplicant/wpa_supplicant.conf \
       	cjimti/iotwifi
