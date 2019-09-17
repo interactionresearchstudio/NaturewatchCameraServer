@@ -22,13 +22,26 @@ class Index extends React.Component {
 
         this.state = {
             feedStatus: "active",
-            sessionStatus: "inactive",
+            sessionStatus: {
+                mode: "inactive",
+                time_started: 0
+            },
             isSettingsOpen: false
         };
     }
 
+    componentDidMount() {
+        axios.get('/api/session')
+            .then((res) => {
+                const status = res.data;
+                this.setState({sessionStatus: status});
+                console.log("INFO: status received.");
+                console.log(this.state.sessionStatus);
+            });
+    }
+
     captureStatus() {
-        if (this.state.sessionStatus === "inactive") {
+        if (this.state.sessionStatus.mode === "inactive") {
             return (
                 <p className="feed-status">Capture is <u>off</u></p>
             );
@@ -42,7 +55,7 @@ class Index extends React.Component {
     getSessionButtonText(type) {
         // Deal with terminology...
         if (type === "photo") type = "image";
-        let session = this.state.sessionStatus;
+        let session = this.state.sessionStatus.mode;
         if (session === "photo") type = "image";
 
         if (session === type) {
@@ -54,11 +67,11 @@ class Index extends React.Component {
     }
 
     onSessionButtonClick(type) {
-        if (this.state.sessionStatus === "inactive") {
+        if (this.state.sessionStatus.mode === "inactive") {
             axios.post('/api/session/start/' + type)
-                .then(() => {
+                .then((res) => {
                     this.setState({
-                        sessionStatus: type
+                        sessionStatus: res.data
                     }, () => {
                         console.log(this.state.sessionStatus);
                     });
@@ -67,9 +80,9 @@ class Index extends React.Component {
                 });
         } else {
             axios.post('/api/session/stop')
-                .then(() => {
+                .then((res) => {
                     this.setState({
-                        sessionStatus: "inactive"
+                        sessionStatus: res.data
                     }, () => {
                         console.log(this.state.sessionStatus);
                     });
@@ -124,14 +137,14 @@ class Index extends React.Component {
                                     <SessionButton
                                         type={"video"}
                                         onButtonClick={this.onSessionButtonClick}
-                                        sessionStatus={this.state.sessionStatus}
+                                        sessionStatus={this.state.sessionStatus.mode}
                                     />
                                 </Col>
                                 <Col xs={6}>
                                     <SessionButton
                                         type={"photo"}
                                         onButtonClick={this.onSessionButtonClick}
-                                        sessionStatus={this.state.sessionStatus}
+                                        sessionStatus={this.state.sessionStatus.mode}
                                     />
                                 </Col>
                             </Row>}
