@@ -55,7 +55,10 @@ def delete_photo(filename):
 def get_video(filename):
     file_path = current_app.user_config["videos_path"] + filename
     if os.path.isfile(os.path.join(file_path)):
-        return send_from_directory(os.path.join('static/data/videos'), filename, mimetype="video/mp4")
+        if filename.endswith(".jpg"):
+            return send_from_directory(os.path.join('static/data/videos'), filename, mimetype="image/jpg")
+        else:
+            return send_from_directory(os.path.join('static/data/videos'), filename, mimetype="video/mp4")
     else:
         return Response("{'NOT_FOUND':'" + filename + "'}", status=404, mimetype='application/json')
 
