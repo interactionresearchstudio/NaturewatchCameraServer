@@ -135,7 +135,13 @@ class CameraController(threading.Thread):
 
     #Get video stream
     def get_stream(self):
-        return self.circularStream;
+        if picamera_exists:
+            if self.rotated_camera is True:
+                self.camera.rotation = 180
+                return self.circularStream
+            else :
+                self.camera.rotation = 0
+                return self.circularStream
 
     def start_circular_stream(self):
         if picamera_exists:

@@ -21,7 +21,7 @@ if os.path.isfile("/home/pi/firstboot") == False:
      changedSettings = 1
      os.system("sudo reboot now")
 
-with open('/home/pi/wificfg.json','r') as json_file:
+with open('/home/pi/NaturewatchCameraServer/wificfg.json','r') as json_file:
     cred_data = json.load(json_file)
     cred_ssid = cred_data["host_apd_cfg"]["ssid"]
     cred_pass = cred_data["host_apd_cfg"]["wpa_passphrase"]
@@ -30,12 +30,10 @@ with open('/boot/_naturewatch-configuration.txt', 'r') as file:
     user_data = file.readlines()
     user_ssid = user_data[1].strip()
     user_pass = user_data[3].strip()
-    user_homessid = user_data[5].strip()
-    user_homepass = user_data[7].strip()
     print(user_ssid)	
 if user_ssid == cred_ssid:
   print("user hasn't updated WiFi name")
-  if user_ssid == "myNatureWatchCam" :
+  if "myNatureWatchCam" in user_ssid :
       unique_id = subprocess.check_output("sed -n 's/^Serial\s*: 0*//p' /proc/cpuinfo", shell=True)
       cred_data["host_apd_cfg"]["ssid"] = "myNatureWatchCam-" + unique_id.strip()
       changedSettings = 1
@@ -55,7 +53,7 @@ else:
   changedSettings = 1
 
 if changedSettings == 1:   
-   with open("/home/pi/wificfg.json", "w") as jsonFile:
+   with open("/home/pi/NaturewatchCameraServer/wificfg.json", "w") as jsonFile:
       json.dump(cred_data, jsonFile)
    print("saving file")
 
