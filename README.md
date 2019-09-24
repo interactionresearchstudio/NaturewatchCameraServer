@@ -5,6 +5,7 @@ This is a Python server script that captures a video stream from a Pi Camera and
 ## Requirements
 
 - Docker installed on Raspbian Stretch
+https://gist.github.com/mikevanis/e360f45e394674b59d663fdf0470d42f
 
 ## Enable SSH (to be automated) 
 
