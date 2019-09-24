@@ -6,7 +6,7 @@ After=multi-user.target
 Type=simple
 ExecStart=/usr/bin/python3 /home/pi/NaturewatchCameraServer/cfgsetup.py
 Restart=always
-User=pi
+User=root
 
 [Install]
 WantedBy=multi-user.target

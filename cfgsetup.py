@@ -4,6 +4,7 @@ import subprocess
 import time
 
 changedSettings = 0
+reboot = 0
 
 #if os.path.isfile("/home/pi/wificfg.json") == False:
 #    os.system("wget https://raw.githubusercontent.com/interactionresearchstudio/NaturewatchCameraServer/wip/flask-server-AP/wificfg.json")
@@ -17,7 +18,7 @@ if os.path.isfile("/home/pi/firstboot") == False:
     fin.write(data)
     fin.close()
     with open("/home/pi/firstboot", 'a'):
-    	os.utime("/home/pi/firstboot", None)
+      os.utime("/home/pi/firstboot", None)
     os.system("sudo raspi-config --expand-rootfs")
     os.system("sudo cp /home/pi/NaturewatchCameraServer/wifisetup.service /etc/systemd/system/")
     os.system("sudo cp /home/pi/NaturewatchCameraServer/docker.naturewatch.service /etc/systemd/system/")
@@ -30,13 +31,14 @@ if os.path.isfile("/home/pi/firstboot") == False:
     os.system("sudo systemctl enable docker.naturewatch.service")
     os.system("sudo systemctl start docker.naturewatch.service")
     changedSettings = 1
-    os.system("sudo reboot now")
+    reboot = 1
+
 
 if os.path.isfile("/boot/_naturewatch-configuration.txt") == False:
-	all_lines = ["Wifi Name\n", "myNatureWatchCam\n", "Wifi Password\n", "badgersandfoxes\n"]
-	outF = open("/boot/_naturewatch-configuration.txt", "w")
-	outF.writelines(all_lines)
-	outF.close()
+  all_lines = ["Wifi Name\n", "myNatureWatchCam\n", "Wifi Password\n", "badgersandfoxes\n"]
+  outF = open("/boot/_naturewatch-configuration.txt", "w")
+  outF.writelines(all_lines)
+  outF.close()
 
 with open('/home/pi/NaturewatchCameraServer/wificfg.json','r') as json_file:
     cred_data = json.load(json_file)
@@ -47,7 +49,7 @@ with open('/boot/_naturewatch-configuration.txt', 'r') as file:
     user_data = file.readlines()
     user_ssid = user_data[1].strip()
     user_pass = user_data[3].strip()
-    print(user_ssid)	
+    print(user_ssid)  
 if user_ssid == cred_ssid:
   print("user hasn't updated WiFi name")
   if "myNatureWatchCam" in user_ssid :
@@ -64,11 +66,11 @@ if user_ssid == cred_ssid:
       print("Wifi Updated to unique name")
 else:
   if "myNatureWatchCam" in user_ssid :
-  	  print("Wifi name automatically updated")
+      print("Wifi name automatically updated")
   else:
-  	  print("user has updated WiFi name")
-  	  cred_data["host_apd_cfg"]["ssid"] = user_ssid
-  	  print("SSID updated to " + user_ssid)
+      print("user has updated WiFi name")
+      cred_data["host_apd_cfg"]["ssid"] = user_ssid
+      print("SSID updated to " + user_ssid)
   changedSettings = 1
 
 if user_pass == cred_pass:
@@ -83,5 +85,8 @@ if changedSettings == 1:
    with open("/home/pi/NaturewatchCameraServer/wificfg.json", "w") as jsonFile:
       json.dump(cred_data, jsonFile)
    print("saving file")
+
+if reboot == 1:
+  os.system("sudo reboot now")
 
 
