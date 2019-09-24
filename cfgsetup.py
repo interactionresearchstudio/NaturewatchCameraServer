@@ -19,8 +19,8 @@ if os.path.isfile("/home/pi/firstboot") == False:
     with open("/home/pi/firstboot", 'a'):
     	os.utime("/home/pi/firstboot", None)
     os.system("sudo raspi-config --expand-rootfs")
-    os.system("sudo cp /home/pi/NatureWatchCameraServer/wifisetup.service /etc/systemd/system/")
-    os.system("sudo cp /home/pi/NatureWatchCameraServer/docker.naturewatch.service /etc/systemd/system/")
+    os.system("sudo cp /home/pi/NaturewatchCameraServer/wifisetup.service /etc/systemd/system/")
+    os.system("sudo cp /home/pi/NaturewatchCameraServer/docker.naturewatch.service /etc/systemd/system/")
     os.system("sudo systemctl mask wpa_supplicant.service")
     os.system("sudo mv /sbin/wpa_supplicant /sbin/no_wpa_supplicant")
     os.system("sudo pkill wpa_supplicant")
