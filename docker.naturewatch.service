@@ -1,0 +1,15 @@
+[Unit]
+Description=Naturewatch Containers
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStartPre=/usr/local/bin/docker-compose down
+ExecStart=/usr/local/bin/docker-compose up
+ExecStop=/usr/local/bin/docker-compose down
+WorkingDirectory=/home/pi/NaturewatchCameraServer
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target

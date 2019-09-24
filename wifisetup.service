@@ -1,0 +1,12 @@
+[Unit]
+Description=Wifi Setup
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/pi/NaturewatchCameraServer/cfgsetup.py
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
