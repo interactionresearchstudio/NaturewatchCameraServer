@@ -90,19 +90,24 @@ class FileSaver(Thread):
             self.logging.exception(e)
             pass
 
-    def save_video(self, stream,timestamp):
+    def save_video(self, stream,timestamp,videoLength):
         """
         Save raw video stream to disk
         :param stream: raw picamera stream object
         :return: none
         """
+        video_length = videoLength
+        if videoLength > 15:
+            video_length = 15
+        else :
+            video_length = videoLength
         if self.checkStorage() < 99 :
             self.logging.info('FileSaver: Writing video...')
             filename = timestamp
             filenameMp4 = filename
             filename = filename + ".h264"
             filenameMp4 = filenameMp4 + ".mp4"
-            stream.copy_to(os.path.join(self.config["videos_path"], filename),seconds = self.config["video_duration_before_motion"] + self.config["video_duration_after_motion"])
+            stream.copy_to(os.path.join(self.config["videos_path"], filename),seconds = video_length)
             self.logging.info('FileSaver: Done writing video ' + filename)
             input_video = os.path.join(self.config["videos_path"], filename)
             output_video = os.path.join(self.config["videos_path"], filenameMp4)

@@ -31,6 +31,7 @@ class ChangeDetector(Thread):
         self.session_start_time = None
         self.avg = None
         self.lastPhotoTime = time.time()
+        self.currentPhotoTime = 0
         self.numOfPhotos = 0
 
         self.activeColour = (255, 255, 0)
@@ -164,12 +165,13 @@ class ChangeDetector(Thread):
         elif self.mode == "video":
             img = self.camera_controller.get_image()
             if self.detect_change_contours(img) is True:
+                self.currentPhotoTime = time.time()
                 timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
                 self.logger.info("ChangeDetector: Detected motion. Capturing Video...")
                 self.camera_controller.wait_recording(self.config["video_duration_after_motion"])
                 self.logger.info("Video capture completed")
                 self.file_saver.save_thumb(img,timestamp,self.mode)
-                self.file_saver.save_video(self.camera_controller.get_stream(),timestamp)
+                self.file_saver.save_video(self.camera_controller.get_stream(),timestamp,(self.currentPhotoTime - self.lastPhotoTime)+self.config["video_duration_after_motion"])
                 self.camera_controller.clear_buffer()
                 self.lastPhotoTime = time.time()
                 self.logger.info("Video timer reset")

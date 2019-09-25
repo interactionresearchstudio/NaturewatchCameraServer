@@ -218,7 +218,7 @@ class CameraController(threading.Thread):
                                                                       use_video_port=True, splitter_port=2,
                                                                       resize=(self.safe_width(self.width),
                                                                               self.safe_height(self.height)))
-                self.circularStream = picamera.PiCameraCircularIO(self.camera,seconds=self.config["video_duration_before_motion"] + self.config["video_duration_after_motion"])      
+                self.circularStream = picamera.PiCameraCircularIO(self.camera,bitrate=17000000,seconds=self.config["video_duration_before_motion"] + self.config["video_duration_after_motion"])      
                 self.camera.start_recording(self.circularStream, format='h264')
                 self.logger.info('Camera initialised with a resolution of %s and a framerate of %s',self.camera.resolution, self.camera.framerate)
 
