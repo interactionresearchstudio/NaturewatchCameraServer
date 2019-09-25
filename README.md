@@ -2,68 +2,37 @@
 
 This is a Python server script that captures a video stream from a Pi Camera and serves it as a .mjpg through a control website to another device. Part of the My Naturewatch project in collaboration with the RCA.
 
-## Requirements
-
-- Docker installed on Raspbian Stretch
-https://gist.github.com/mikevanis/e360f45e394674b59d663fdf0470d42f
 
 ## Enable SSH (to be automated) 
 
 Add a blank file named `ssh` to the boot folder on the SD card
 
-## Disable wpa_supplicant on Raspberry Pi
-
-	# prevent wpa_supplicant from starting on boot
-	$ sudo systemctl mask wpa_supplicant.service
-
-	# rename wpa_supplicant on the host to ensure that it is not used.
-	sudo mv /sbin/wpa_supplicant /sbin/no_wpa_supplicant
-
-	# kill any running processes named wpa_supplicant
-	$ sudo pkill wpa_supplicant
-
 ## Set up OTG ethernet (to be automated) 
 
 Follow the guide created by gbaman to set up OTG ethernet over USB serial https://gist.github.com/gbaman/975e2db164b3ca2b51ae11e45e8fd40a
 
-## Configuring Network
+## Requirements
 
-Use the iotwifi docker container to handle Wifi setup
-
-	docker pull cjimti/iotwifi
-	
-Download wifi config files to allow the setup of the Access point's credentials 
-
-	# Download the default configuration file
-	$ wget https://raw.githubusercontent.com/interactionresearchstudio/NaturewatchCameraServer/wip/flask-server-AP/wificfg.json
-	
-Editing this file to change the SSID and Pass of the Access Point.
-
-Run the docker Container
-
-	$ docker run -d --privileged --net host \
-      	-v $(pwd)/wificfg.json:/cfg/wificfg.json \
-      	-v /etc/wpa_supplicant/wpa_supplicant.conf:/etc/wpa_supplicant/wpa_supplicant.conf \
-      	cjimti/iotwifi
+- Docker installed on Raspbian Stretch
+https://gist.github.com/mikevanis/e360f45e394674b59d663fdf0470d42f
 
 ## Running the server
 
 Build the docker container
 	
-	docker build -t naturewatchcameraserver .
-    
-    
-Run the docker container
+	docker-compose build
+	
+## Configuring the wifi setup
 
-    docker run \
-    --device /dev/vcsm --device /dev/vchiq \
-    -p 5000:5000 \
-    -v ~/data:/naturewatch_camera_server/static/data \
-    naturewatchcameraserver
+Run the config setup python script. This will reboot the pi
+	
+	sudo python3 NaturewatchCameraServer/cfgsetup.py
 
+## Access the interface
+    
 The website is then accessible through its hostname:
 
-	http://raspberrypi.local:5000/
+	http://raspberrypi.local/
 	
 Be sure to replace `raspberrypi.local` with whatever hostname the Pi has.
 
