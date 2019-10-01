@@ -9,13 +9,13 @@ data = Blueprint('data', __name__)
 
 @data.route('/photos')
 def get_photos():
-    photos_list = construct_directory_list(current_app.user_config["photos_path"])
+    photos_list = construct_directory_list(current_app, current_app.user_config["photos_path"])
     return Response(json.dumps(photos_list), mimetype='application/json')
 
 
 @data.route('/videos')
 def get_videos():
-    videos_list = construct_directory_list(current_app.user_config["videos_path"])
+    videos_list = construct_directory_list(current_app, current_app.user_config["videos_path"])
     return Response(json.dumps(videos_list), mimetype='application/json')
 
 
@@ -74,8 +74,15 @@ def delete_video(filename):
             return Response('{"ERROR": "' + filename + '"}', status=500, mimetype='application/json')
 
 
-def construct_directory_list(path):
+def construct_directory_list(current_app, path):
     files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
     files = [f for f in files if f.lower().endswith(('.jpg', '.mp4'))]
     files = [f for f in files if not f.lower().startswith('thumb_')]
+    files.sort(key=lambda f: os.path.getmtime(os.path.join(get_correct_filepath(current_app,f))), reverse=True)
     return files
+
+def get_correct_filepath(current_app, path):
+    if path.lower().endswith('.jpg'):
+        return os.path.join(current_app.user_config["photos_path"], path)
+    elif path.lower().endswith('.mp4'):
+        return os.path.join(current_app.user_config["videos_path"], path)
