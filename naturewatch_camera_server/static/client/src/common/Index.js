@@ -31,12 +31,21 @@ class Index extends React.Component {
     }
 
     componentDidMount() {
+        // Get session object form camera
         axios.get('/api/session')
             .then((res) => {
                 const status = res.data;
                 this.setState({sessionStatus: status});
                 console.log("INFO: status received.");
                 console.log(this.state.sessionStatus);
+            });
+        // Send time to camera.
+        let currentTime = Math.round((new Date()).getTime() / 1000);
+        axios.get('/api/time/' + currentTime)
+            .then((res) => {
+                const status = res.data;
+                console.log("INFO: Sent time to camera.");
+                console.log(status);
             });
     }
 

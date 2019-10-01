@@ -21,4 +21,5 @@ services:
     network_mode: "host"
     volumes:
       - "/home/pi/NaturewatchCameraServer/wificfg.json:/cfg/wificfg.json"
+      - "/etc/wpa_supplicant/wpa_supplicant.conf:/etc/wpa_supplicant/wpa_supplicant.conf"
 
