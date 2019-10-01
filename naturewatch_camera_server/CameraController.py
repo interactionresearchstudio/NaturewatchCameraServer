@@ -5,6 +5,7 @@ import time
 import logging
 import io
 import numpy as np
+import os
 try:
     import picamera
     import picamera.array
@@ -41,6 +42,10 @@ class CameraController(threading.Thread):
         if picamera_exists:
             # Use pi camera
             self.logger.info("picamera module exists.")
+            if self.config["rotate_camera"] == 1:
+                self.set_camera_rotation(True)
+            else:
+                self.set_camera_rotation(False)
             self.initialise_picamera()
 
         else:
@@ -123,10 +128,7 @@ class CameraController(threading.Thread):
     # Get CV image
     def get_image(self):
         if self.image is not None:
-            if self.rotated_camera is True:
-                return self.image.copy()
-            else:
-                return self.image.copy()
+            return self.image.copy()
 
     # Get CV image in binary jpeg encoding format
     def get_image_binary(self):
@@ -180,11 +182,7 @@ class CameraController(threading.Thread):
                 s = cv2.imdecode(data, 1)
 
                 if s is not None:
-                    if self.rotated_camera is True:
-                        #return imutils.rotate(s.array.copy(), angle=180)
-                        return s.copy()
-                    else:
-                        return s.copy()
+                    return s.copy()
                 else:
                     return None
 
@@ -207,7 +205,12 @@ class CameraController(threading.Thread):
             self.camera = picamera.PiCamera()
             self.camera.framerate = self.config["frame_rate"]
             picamera.PiCamera.CAPTURE_TIMEOUT = 60
-            self.camera.rotation = 0
+            if self.config["rotate_camera"] == 1:
+                self.camera.rotation = 180
+                self.rotated_camera = True
+            else:
+                self.camera.rotation = 0
+                self.rotated_camera = False
 
             if self.use_splitter_port is True:
                 self.camera.resolution = (self.safe_width(self.splitter_width), self.safe_height(self.splitter_height))
@@ -231,14 +234,19 @@ class CameraController(threading.Thread):
 
     # Set camera rotation
     def set_camera_rotation(self, rotation):
-        self.rotated_camera = rotation
-        if self.rotated_camera is True:
-            self.camera.vflip = True
-            self.logger.info("Cam Flip")
-
-        else :
-            self.camera.vflip = False
-            self.logger.info("Cam Norm")
+        if self.rotated_camera != rotation:
+            self.rotated_camera = rotation
+            module_path = os.path.abspath(os.path.dirname(__file__))
+            if self.rotated_camera is True:
+                self.camera.rotation = 180
+                new_config = self.config
+                new_config["rotate_camera"] = 1
+                self.config = self.update_config(new_config, os.path.join(module_path, 'config.json'))
+            else:
+                self.camera.rotation = 0
+                new_config = self.config
+                new_config["rotate_camera"] = 0
+                self.config = self.update_config(new_config, os.path.join(module_path, 'config.json'))
 
     # Set picamera exposure
     def set_exposure(self, shutter_speed, iso):
@@ -313,3 +321,10 @@ class CameraController(threading.Thread):
             return height
         else:
             return CameraController.safe_height(height + 1)
+
+    @staticmethod
+    def update_config(new_config, config_path):
+        with open(config_path, 'w') as json_file:
+            contents = json.dumps(new_config, sort_keys=True, indent=4, separators=(',', ': '))
+            json_file.write(contents)
+        return new_config
