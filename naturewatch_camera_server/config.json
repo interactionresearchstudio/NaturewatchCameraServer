@@ -7,7 +7,7 @@
     "use_video_port": false,
     "camera_warmup": 2.5,
     "stream_delay": 0.2,
-    "rotate_camera": 1,
+    "rotate_camera": 0,
     "delta_threshold": 5,
     "min_width": 100,
     "min_height": 100,

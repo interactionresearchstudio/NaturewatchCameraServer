@@ -32,10 +32,10 @@ def create_app():
 
     # Load configuration json
     module_path = os.path.abspath(os.path.dirname(__file__))
-    flask_app.user_config = json.load(open(os.path.join(module_path, "./config.json")))
-    flask_app.user_config["photos_path"] = os.path.join(module_path, flask_app.user_config["photos_path"])
+    flask_app.user_config = json.load(open(os.path.join(module_path, "config.json")))
 
-    # Create photos directory if it doesn't exist
+    # Find photos and videos paths
+    flask_app.user_config["photos_path"] = os.path.join(module_path, flask_app.user_config["photos_path"])
     if os.path.isdir(flask_app.user_config["photos_path"]) is False:
         os.mkdir(flask_app.user_config["photos_path"])
         flask_app.logger.warning("Photos directory does not exist, creating path")
@@ -44,11 +44,20 @@ def create_app():
         os.mkdir(flask_app.user_config["videos_path"])
         flask_app.logger.warning("Videos directory does not exist, creating path")
 
+    # Copy config file into data directory or load it from data directory if it already exists...
+    if os.path.isfile(os.path.join(module_path, flask_app.user_config["data_path"], 'config.json')) is False:
+        flask_app.logger.warning("Config file does not exist within the data context, copying file")
+        with open(os.path.join(module_path, flask_app.user_config["data_path"], "config.json"), 'w') as json_file:
+            contents = json.dumps(flask_app.user_config, sort_keys=True, indent=4, separators=(',', ': '))
+            json_file.write(contents)
+    else:
+        flask_app.user_config = json.load(open(os.path.join(module_path, flask_app.user_config["data_path"], 'config.json')))
+
     # Create marker for time updates through the client
     flask_app.is_time_set = False
 
     # Instantiate classes
-    flask_app.camera_controller = CameraController(flask_app.logger,flask_app.user_config, use_splitter_port=True)
+    flask_app.camera_controller = CameraController(flask_app.logger, flask_app.user_config, use_splitter_port=True)
     flask_app.change_detector = ChangeDetector(flask_app.camera_controller, flask_app.user_config, flask_app.logger)
     flask_app.file_saver = FileSaver(flask_app.user_config, flask_app.logger)
 

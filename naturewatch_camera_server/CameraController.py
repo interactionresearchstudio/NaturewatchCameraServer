@@ -231,17 +231,18 @@ class CameraController(threading.Thread):
     def set_camera_rotation(self, rotation):
         if self.rotated_camera != rotation:
             self.rotated_camera = rotation
-            module_path = os.path.abspath(os.path.dirname(__file__))
             if self.rotated_camera is True:
                 self.camera.rotation = 180
                 new_config = self.config
                 new_config["rotate_camera"] = 1
-                self.config = self.update_config(new_config, os.path.join(module_path, 'config.json'))
+                module_path = os.path.abspath(os.path.dirname(__file__))
+                self.config = self.update_config(new_config, os.path.join(module_path, self.config["data_path"], 'config.json'))
             else:
                 self.camera.rotation = 0
                 new_config = self.config
                 new_config["rotate_camera"] = 0
-                self.config = self.update_config(new_config, os.path.join(module_path, 'config.json'))
+                module_path = os.path.abspath(os.path.dirname(__file__))
+                self.config = self.update_config(new_config, os.path.join(module_path, self.config["data_path"], 'config.json'))
 
     # Set picamera exposure
     def set_exposure(self, shutter_speed, iso):
