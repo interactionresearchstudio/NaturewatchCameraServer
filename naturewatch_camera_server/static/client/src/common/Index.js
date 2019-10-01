@@ -41,7 +41,7 @@ class Index extends React.Component {
             });
         // Send time to camera.
         let currentTime = Math.round((new Date()).getTime() / 1000);
-        axios.get('/api/time/' + currentTime)
+        axios.post('/api/time/' + currentTime)
             .then((res) => {
                 const status = res.data;
                 console.log("INFO: Sent time to camera.");
