@@ -42,12 +42,7 @@ class CameraController(threading.Thread):
         if picamera_exists:
             # Use pi camera
             self.logger.info("picamera module exists.")
-            if self.config["rotate_camera"] == 1:
-                self.set_camera_rotation(True)
-            else:
-                self.set_camera_rotation(False)
             self.initialise_picamera()
-
         else:
             # Use webcam
             self.logger.info("picamera module not found. Using oCV VideoCapture instead.")
