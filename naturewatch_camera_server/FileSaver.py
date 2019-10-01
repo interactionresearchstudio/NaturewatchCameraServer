@@ -90,29 +90,24 @@ class FileSaver(Thread):
             self.logging.exception(e)
             pass
 
-    def save_video(self, stream,timestamp,videoLength):
+    def save_video(self, stream,timestamp):
         """
         Save raw video stream to disk
         :param stream: raw picamera stream object
         :return: none
         """
-        video_length = videoLength
-        if videoLength > 15:
-            video_length = 15
-        else :
-            video_length = videoLength
         if self.checkStorage() < 99 :
             self.logging.info('FileSaver: Writing video...')
             filename = timestamp
             filenameMp4 = filename
             filename = filename + ".h264"
             filenameMp4 = filenameMp4 + ".mp4"
-            stream.copy_to(os.path.join(self.config["videos_path"], filename),seconds = video_length)
             self.logging.info('FileSaver: Done writing video ' + filename)
             input_video = os.path.join(self.config["videos_path"], filename)
+            stream.copy_to(input_video,seconds = 15)
             output_video = os.path.join(self.config["videos_path"], filenameMp4)
-            call(["MP4Box", "-fps", str(self.config["frame_rate"]), "-add", input_video, output_video])
-            os.remove(os.path.join(self.config["videos_path"], filename))
+            call(["MP4Box", "-fps", str(self.config["frame_rate"]),"-add", input_video, output_video])
+            os.remove(input_video)
             self.logging.info('Removed ' + filename)
         else : 
             self.logging.error('not enough space to save video')
@@ -123,6 +118,3 @@ class FileSaver(Thread):
         filename = "video_"+timestamp.strftime('%Y-%m-%d-%H-%M-%S')
         filename = filename.strip()
         output_folder = os.path.join(self.config["data_path"], filename)
-        call(["cp", "-r", "data/videos/", output_folder])
-        call(["zip","-r",output_folder,output_folder])
-        #call(["rm","-rf",output_folder])

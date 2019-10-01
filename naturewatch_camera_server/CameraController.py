@@ -124,7 +124,7 @@ class CameraController(threading.Thread):
     def get_image(self):
         if self.image is not None:
             if self.rotated_camera is True:
-                return imutils.rotate(self.image.copy(), angle=180)
+                return self.image.copy()
             else:
                 return self.image.copy()
 
@@ -133,19 +133,17 @@ class CameraController(threading.Thread):
         r, buf = cv2.imencode(".jpg", self.get_image())
         return buf
 
+
     #Get video stream
     def get_stream(self):
         if picamera_exists:
-            if self.rotated_camera is True:
-                self.camera.rotation = 180
-                return self.circularStream
-            else :
-                self.camera.rotation = 0
-                return self.circularStream
+            return self.circularStream
 
     def start_circular_stream(self):
         if picamera_exists:
-            self.camera.start_recording(self.circularStream, format='h264')
+            self.camera.framerate = self.config["frame_rate"]
+            self.camera.start_recording(self.circularStream,bitrate = 10000000, format='h264')
+            self.logger.info('Camera initialised with a resolution of %s and a framerate of %s',self.camera.resolution, self.camera.framerate)
 
     def stop_circular_stream(self):
         if picamera_exists:
@@ -184,7 +182,7 @@ class CameraController(threading.Thread):
                 if s is not None:
                     if self.rotated_camera is True:
                         #return imutils.rotate(s.array.copy(), angle=180)
-                        return imutils.rotate(s.copy(), angle=180)
+                        return s.copy()
                     else:
                         return s.copy()
                 else:
@@ -209,6 +207,7 @@ class CameraController(threading.Thread):
             self.camera = picamera.PiCamera()
             self.camera.framerate = self.config["frame_rate"]
             picamera.PiCamera.CAPTURE_TIMEOUT = 60
+            self.camera.rotation = 0
 
             if self.use_splitter_port is True:
                 self.camera.resolution = (self.safe_width(self.splitter_width), self.safe_height(self.splitter_height))
@@ -218,8 +217,8 @@ class CameraController(threading.Thread):
                                                                       use_video_port=True, splitter_port=2,
                                                                       resize=(self.safe_width(self.width),
                                                                               self.safe_height(self.height)))
-                self.circularStream = picamera.PiCameraCircularIO(self.camera,bitrate=17000000,seconds=self.config["video_duration_before_motion"] + self.config["video_duration_after_motion"])      
-                self.camera.start_recording(self.circularStream, format='h264')
+                self.circularStream = picamera.PiCameraCircularIO(self.camera, bitrate = 10000000,seconds=self.config["video_duration_before_motion"] + self.config["video_duration_after_motion"])      
+                self.start_circular_stream()
                 self.logger.info('Camera initialised with a resolution of %s and a framerate of %s',self.camera.resolution, self.camera.framerate)
 
             else:
@@ -233,6 +232,13 @@ class CameraController(threading.Thread):
     # Set camera rotation
     def set_camera_rotation(self, rotation):
         self.rotated_camera = rotation
+        if self.rotated_camera is True:
+            self.camera.vflip = True
+            self.logger.info("Cam Flip")
+
+        else :
+            self.camera.vflip = False
+            self.logger.info("Cam Norm")
 
     # Set picamera exposure
     def set_exposure(self, shutter_speed, iso):
