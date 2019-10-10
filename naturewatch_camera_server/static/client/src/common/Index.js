@@ -40,11 +40,11 @@ class Index extends React.Component {
                 console.log(this.state.sessionStatus);
             });
         // Send time to camera.
-        let currentTime = Math.round((new Date()).getTime() / 1000);
+        let currentTime = this.formatTime(new Date());
         axios.post('/api/time/' + currentTime)
             .then((res) => {
                 const status = res.data;
-                console.log("INFO: Sent time to camera.");
+                console.log("INFO: Sent time " + currentTime + " to camera.");
                 console.log(status);
             });
     }
@@ -73,6 +73,42 @@ class Index extends React.Component {
         else {
             return "Start " + type + " Capture";
         }
+    }
+
+    formatTime(d) {
+        let year = d.getFullYear().toString();
+        let month = "";
+        if (d.getMonth()+1 < 10) {
+            month = "0" + (d.getMonth()+1).toString();
+        } else {
+            month += (d.getMonth()+1).toString();
+        }
+        let date = "";
+        if (d.getDate() < 10) {
+            date = "0" + d.getDate().toString();
+        } else {
+            date = d.getDate().toString();
+        }
+        let hours = "";
+        if (d.getHours() < 10) {
+            hours = "0" + d.getHours().toString();
+        } else {
+            hours = d.getHours().toString();
+        }
+        let minutes = "";
+        if (d.getMinutes() < 10) {
+            minutes = "0" + d.getMinutes().toString();
+        } else {
+            minutes = d.getMinutes().toString();
+        }
+        let seconds = "";
+        if (d.getSeconds() < 10) {
+            seconds = "0" + d.getSeconds().toString();
+        } else {
+            seconds = d.getSeconds().toString();
+        }
+
+        return year + "-" + month + "-" + date + " " + hours + ":" + minutes + ":" + seconds;
     }
 
     onSessionButtonClick(type) {
