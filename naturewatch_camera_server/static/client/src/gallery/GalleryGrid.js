@@ -78,7 +78,9 @@ class GalleryGrid extends React.Component {
                     {this.renderModalContent()}
                 </Modal.Body>
                 <Modal.Footer>
-                    <p className="mr-auto">Press and hold photo to download.</p>
+                    {this.state.activeContent.endsWith(".jpg") &&
+                        <p className="mr-auto">Press and hold photo to download.</p>
+                    }
                     <Button variant="primary" onClick={this.handleModalExit}>
                         <Cancel/>
                     </Button>

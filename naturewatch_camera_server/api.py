@@ -5,6 +5,7 @@ from flask import Blueprint, Response, request, json
 from flask import current_app
 import time
 import json
+import os
 import subprocess
 
 api = Blueprint('api', __name__)
@@ -33,6 +34,7 @@ def generate_mjpg(camera_controller):
     while camera_controller.is_alive():
         latest_frame = camera_controller.get_image_binary()
         response = b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + bytearray(latest_frame) + b'\r\n'
+        time.sleep(0.2)
         yield(response)
 
 
@@ -173,16 +175,17 @@ def stop_session_handler():
 @api.route('/time/<time_string>', methods=['POST'])
 def update_time(time_string):
     if current_app.is_time_set is False:
-        if int(time_string) > int('1565013742'):
-            try:
-                subprocess.call(['date', '-s', '@' + time_string])
-                current_app.is_time_set = True
-                return Response('{"SUCCESS": "' + time_string + '"}', status=200, mimetype='application/json')
-            except OSError:
-                current_app.logger.error("Error running date subprocess")
-                current_app.is_time_set = False
-                return Response('{"ERROR": "' + time_string + '"}', status=500, mimetype='application/json')
-        else:
-            return Response('{"ERROR": "' + time_string + '"}', status=400, mimetype='application/json')
+        os.environ["FAKETIME"] = time_string
+        """
+        try:
+            subprocess.call(['date', '-s', '@' + time_string])
+            current_app.is_time_set = True
+            return Response('{"SUCCESS": "' + time_string + '"}', status=200, mimetype='application/json')
+        except OSError:
+            current_app.logger.error("Error running date subprocess")
+            current_app.is_time_set = False
+            return Response('{"ERROR": "' + time_string + '"}', status=500, mimetype='application/json')
+        """
+        return Response('{"SUCCESS": "' + time_string + '"}', status=200, mimetype='application/json')
     else:
         return Response('{"NOT_MODIFIED": "' + time_string + '"}', status=304, mimetype='application/json')

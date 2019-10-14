@@ -5,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    links:
-      - iotwifi
     ports:
       - "80:5000"
     volumes:
@@ -14,12 +12,6 @@ services:
     devices:
       - "/dev/vcsm"
       - "/dev/vchiq"
-  iotwifi:
-    container_name: iot_wifi
-    image: cjimti/iotwifi
-    privileged: true
-    network_mode: "host"
-    volumes:
-      - "/home/pi/NaturewatchCameraServer/wificfg.json:/cfg/wificfg.json"
-      - "/etc/wpa_supplicant/wpa_supplicant.conf:/etc/wpa_supplicant/wpa_supplicant.conf"
+    environment:
+      - "LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1"
 

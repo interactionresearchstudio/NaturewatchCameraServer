@@ -64,6 +64,7 @@ class FileSaver(Thread):
             self.logging.info('saving file')
             try:
                 cv2.imwrite(os.path.join(self.config["photos_path"], filename), image)
+                self.logging.info("Saved file to " + os.path.join(self.config["photos_path"], filename))
                 return filename
             except Exception as e:
                 self.logging.error('FileSaver: save_photo() error: ')

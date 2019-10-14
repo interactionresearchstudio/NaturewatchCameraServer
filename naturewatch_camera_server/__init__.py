@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import sys
+from shutil import copyfile
 from logging.handlers import RotatingFileHandler
 from naturewatch_camera_server.CameraController import CameraController
 from naturewatch_camera_server.ChangeDetector import ChangeDetector
@@ -32,10 +33,19 @@ def create_app():
 
     # Load configuration json
     module_path = os.path.abspath(os.path.dirname(__file__))
+    flask_app.logger.info("Module path: " + module_path)
     flask_app.user_config = json.load(open(os.path.join(module_path, "config.json")))
+
+    # Copy config file into data directory or load it from data directory if it already exists...
+    if os.path.isfile(os.path.join(module_path, flask_app.user_config["data_path"], 'config.json')) is False:
+        flask_app.logger.warning("Config file does not exist within the data context, copying file")
+        copyfile(os.path.join(module_path, "config.json"), os.path.join(module_path, flask_app.user_config["data_path"], "config.json"))
+    else:
+        flask_app.user_config = json.load(open(os.path.join(module_path, flask_app.user_config["data_path"], 'config.json')))
 
     # Find photos and videos paths
     flask_app.user_config["photos_path"] = os.path.join(module_path, flask_app.user_config["photos_path"])
+    flask_app.logger.info("Photos path: " + flask_app.user_config["photos_path"])
     if os.path.isdir(flask_app.user_config["photos_path"]) is False:
         os.mkdir(flask_app.user_config["photos_path"])
         flask_app.logger.warning("Photos directory does not exist, creating path")
@@ -43,15 +53,6 @@ def create_app():
     if os.path.isdir(flask_app.user_config["videos_path"]) is False:
         os.mkdir(flask_app.user_config["videos_path"])
         flask_app.logger.warning("Videos directory does not exist, creating path")
-
-    # Copy config file into data directory or load it from data directory if it already exists...
-    if os.path.isfile(os.path.join(module_path, flask_app.user_config["data_path"], 'config.json')) is False:
-        flask_app.logger.warning("Config file does not exist within the data context, copying file")
-        with open(os.path.join(module_path, flask_app.user_config["data_path"], "config.json"), 'w') as json_file:
-            contents = json.dumps(flask_app.user_config, sort_keys=True, indent=4, separators=(',', ': '))
-            json_file.write(contents)
-    else:
-        flask_app.user_config = json.load(open(os.path.join(module_path, flask_app.user_config["data_path"], 'config.json')))
 
     # Create marker for time updates through the client
     flask_app.is_time_set = False
