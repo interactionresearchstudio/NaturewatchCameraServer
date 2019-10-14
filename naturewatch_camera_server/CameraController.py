@@ -78,11 +78,12 @@ class CameraController(threading.Thread):
 
                         if self.image is None:
                             self.logger.warning("Got empty image.")
-
+                        time.sleep(0.01)
                     except Exception as e:
                         self.logger.error("picamera update error.")
                         self.logger.exception(e)
                         self.initialise_picamera()
+                        time.sleep(0.02)
                         pass
 
                 else:
@@ -96,6 +97,7 @@ class CameraController(threading.Thread):
 
                     if self.image is None:
                         self.logger.warning("Got empty image.")
+
             except KeyboardInterrupt:
                 self.logger.info("Received KeyboardInterrupt. Shutting down CameraController...")
                 self.stop()
@@ -141,7 +143,6 @@ class CameraController(threading.Thread):
         if picamera_exists:
             self.camera.framerate = self.config["frame_rate"]
             self.camera.start_recording(self.circularStream,bitrate = 10000000, format='h264')
-            self.logger.info('Camera initialised with a resolution of %s and a framerate of %s',self.camera.resolution, self.camera.framerate)
 
     def stop_circular_stream(self):
         if picamera_exists:
@@ -227,7 +228,6 @@ class CameraController(threading.Thread):
                                                                       use_video_port=True)
 
             time.sleep(2)
-
     # Set camera rotation
     def set_camera_rotation(self, rotation):
         if self.rotated_camera != rotation:

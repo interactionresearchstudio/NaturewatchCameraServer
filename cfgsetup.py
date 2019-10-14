@@ -1,92 +1,51 @@
-import json
 import os
-import subprocess
-import time
 
 changedSettings = 0
-reboot = 0
 
-#if os.path.isfile("/home/pi/wificfg.json") == False:
-#    os.system("wget https://raw.githubusercontent.com/interactionresearchstudio/NaturewatchCameraServer/wip/flask-server-AP/wificfg.json")
+# get SSID and passphrase from hostapd.conf
+hostConfigFileName = "/etc/hostapd/hostapd.conf"
+with open(hostConfigFileName, "r") as file:
+    hostConfigFile = file.readlines()
+currentSSID = hostConfigFile[2][5:].strip()
+currentPassphrase = hostConfigFile[10][15:].strip()
+print("hostapd configuration - SSID: " + currentSSID)
+print("hostapd configuration - Passphrase: " + currentPassphrase)
 
-if os.path.isfile("/home/pi/firstboot") == False:
-    fin = open("/boot/config.txt", "rt")
-    data = fin.read()
-    data = data.replace('start_x=0','start_x=1')
-    fin.close()
-    fin = open("/boot/config.txt","wt")
-    fin.write(data)
-    fin.close()
-    with open("/home/pi/firstboot", 'a'):
-      os.utime("/home/pi/firstboot", None)
-    os.system("sudo raspi-config --expand-rootfs")
-    os.system("sudo cp /home/pi/NaturewatchCameraServer/wifisetup.service /etc/systemd/system/")
-    os.system("sudo cp /home/pi/NaturewatchCameraServer/docker.naturewatch.service /etc/systemd/system/")
-    os.system("sudo systemctl mask wpa_supplicant.service")
-    os.system("sudo mv /sbin/wpa_supplicant /sbin/no_wpa_supplicant")
-    os.system("sudo pkill wpa_supplicant")
-    os.system("sudo systemctl daemon-reload")
-    os.system("sudo systemctl enable wifisetup.service")
-    os.system("sudo systemctl start wifisetup.service")
-    os.system("sudo systemctl enable docker.naturewatch.service")
-    os.system("sudo systemctl start docker.naturewatch.service")
-    changedSettings = 1
-    reboot = 1
-
-
-if os.path.isfile("/boot/_naturewatch-configuration.txt") == False:
-  all_lines = ["Wifi Name\n", "myNatureWatchCam\n", "Wifi Password\n", "badgersandfoxes\n"]
-  outF = open("/boot/_naturewatch-configuration.txt", "w")
-  outF.writelines(all_lines)
-  outF.close()
-
-with open('/home/pi/NaturewatchCameraServer/wificfg.json','r') as json_file:
-    cred_data = json.load(json_file)
-    cred_ssid = cred_data["host_apd_cfg"]["ssid"]
-    cred_pass = cred_data["host_apd_cfg"]["wpa_passphrase"]
-    print(cred_ssid)
-with open('/boot/_naturewatch-configuration.txt', 'r') as file:
-    user_data = file.readlines()
-    user_ssid = user_data[1].strip()
-    user_pass = user_data[3].strip()
-    print(user_ssid)  
-if user_ssid == cred_ssid:
-  print("user hasn't updated WiFi name")
-  if "myNatureWatchCam" in user_ssid :
+# get SSID and passphrase from user configuration file
+nwConfigFileName = "/boot/_naturewatch-configuration.txt"
+with open(nwConfigFileName, "r") as file:
+    nwConfigFile = file.readlines()
+configFileSSID = nwConfigFile[1].strip()
+configFilePassphrase = nwConfigFile[3].strip()
+if "myNatureWatchCam" in configFileSSID :
       unique_id = subprocess.check_output("sed -n 's/^Serial\s*: 0*//p' /proc/cpuinfo", shell=True)
-      cred_data["host_apd_cfg"]["ssid"] = "myNatureWatchCam-" + unique_id.strip().decode('utf-8')
-      fin = open("/boot/_naturewatch-configuration.txt", "rt")
-      data = fin.read()
-      data = data.replace('myNatureWatchCam\n',cred_data["host_apd_cfg"]["ssid"]+'\n')
-      fin.close()
-      fin = open("/boot/_naturewatch-configuration.txt","wt")
-      fin.write(data)
-      fin.close()
-      changedSettings = 1
+      configFileSSID = "myNatureWatchCam-" + unique_id.strip().decode('utf-8')
       print("Wifi Updated to unique name")
+
+print("Boot configuration - SSID: " + configFileSSID)
+print("Boot configuration - Passphrase: " + configFilePassphrase)
+
+if configFileSSID == currentSSID:
+    print("Config file and hostapd SSIDs match. No need to change them.")
 else:
-  if "myNatureWatchCam" in user_ssid :
-      print("Wifi name automatically updated")
-  else:
-      print("user has updated WiFi name")
-      cred_data["host_apd_cfg"]["ssid"] = user_ssid
-      print("SSID updated to " + user_ssid)
-  changedSettings = 1
+    hostConfigFile[2] = "ssid=" + configFileSSID + "\n"
+    print("Updating hostapd config with new SSID...")
+    changedSettings = 1
 
-if user_pass == cred_pass:
-  print("user hasn't updated WiFi password")
+if configFilePassphrase == currentPassphrase:
+    print("Config file and hostapd passphrases match. No need to change them.")
 else:
-  print("user has updated WiFi password")
-  cred_data["host_apd_cfg"]["wpa_passphrase"] = user_pass
-  print("Password updated to " + user_pass)
-  changedSettings = 1
+    hostConfigFile[10] = "wpa_passphrase=" + configFilePassphrase + "\n"
+    print("Updating hostapd config with new passphrase...")
+    changedSettings = 1
 
-if changedSettings == 1:   
-   with open("/home/pi/NaturewatchCameraServer/wificfg.json", "w") as jsonFile:
-      json.dump(cred_data, jsonFile)
-   print("saving file")
+if os.path.isfile("/home/pi/firstboot"):
+    os.system("rm /home/pi/firstboot")
+    os.system("sudo raspi-config --expand-rootfs")
+    changedSettings = 1
 
-if reboot == 1:
-  os.system("sudo reboot now")
-
-
+if changedSettings == 1:
+    with open(hostConfigFileName, "w") as file:
+        file.writelines(hostConfigFile)
+    print("Updated hostapd.conf.")
+    os.system("sudo reboot now")

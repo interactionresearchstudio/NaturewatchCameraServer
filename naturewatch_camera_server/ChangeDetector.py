@@ -154,6 +154,7 @@ class ChangeDetector(Thread):
         self.session_start_time = time.time()
 
     def update(self):
+        time.sleep(0.02)
         if self.mode == "photo":
             img = self.camera_controller.get_image()
             if self.detect_change_contours(img) is True:

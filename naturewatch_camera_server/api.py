@@ -34,6 +34,7 @@ def generate_mjpg(camera_controller):
         latest_frame = camera_controller.get_image_binary()
         response = b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + bytearray(latest_frame) + b'\r\n'
         yield(response)
+        time.sleep(0.2)
 
 
 @api.route('/frame')
@@ -60,6 +61,7 @@ def generate_jpg(camera_controller):
         current_app.logger.warning("Could not retrieve image binary.")
         current_app.logger.exception(e)
         return b'Empty'
+    time.sleep(0.1)
 
 
 @api.route('/settings', methods=['GET', 'POST'])
@@ -175,7 +177,7 @@ def update_time(time_string):
     if current_app.is_time_set is False:
         if int(time_string) > int('1565013742'):
             try:
-                subprocess.call(['date', '-s', '@' + time_string])
+                subprocess.call(['sudo','date', '-s', '@' + time_string])
                 current_app.is_time_set = True
                 return Response('{"SUCCESS": "' + time_string + '"}', status=200, mimetype='application/json')
             except OSError:

@@ -5,6 +5,9 @@ import logging
 import os
 import datetime
 from subprocess import call
+import zipfile
+
+
 try:
     import picamera
     import picamera.array
@@ -31,6 +34,7 @@ class FileSaver(Thread):
         description = self.getDfDescription()
         disk_root = self.getDf()
         out = disk_root[4].split('%')
+        self.logging.info(str(out[0]))
         return int(out[0])
 
     def getDfDescription(self):
@@ -118,3 +122,16 @@ class FileSaver(Thread):
         filename = "video_"+timestamp.strftime('%Y-%m-%d-%H-%M-%S')
         filename = filename.strip()
         output_folder = os.path.join(self.config["data_path"], filename)
+
+    def download_zip(self,filename):
+        input_file = os.path.join(self.config["videos_path"], filename)
+        output_zip = input_file + ".zip"
+        zf = zipfile.ZipFile(output_zip, mode='w')
+        try:
+            self.logging.info('adding file')
+            zf.write(input_file)
+        finally:
+            self.logging.info('closing')
+            zf.close()
+        return output_zip
+

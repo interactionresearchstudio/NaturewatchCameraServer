@@ -29,9 +29,10 @@ def get_photo(filename):
 
 @data.route('/download/<filename>')
 def get_download(filename):
-    file_path = current_app.user_config["photos_path"] + filename
+    file_path = current_app.user_config["videos_path"] + filename
     if os.path.isfile(os.path.join(file_path)):
-        return send_from_directory(os.path.join('static/data/photos'), filename, mimetype="application/zip")
+        output = current_app.file_saver.download_zip(filename)
+        return send_from_directory(os.path.join('static/data/videos'), filename+".zip", mimetype="application/octet-stream")
     else:
         return Response("{'NOT_FOUND':'" + filename + "'}", status=404, mimetype='application/json')
 
