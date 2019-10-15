@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 /home/pi/NaturewatchCameraServer/cfgsetup.py
+ExecStart=/usr/bin/python3 /home/pi/NaturewatchCameraServer/helpers/cfgsetup.py
 Restart=always
 User=root
 
