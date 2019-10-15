@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 changedSettings = 0
 
