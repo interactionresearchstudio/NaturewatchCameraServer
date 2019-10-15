@@ -75,6 +75,8 @@ class CameraController(threading.Thread):
                         self.picamera_capture.seek(0)
                         s = self.picamera_stream.__next__()
                         self.image = s.array
+                        self.picamera_capture.truncate(0)
+                        self.picamera_capture.seek(0)
 
                         if self.image is None:
                             self.logger.warning("Got empty image.")

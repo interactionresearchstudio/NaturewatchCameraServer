@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 from threading import Thread
-import datetime
+from datetime import datetime
 import time
 import imutils
 import logging
@@ -27,10 +27,13 @@ class ChangeDetector(Thread):
         self.minHeight = self.config["min_height"]
         self.maxHeight = self.config["max_height"]
 
+        self.device_time = None
+        self.device_time_start = None
+
         self.mode = "inactive"
         self.session_start_time = None
         self.avg = None
-        self.lastPhotoTime = time.time()
+        self.lastPhotoTime = self.get_fake_time()
         self.numOfPhotos = 0
 
         self.activeColour = (255, 255, 0)
@@ -113,7 +116,7 @@ class ChangeDetector(Thread):
         if w > self.maxWidth or w < self.minWidth or h > self.maxHeight or h < self.minHeight:
             return False
         else:
-            if time.time() - self.lastPhotoTime >= self.config['min_photo_interval_s']:
+            if self.get_fake_time() - self.lastPhotoTime >= self.config['min_photo_interval_s']:
                 return True
 
         return False
@@ -141,47 +144,57 @@ class ChangeDetector(Thread):
     def start_photo_session(self):
         self.logger.info('Starting photo capturing')
         self.mode = "photo"
-        self.session_start_time = time.time()
+        self.session_start_time = self.get_fake_time()
 
     def start_video_session(self):
         self.logger.info('Starting Video Capture')
         self.mode = "video"
-        self.session_start_time = time.time()
+        self.session_start_time = self.get_fake_time()
 
     def stop_session(self):
         self.logger.info('Ending photo capturing')
         self.mode = "inactive"
-        self.session_start_time = time.time()
+        self.session_start_time = self.get_fake_time()
 
     def update(self):
         time.sleep(0.02)
         if self.mode == "photo":
             img = self.camera_controller.get_image()
             if self.detect_change_contours(img) is True:
-                #timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-                timestamp = datetime.utcfromtimestamp(current_app.device_time + time.time() - current_app.device_time_start).strftime('%Y-%m-%d-%H-%M-%S')
+                timestamp = self.get_formatted_time()
                 self.logger.info("ChangeDetector: Detected motion. Taking photo...")
                 self.file_saver.save_image(self.camera_controller.get_splitter_image(),timestamp)
                 self.file_saver.save_thumb(img,timestamp,self.mode)
-                self.lastPhotoTime = time.time()
+                self.lastPhotoTime = self.get_fake_time()
         elif self.mode == "video":
             self.camera_controller.wait_recording(1)
             img = self.camera_controller.get_image()
             if self.detect_change_contours(img) is True: 
                 self.logger.info("ChangeDetector: Detected motion. Capturing Video...")
-                #timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-                timestamp = datetime.utcfromtimestamp(current_app.device_time + time.time() - current_app.device_time_start).strftime('%Y-%m-%d-%H-%M-%S')
+                timestamp = self.get_formatted_time()
                 self.file_saver.save_thumb(img,timestamp,self.mode)
                 try:
-                    start = time.time()
-                    while time.time() - start < self.config["video_duration_after_motion"] :
+                    start = self.get_fake_time()
+                    while self.get_fake_time() - start < self.config["video_duration_after_motion"] :
                         self.camera_controller.wait_recording(1)
                 finally:
                     self.logger.info("Video capture completed")
                     with self.camera_controller.circularStream.lock:
                         self.file_saver.save_video(self.camera_controller.circularStream,timestamp)
-                    self.lastPhotoTime = time.time()
+                    self.lastPhotoTime = self.get_fake_time()
                     self.logger.info("Video timer reset")
+
+    def get_fake_time(self):
+        if self.device_time is not None:
+            time_float = self.device_time + time.time() - self.device_time_start
+        else:
+            time_float = time.time()
+        return time_float
+
+    def get_formatted_time(self):
+        time_float = self.get_fake_time()
+        timestamp = datetime.utcfromtimestamp(time_float).strftime('%Y-%m-%d-%H-%M-%S')
+        return timestamp
 
     @staticmethod
     def safe_width(width):
