@@ -158,7 +158,8 @@ class ChangeDetector(Thread):
         if self.mode == "photo":
             img = self.camera_controller.get_image()
             if self.detect_change_contours(img) is True:
-                timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+                #timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+                timestamp = datetime.utcfromtimestamp(current_app.device_time + time.time() - current_app.device_time_start).strftime('%Y-%m-%d-%H-%M-%S')
                 self.logger.info("ChangeDetector: Detected motion. Taking photo...")
                 self.file_saver.save_image(self.camera_controller.get_splitter_image(),timestamp)
                 self.file_saver.save_thumb(img,timestamp,self.mode)
@@ -168,7 +169,8 @@ class ChangeDetector(Thread):
             img = self.camera_controller.get_image()
             if self.detect_change_contours(img) is True: 
                 self.logger.info("ChangeDetector: Detected motion. Capturing Video...")
-                timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+                #timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+                timestamp = datetime.utcfromtimestamp(current_app.device_time + time.time() - current_app.device_time_start).strftime('%Y-%m-%d-%H-%M-%S')
                 self.file_saver.save_thumb(img,timestamp,self.mode)
                 try:
                     start = time.time()

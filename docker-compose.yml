@@ -12,6 +12,4 @@ services:
     devices:
       - "/dev/vcsm"
       - "/dev/vchiq"
-    environment:
-      - "LD_PRELOAD=/usr/local/lib/faketime/libfaketime.so.1"
 

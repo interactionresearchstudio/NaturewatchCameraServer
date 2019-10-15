@@ -56,6 +56,8 @@ def create_app():
 
     # Create marker for time updates through the client
     flask_app.is_time_set = False
+    flask_app.device_time = None
+    flask_app.device_time_start = None
 
     # Instantiate classes
     flask_app.camera_controller = CameraController(flask_app.logger, flask_app.user_config, use_splitter_port=True)
