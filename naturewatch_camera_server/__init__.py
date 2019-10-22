@@ -39,9 +39,12 @@ def create_app():
     # Copy config file into data directory or load it from data directory if it already exists...
     if os.path.isfile(os.path.join(module_path, flask_app.user_config["data_path"], 'config.json')) is False:
         flask_app.logger.warning("Config file does not exist within the data context, copying file")
-        copyfile(os.path.join(module_path, "config.json"), os.path.join(module_path, flask_app.user_config["data_path"], "config.json"))
+        copyfile(os.path.join(module_path, "config.json"),
+                 os.path.join(module_path, flask_app.user_config["data_path"], "config.json"))
     else:
-        flask_app.user_config = json.load(open(os.path.join(module_path, flask_app.user_config["data_path"], 'config.json')))
+        flask_app.user_config = json.load(open(os.path.join(module_path,
+                                                            flask_app.user_config["data_path"],
+                                                            'config.json')))
 
     # Find photos and videos paths
     flask_app.user_config["photos_path"] = os.path.join(module_path, flask_app.user_config["photos_path"])
@@ -53,9 +56,6 @@ def create_app():
     if os.path.isdir(flask_app.user_config["videos_path"]) is False:
         os.mkdir(flask_app.user_config["videos_path"])
         flask_app.logger.warning("Videos directory does not exist, creating path")
-
-    # Create marker for time updates through the client
-    flask_app.is_time_set = False
 
     # Instantiate classes
     flask_app.camera_controller = CameraController(flask_app.logger, flask_app.user_config, use_splitter_port=True)

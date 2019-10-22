@@ -163,8 +163,8 @@ class ChangeDetector(Thread):
             if self.detect_change_contours(img) is True:
                 timestamp = self.get_formatted_time()
                 self.logger.info("ChangeDetector: Detected motion. Taking photo...")
-                self.file_saver.save_image(self.camera_controller.get_splitter_image(),timestamp)
-                self.file_saver.save_thumb(img,timestamp,self.mode)
+                self.file_saver.save_image(self.camera_controller.get_splitter_image(), timestamp)
+                self.file_saver.save_thumb(img, timestamp, self.mode)
                 self.lastPhotoTime = self.get_fake_time()
         elif self.mode == "video":
             self.camera_controller.wait_recording(1)
@@ -172,15 +172,15 @@ class ChangeDetector(Thread):
             if self.detect_change_contours(img) is True: 
                 self.logger.info("ChangeDetector: Detected motion. Capturing Video...")
                 timestamp = self.get_formatted_time()
-                self.file_saver.save_thumb(img,timestamp,self.mode)
+                self.file_saver.save_thumb(img, timestamp, self.mode)
                 try:
                     start = self.get_fake_time()
-                    while self.get_fake_time() - start < self.config["video_duration_after_motion"] :
+                    while self.get_fake_time() - start < self.config["video_duration_after_motion"]:
                         self.camera_controller.wait_recording(1)
                 finally:
                     self.logger.info("Video capture completed")
                     with self.camera_controller.circularStream.lock:
-                        self.file_saver.save_video(self.camera_controller.circularStream,timestamp)
+                        self.file_saver.save_video(self.camera_controller.circularStream, timestamp)
                     self.lastPhotoTime = self.get_fake_time()
                     self.logger.info("Video timer reset")
 

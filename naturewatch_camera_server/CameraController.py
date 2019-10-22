@@ -18,7 +18,7 @@ except ImportError:
 
 class CameraController(threading.Thread):
 
-    def __init__(self, logger,config, width=320, height=240, use_splitter_port=False, splitter_width=1920,
+    def __init__(self, logger, config, width=320, height=240, use_splitter_port=False, splitter_width=1920,
                  splitter_height=1080):
         threading.Thread.__init__(self)
         self._stop_event = threading.Event()
@@ -135,8 +135,7 @@ class CameraController(threading.Thread):
         r, buf = cv2.imencode(".jpg", self.get_image())
         return buf
 
-
-    #Get video stream
+    # Get video stream
     def get_stream(self):
         if picamera_exists:
             return self.circularStream
@@ -144,13 +143,13 @@ class CameraController(threading.Thread):
     def start_circular_stream(self):
         if picamera_exists:
             self.camera.framerate = self.config["frame_rate"]
-            self.camera.start_recording(self.circularStream,bitrate = 10000000, format='h264')
+            self.camera.start_recording(self.circularStream, bitrate=10000000, format='h264')
 
     def stop_circular_stream(self):
         if picamera_exists:
             self.camera.stop_recording()
 
-    def wait_recording(self,delay):
+    def wait_recording(self, delay):
         if picamera_exists:
             return self.camera.wait_recording(delay)
         else:
@@ -166,7 +165,6 @@ class CameraController(threading.Thread):
             return self.get_image_binary()
         else:
             return None
-
 
     # Get splitter image
     def get_splitter_image(self):
@@ -219,9 +217,14 @@ class CameraController(threading.Thread):
                                                                       use_video_port=True, splitter_port=2,
                                                                       resize=(self.safe_width(self.width),
                                                                               self.safe_height(self.height)))
-                self.circularStream = picamera.PiCameraCircularIO(self.camera, bitrate = 10000000,seconds=self.config["video_duration_before_motion"] + self.config["video_duration_after_motion"])      
+                self.circularStream = picamera.PiCameraCircularIO(self.camera,
+                                                                  bitrate=10000000,
+                                                                  seconds=self.config["video_duration_before_motion"] +
+                                                                  self.config["video_duration_after_motion"])
                 self.start_circular_stream()
-                self.logger.info('Camera initialised with a resolution of %s and a framerate of %s',self.camera.resolution, self.camera.framerate)
+                self.logger.info('Camera initialised with a resolution of %s and a framerate of %s',
+                                 self.camera.resolution,
+                                 self.camera.framerate)
 
             else:
                 self.camera.resolution = (self.safe_width(self.width), self.safe_height(self.height))
@@ -230,6 +233,7 @@ class CameraController(threading.Thread):
                                                                       use_video_port=True)
 
             time.sleep(2)
+
     # Set camera rotation
     def set_camera_rotation(self, rotation):
         if self.rotated_camera != rotation:
@@ -239,13 +243,15 @@ class CameraController(threading.Thread):
                 new_config = self.config
                 new_config["rotate_camera"] = 1
                 module_path = os.path.abspath(os.path.dirname(__file__))
-                self.config = self.update_config(new_config, os.path.join(module_path, self.config["data_path"], 'config.json'))
+                self.config = self.update_config(new_config,
+                                                 os.path.join(module_path, self.config["data_path"], 'config.json'))
             else:
                 self.camera.rotation = 0
                 new_config = self.config
                 new_config["rotate_camera"] = 0
                 module_path = os.path.abspath(os.path.dirname(__file__))
-                self.config = self.update_config(new_config, os.path.join(module_path, self.config["data_path"], 'config.json'))
+                self.config = self.update_config(new_config,
+                                                 os.path.join(module_path, self.config["data_path"], 'config.json'))
 
     # Set picamera exposure
     def set_exposure(self, shutter_speed, iso):
