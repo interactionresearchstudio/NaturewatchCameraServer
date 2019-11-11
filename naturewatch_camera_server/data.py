@@ -27,20 +27,23 @@ def get_photo(filename):
     else:
         return Response("{'NOT_FOUND':'" + filename + "'}", status=404, mimetype='application/json')
 
+
 @data.route('/download/<filename>')
 def get_download(filename):
-    file_path = current_app.user_config["videos_path"] + filename
+    file_path = current_app.user_config["videos_path"] + filename + '.mp4'
     if os.path.isfile(os.path.join(file_path)):
-        output = current_app.file_saver.download_zip(filename)
-        return send_from_directory(os.path.join('static/data/videos'), filename+".zip", mimetype="application/octet-stream")
+        output = current_app.file_saver.download_zip(filename + '.mp4')
+        return send_from_directory(os.path.join('static/data/videos'), filename + ".mp4" + ".zip", mimetype="application/zip")
     else:
         return Response("{'NOT_FOUND':'" + filename + "'}", status=404, mimetype='application/json')
+
 
 @data.route('/download/video')
 def download_all():
     current_app.file_saver.download_all_video()
     return Response("{'NOT_FOUND':'" "'}", status=404, mimetype='application/json')
-    
+
+
 @data.route('/photos/<filename>', methods=["DELETE"])
 def delete_photo(filename):
     file_path = current_app.user_config["photos_path"] + filename

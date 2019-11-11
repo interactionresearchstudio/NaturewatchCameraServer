@@ -133,7 +133,7 @@ class FileSaver(Thread):
         zf = zipfile.ZipFile(output_zip, mode='w')
         try:
             self.logging.info('adding file')
-            zf.write(input_file)
+            zf.write(input_file, os.path.basename(input_file))
         finally:
             self.logging.info('closing')
             zf.close()
