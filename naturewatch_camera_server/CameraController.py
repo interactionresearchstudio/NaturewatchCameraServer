@@ -308,11 +308,7 @@ class CameraController(threading.Thread):
         :param width: width in pixels
         :return: safe width in pixels
         """
-        div = width % 32
-        if div is 0:
-            return width
-        else:
-            return CameraController.safe_width(width + 1)
+        return (width // 32 + 1) * 32
 
     @staticmethod
     def safe_height(height):
@@ -321,11 +317,7 @@ class CameraController(threading.Thread):
         :param height: height in pixels
         :return: safe height in pixels
         """
-        div = height % 16
-        if div is 0:
-            return height
-        else:
-            return CameraController.safe_height(height + 1)
+        return (height // 16 + 1) * 16
 
     @staticmethod
     def update_config(new_config, config_path):
