@@ -169,7 +169,7 @@ class ChangeDetector(Thread):
         elif self.mode == "video":
             self.camera_controller.wait_recording(1)
             img = self.camera_controller.get_image()
-            if self.detect_change_contours(img) is True: 
+            if self.detect_change_contours(img) is True:
                 self.logger.info("ChangeDetector: Detected motion. Capturing Video...")
                 timestamp = self.get_formatted_time()
                 self.file_saver.save_thumb(img, timestamp, self.mode)
@@ -195,19 +195,3 @@ class ChangeDetector(Thread):
         time_float = self.get_fake_time()
         timestamp = datetime.utcfromtimestamp(time_float).strftime('%Y-%m-%d-%H-%M-%S')
         return timestamp
-
-    @staticmethod
-    def safe_width(width):
-        div = width % 32
-        if div is 0:
-            return width
-        else:
-            return ChangeDetector.safe_width(width-1)
-
-    @staticmethod
-    def safe_height(height):
-        div = height % 16
-        if div is 0:
-            return height
-        else:
-            return ChangeDetector.safe_height(height-1)

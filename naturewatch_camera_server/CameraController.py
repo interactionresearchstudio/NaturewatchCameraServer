@@ -196,10 +196,13 @@ class CameraController(threading.Thread):
     # TODO - reset with manual exposure, if it was set before.
     def initialise_picamera(self):
         if picamera_exists:
+            self.logger.debug('Initialising camera ...')
             if self.camera is not None:
                 self.camera.close()
 
             self.camera = picamera.PiCamera()
+            self.logger.debug('Camera revision {} detected.'.format(self.camera.revision))
+
             self.camera.framerate = self.config["frame_rate"]
             picamera.PiCamera.CAPTURE_TIMEOUT = 60
             if self.config["rotate_camera"] == 1:
