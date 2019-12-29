@@ -302,22 +302,24 @@ class CameraController(threading.Thread):
             self.exposure_mode = 'auto'
 
     @staticmethod
-    def safe_width(width):
+    def safe_width(number):
         """
         Return safe width (multiple of 32)
-        :param width: width in pixels
+        :param number: width in pixels
         :return: safe width in pixels
         """
-        return (width // 32 + 1) * 32
+        factor = 32
+        return  number if number % factor == 0 else (number // factor + 1) * factor
 
     @staticmethod
-    def safe_height(height):
+    def safe_height(number):
         """
-        Return safe height (multiple of 32)
-        :param height: height in pixels
+        Return safe height (multiple of 16)
+        :param number: height in pixels
         :return: safe height in pixels
         """
-        return (height // 16 + 1) * 16
+        factor = 16
+        return  number if number % factor == 0 else (number // factor + 1) * factor
 
     @staticmethod
     def update_config(new_config, config_path):
