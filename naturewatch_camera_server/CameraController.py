@@ -309,7 +309,7 @@ class CameraController(threading.Thread):
         :return: safe width in pixels
         """
         factor = 32
-        return  number if number % factor == 0 else (number // factor + 1) * factor
+        return  ( number + factor - 1 ) & ~(factor - 1 )
 
     @staticmethod
     def safe_height(number):
@@ -319,7 +319,7 @@ class CameraController(threading.Thread):
         :return: safe height in pixels
         """
         factor = 16
-        return  number if number % factor == 0 else (number // factor + 1) * factor
+        return  ( number + factor - 1 ) & ~(factor - 1 )
 
     @staticmethod
     def update_config(new_config, config_path):
