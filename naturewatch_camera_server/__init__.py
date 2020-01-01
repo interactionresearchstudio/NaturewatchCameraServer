@@ -76,7 +76,7 @@ def create_app():
         flask_app.logger.warning("Videos directory does not exist, creating path")
 
     # Instantiate classes
-    flask_app.camera_controller = CameraController(flask_app.logger, flask_app.user_config, use_splitter_port=True)
+    flask_app.camera_controller = CameraController(flask_app.logger, flask_app.user_config)
     flask_app.logger.debug("Instantiating classes ...")
     flask_app.change_detector = ChangeDetector(flask_app.camera_controller, flask_app.user_config, flask_app.logger)
     flask_app.file_saver = FileSaver(flask_app.user_config, flask_app.logger)

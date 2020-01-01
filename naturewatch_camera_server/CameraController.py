@@ -18,8 +18,7 @@ except ImportError:
 
 class CameraController(threading.Thread):
 
-    def __init__(self, logger, config, width=320, height=240, use_splitter_port=False, splitter_width=1920,
-                 splitter_height=1080):
+    def __init__(self, logger, config, video_mode=False):
         threading.Thread.__init__(self)
         self._stop_event = threading.Event()
         self.cancelled = False
@@ -27,42 +26,47 @@ class CameraController(threading.Thread):
         self.logger = logger
         self.config = config
 
-        self.width = self.config["cv_width"]
-        self.height = self.config["cv_height"]
-        self.use_splitter_port = use_splitter_port
-        self.splitter_width = self.config["img_width"]
-        self.splitter_height = self.config["img_height"]
-        self.picamera_splitter_capture = None
-        self.picamera_splitter_stream = None
-        self.picamera_capture = None
-        self.picamera_stream = None
+# Desired image resolution
+        self.width = self.config["img_width"]
+        self.height = self.config["img_height"]
+
+# Image resolution used for motion detection, same aspect ratio as desired image
+        self.md_width = self.config["md_width"]
+        self.md_height = self.md_width * self.height // self.width
+
+# Mode switcher
+        self.video_mode = video_mode
+
+
+# TODO: this parameter should only be required in case of photo-mode
+        self.use_video_port = self.config["use_video_port"]
+
+# For photos
+        self.picamera_photo_stream = None
+
+# For motion detection
+        self.picamera_md_output = None
+        self.picamera_md_stream = None
+
+# For video
+        self.picamera_video_stream = None
+        self.video_bitrate = 10000000
+
         self.camera = None
-        self.circularStream = None
         self.rotated_camera = False
 
         if picamera_exists:
             # Use pi camera
-            self.logger.info("picamera module exists.")
+            self.logger.info("CameraController: picamera module exists.")
+# TODO: is this the right place to initialise the camera? We cannot know at this point whether we are going to capture stills or videos
             self.initialise_picamera()
         else:
             # Use webcam
-            self.logger.info("picamera module not found. Using oCV VideoCapture instead.")
-            self.capture = cv2.VideoCapture(0)
-
-            self.shutter_speed = 0
-            self.exposure_mode = "auto"
-            self.iso = "auto"
-
-            if use_splitter_port is True:
-                self.logger.info("Using splitter port")
-                self.capture.set(3, splitter_width)
-                self.capture.set(4, splitter_height)
-            else:
-                self.capture.set(3, width)
-                self.capture.set(4, height)
+            self.logger.info("CameraController: picamera module not found. Using oCV VideoCapture instead.")
+            self.initialise_webcam()
 
         self.image = None
-        self.splitter_image = None
+        self.hires_image = None
 
     # Main routine
     def run(self):
@@ -71,22 +75,18 @@ class CameraController(threading.Thread):
                 if picamera_exists:
                     try:
                         # Get image from Pi camera
-                        self.picamera_capture.truncate(0)
-                        self.picamera_capture.seek(0)
-                        s = self.picamera_stream.__next__()
-                        self.image = s.array
-                        self.picamera_capture.truncate(0)
-                        self.picamera_capture.seek(0)
-
+                        self.picamera_md_output.truncate(0)
+                        self.picamera_md_output.seek(0)
+                        self.picamera_md_stream.__next__()
+                        self.image = self.picamera_md_output.array
                         if self.image is None:
-                            self.logger.warning("Got empty image.")
+                            self.logger.warning("CameraController: got empty image.")
                         time.sleep(0.01)
                     except Exception as e:
-                        self.logger.error("picamera update error.")
+                        self.logger.error("CameraController: picamera update error.")
                         self.logger.exception(e)
                         self.initialise_picamera()
                         time.sleep(0.02)
-                        pass
 
                 else:
                     # Get image from webcam
@@ -98,10 +98,10 @@ class CameraController(threading.Thread):
                         ret, self.image = self.capture.read()
 
                     if self.image is None:
-                        self.logger.warning("Got empty image.")
+                        self.logger.warning("CameraController: got empty image.")
 
             except KeyboardInterrupt:
-                self.logger.info("Received KeyboardInterrupt. Shutting down CameraController...")
+                self.logger.info("CameraController: received KeyboardInterrupt,  shutting down ...")
                 self.stop()
 
     # Stop thread
@@ -110,44 +110,45 @@ class CameraController(threading.Thread):
 
         if picamera_exists:
             # Close pi camera
-            self.picamera_splitter_capture.truncate(0)
-            self.picamera_splitter_capture.seek(0)
+            self.picamera_md_output.truncate(0)
+            self.picamera_md_output.seek(0)
             self.camera.close()
             self.camera = None
-            pass
         else:
             # Close webcam
             cv2.VideoCapture(0).release()
 
-        self.logger.info('Cancelling...')
+        self.logger.info('CameraController: cancelling ...')
 
     # Check if thread is stopped
     def is_stopped(self):
         return self._stop_event.is_set()
 
-    # Get CV image
-    def get_image(self):
+    # Get MD image
+    def get_md_image(self):
         if self.image is not None:
             return self.image.copy()
 
-    # Get CV image in binary jpeg encoding format
+# TODO: Why?
+    # Get MD image in binary jpeg encoding format
     def get_image_binary(self):
-        r, buf = cv2.imencode(".jpg", self.get_image())
+        r, buf = cv2.imencode(".jpg", self.get_md_image())
         return buf
 
-    # Get video stream
-    def get_stream(self):
+    def get_video_stream(self):
         if picamera_exists:
-            return self.circularStream
+            return self.picamera_video_stream
 
-    def start_circular_stream(self):
+    def start_video_stream(self):
         if picamera_exists:
-            self.camera.framerate = self.config["frame_rate"]
-            self.camera.start_recording(self.circularStream, bitrate=10000000, format='h264')
+            self.picamera_video_stream.clear()
+            self.camera.start_recording(self.picamera_video_stream, format='h264', bitrate=self.video_bitrate)
+            self.logger.debug('CameraController: recording started')
 
-    def stop_circular_stream(self):
+    def stop_video_stream(self):
         if picamera_exists:
             self.camera.stop_recording()
+            self.logger.debug('CameraController: recording stopped')
 
     def wait_recording(self, delay):
         if picamera_exists:
@@ -155,87 +156,101 @@ class CameraController(threading.Thread):
         else:
             return None
 
-    def clear_buffer(self):
-        if picamera_exists:
-            self.circularStream.clear()
-
+    # TODO: Not used?
     def get_thumb_image(self):
-        self.logger.info("Requested thumb image.")
+        self.logger.debug("CameraController: lores image requested.")
         if picamera_exists:
             return self.get_image_binary()
         else:
             return None
 
-    # Get splitter image
-    def get_splitter_image(self):
-        self.logger.info("Requested splitter image.")
-        if self.use_splitter_port:
-            if picamera_exists:
-                stream = io.BytesIO()
-                self.camera.capture(stream, format='jpeg', use_video_port=True)
-                stream.seek(0)
-                data = np.fromstring(stream.getvalue(), dtype=np.uint8)
-                # "Decode" the image from the array, preserving colour
-                s = cv2.imdecode(data, 1)
+    # Get high res image
+    def get_hires_image(self):
+        self.logger.debug("CameraController: hires image requested.")
+        if picamera_exists:
+            # TODO: understand the decode. Is another more intuitive way possible?
+            self.picamera_photo_stream = io.BytesIO()
+            self.camera.capture(self.picamera_photo_stream, format='jpeg', use_video_port=self.use_video_port)
+            self.picamera_photo_stream.seek(0)
+            # "Decode" the image from the stream, preserving colour
+            s = cv2.imdecode(np.fromstring(self.picamera_photo_stream.getvalue(), dtype=np.uint8), 1)
 
-                if s is not None:
-                    return s.copy()
-                else:
-                    return None
-
+            if s is not None:
+                return s.copy()
             else:
-                if self.splitter_image is not None:
-                    return self.splitter_image.copy()
-                else:
-                    return None
+                return None
+
         else:
-            self.logger.warning("Splitter image was not opened in constructor.")
-            return None
+            if self.hires_image is not None:
+                return self.hires_image.copy()
+            else:
+                return None
 
     # Initialise picamera. If already started, close and reinitialise.
     # TODO - reset with manual exposure, if it was set before.
     def initialise_picamera(self):
-        if picamera_exists:
-            self.logger.debug('Initialising camera ...')
-            if self.camera is not None:
-                self.camera.close()
+        self.logger.debug('CameraController: initialising picamera ...')
 
-            self.camera = picamera.PiCamera()
-            self.logger.debug('Camera revision {} detected.'.format(self.camera.revision))
+        # If there is already a running instance, close it
+        if self.camera is not None:
+            self.camera.close()
 
-            self.camera.framerate = self.config["frame_rate"]
-            picamera.PiCamera.CAPTURE_TIMEOUT = 60
-            if self.config["rotate_camera"] == 1:
-                self.camera.rotation = 180
-                self.rotated_camera = True
-            else:
-                self.camera.rotation = 0
-                self.rotated_camera = False
+        # Create a new instance
+        self.camera = picamera.PiCamera()
+        # Check for module revision
+        # TODO: set maximum resolution based on module revision
+        self.logger.debug('CameraController: camera module revision {} detected.'.format(self.camera.revision))
 
-            if self.use_splitter_port is True:
-                self.camera.resolution = (self.safe_width(self.splitter_width), self.safe_height(self.splitter_height))
-                self.picamera_capture = picamera.array.PiRGBArray(self.camera, size=(self.safe_width(self.width),
-                                                                                     self.safe_height(self.height)))
-                self.picamera_stream = self.camera.capture_continuous(self.picamera_capture, format="bgr",
-                                                                      use_video_port=True, splitter_port=2,
-                                                                      resize=(self.safe_width(self.width),
-                                                                              self.safe_height(self.height)))
-                self.circularStream = picamera.PiCameraCircularIO(self.camera,
-                                                                  bitrate=10000000,
-                                                                  seconds=self.config["video_duration_before_motion"] +
-                                                                  self.config["video_duration_after_motion"])
-                self.start_circular_stream()
-                self.logger.info('Camera initialised with a resolution of %s and a framerate of %s',
-                                 self.camera.resolution,
-                                 self.camera.framerate)
+        # Set camera parameters
+        self.camera.framerate = self.config["frame_rate"]
+        self.camera.resolution = (self.width,self.height)
 
-            else:
-                self.camera.resolution = (self.safe_width(self.width), self.safe_height(self.height))
-                self.picamera_capture = picamera.array.PiRGBArray(self.camera)
-                self.picamera_stream = self.camera.capture_continuous(self.picamera_capture, format="bgr",
-                                                                      use_video_port=True)
+        picamera.PiCamera.CAPTURE_TIMEOUT = 60
 
-            time.sleep(2)
+        if self.config["rotate_camera"] == 1:
+            self.camera.rotation = 180
+            self.rotated_camera = True
+        else:
+            self.camera.rotation = 0
+            self.rotated_camera = False
+
+        self.logger.info('CameraController: camera initialised with a resolution of {} and a framerate of {}'.format(self.camera.resolution, self.camera.framerate))
+
+# TODO: use correct port fitting the requested resolution
+        # Set up low res stream for motion detection
+        self.picamera_md_output = picamera.array.PiRGBArray(self.camera, size=(self.md_width, self.md_height))
+        self.picamera_md_stream = self.camera.capture_continuous(self.picamera_md_output, format="bgr",
+                                                              use_video_port=True, splitter_port=2,
+                                                              resize=(self.md_width, self.md_height))
+        self.logger.debug('CameraController: low res stream prepared with resolution {}x{}.'.format(self.md_width, self.md_height))
+
+        # Set up high res stream for actual recording
+        # Bitrate has to be specified so size can be calculated from the seconds specified
+        # Unfortunately the effective bitrate depends on the quality-parameter specified with start_recording, so the effective duration can not be predicted well
+        self.picamera_video_stream = picamera.PiCameraCircularIO(self.camera,
+                                                          bitrate=self.video_bitrate,
+                                                          seconds=self.config["video_duration_before_motion"] +
+                                                          self.config["video_duration_after_motion"])
+        self.logger.debug('CameraController: circular stream prepared for video.')
+
+        time.sleep(2)
+
+# TODO: Understand
+    # initialise webcam
+    def initialise_webcam():
+        self.capture = cv2.VideoCapture(0)
+
+        self.shutter_speed = 0
+        self.exposure_mode = "auto"
+        self.iso = "auto"
+
+        if use_splitter_port is True:
+            self.logger.info("CameraController: using splitter port")
+            self.capture.set(3, width)
+            self.capture.set(4, height)
+        else:
+            self.capture.set(3, md_width)
+            self.capture.set(4, md_height)
 
     # Set camera rotation
     def set_camera_rotation(self, rotation):
@@ -303,26 +318,6 @@ class CameraController(threading.Thread):
             self.iso = 'auto'
             self.shutter_speed = 0
             self.exposure_mode = 'auto'
-
-    @staticmethod
-    def safe_width(number):
-        """
-        Return safe width (multiple of 32)
-        :param number: width in pixels
-        :return: safe width in pixels
-        """
-        factor = 32
-        return  ( number + factor - 1 ) & ~(factor - 1 )
-
-    @staticmethod
-    def safe_height(number):
-        """
-        Return safe height (multiple of 16)
-        :param number: height in pixels
-        :return: safe height in pixels
-        """
-        factor = 16
-        return  ( number + factor - 1 ) & ~(factor - 1 )
 
     @staticmethod
     def update_config(new_config, config_path):
