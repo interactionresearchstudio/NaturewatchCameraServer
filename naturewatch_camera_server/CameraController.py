@@ -18,7 +18,7 @@ except ImportError:
 
 class CameraController(threading.Thread):
 
-    def __init__(self, logger, config, video_mode=False):
+    def __init__(self, logger, config):
         threading.Thread.__init__(self)
         self._stop_event = threading.Event()
         self.cancelled = False
@@ -33,10 +33,6 @@ class CameraController(threading.Thread):
 # Image resolution used for motion detection, same aspect ratio as desired image
         self.md_width = self.config["md_width"]
         self.md_height = self.md_width * self.height // self.width
-
-# Mode switcher
-        self.video_mode = video_mode
-
 
 # TODO: this parameter should only be required in case of photo-mode
         self.use_video_port = self.config["use_video_port"]
@@ -58,7 +54,6 @@ class CameraController(threading.Thread):
         if picamera_exists:
             # Use pi camera
             self.logger.info("CameraController: picamera module exists.")
-# TODO: is this the right place to initialise the camera? We cannot know at this point whether we are going to capture stills or videos
             self.initialise_picamera()
         else:
             # Use webcam
@@ -129,7 +124,6 @@ class CameraController(threading.Thread):
         if self.image is not None:
             return self.image.copy()
 
-# TODO: Why?
     # Get MD image in binary jpeg encoding format
     def get_image_binary(self):
         r, buf = cv2.imencode(".jpg", self.get_md_image())
