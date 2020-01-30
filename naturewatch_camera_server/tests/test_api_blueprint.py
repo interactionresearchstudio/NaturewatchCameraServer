@@ -4,7 +4,7 @@ import json
 from naturewatch_camera_server import create_app
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def test_client():
     app = create_app()
     testing_client = app.test_client()
@@ -65,11 +65,11 @@ def test_get_settings(test_client):
     assert "rotation" in response_dict
     assert "exposure" in response_dict
     assert "sensitivity" in response_dict
+    assert "rotation" in response_dict
     assert response_dict["sensitivity"] == "default"
     assert response_dict["exposure"]["mode"] == 'auto'
-    assert response_dict["exposure"]["iso"] == 'auto'
+    assert response_dict["exposure"]["iso"] == 0
     assert response_dict["exposure"]["shutter_speed"] == 0
-    assert response_dict["rotation"] is False
 
 
 def test_post_settings(test_client):
@@ -97,7 +97,7 @@ def test_post_settings(test_client):
     assert "sensitivity" in response_dict
     assert response_dict["sensitivity"] == "less"
     assert response_dict["exposure"]["mode"] == 'auto'
-    assert response_dict["exposure"]["iso"] == 'auto'
+    assert response_dict["exposure"]["iso"] == 0
     assert response_dict["exposure"]["shutter_speed"] == 0
     assert response_dict["rotation"] is True
 
@@ -163,4 +163,4 @@ def test_correct_time(test_client):
     assert response.status_code == 200
     response_dict = json.loads(response.data.decode('utf8'))
     assert "SUCCESS" in response_dict
-    assert response_dict == "1580317004"
+    assert response_dict["SUCCESS"] == "1580317005"
