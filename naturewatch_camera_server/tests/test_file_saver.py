@@ -11,7 +11,7 @@ file_saver = None
 app = None
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True, scope="session")
 def run_around_tests():
     global file_saver
     global app
