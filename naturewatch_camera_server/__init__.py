@@ -26,25 +26,43 @@ def create_app():
 
     # Setup logger
     flask_app.logger = logging.getLogger(__name__)
-    handler = logging.StreamHandler()
-    handler.setLevel(logging.INFO)
-    flask_app.logger.addHandler(handler)
     flask_app.logger.setLevel(logging.DEBUG)
+    # setup logging handler for stderr
+    stderr_handler = logging.StreamHandler()
+    stderr_handler.setLevel(logging.INFO)
+    flask_app.logger.addHandler(stderr_handler)
 
     # Load configuration json
     module_path = os.path.abspath(os.path.dirname(__file__))
     flask_app.logger.info("Module path: " + module_path)
+    # load central config file first
     flask_app.user_config = json.load(open(os.path.join(module_path, "config.json")))
 
-    # Copy config file into data directory or load it from data directory if it already exists...
-    if os.path.isfile(os.path.join(module_path, flask_app.user_config["data_path"], 'config.json')) is False:
-        flask_app.logger.warning("Config file does not exist within the data context, copying file")
-        copyfile(os.path.join(module_path, "config.json"),
-                 os.path.join(module_path, flask_app.user_config["data_path"], "config.json"))
-    else:
+    # Check if a config file exists in data directory
+    if os.path.isfile(os.path.join(module_path, flask_app.user_config["data_path"], 'config.json')):
+        # if yes, load that file, too
+        flask_app.logger.info("Using config file from data context")
         flask_app.user_config = json.load(open(os.path.join(module_path,
                                                             flask_app.user_config["data_path"],
                                                             'config.json')))
+    else:
+        # if not, copy central config file to data directory
+        flask_app.logger.warning("Config file does not exist within the data context, copying file")
+        copyfile(os.path.join(module_path, "config.json"),
+                 os.path.join(module_path, flask_app.user_config["data_path"], "config.json"))
+
+    # Set up logging to file
+    file_handler = logging.handlers.RotatingFileHandler(os.path.join(module_path, flask_app.user_config["data_path"], 'camera.log'), maxBytes=1024000, backupCount=5)
+    file_handler.setLevel(logging.INFO)
+    numeric_loglevel = getattr(logging, flask_app.user_config["log_level"].upper(), None)
+    if not isinstance(numeric_loglevel, int):
+        flask_app.logger.info('Invalid log level {0} in config file: %s'.format(self.config["log_level"]))
+    else:
+        file_handler.setLevel(numeric_loglevel)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(formatter)
+    flask_app.logger.addHandler(file_handler)
+    flask_app.logger.info("Logging to file initialised")
 
     # Find photos and videos paths
     flask_app.user_config["photos_path"] = os.path.join(module_path, flask_app.user_config["photos_path"])
@@ -58,8 +76,10 @@ def create_app():
         flask_app.logger.warning("Videos directory does not exist, creating path")
 
     # Instantiate classes
-    flask_app.camera_controller = CameraController(flask_app.logger, flask_app.user_config, use_splitter_port=True)
+    flask_app.camera_controller = CameraController(flask_app.logger, flask_app.user_config)
+    flask_app.logger.debug("Instantiating classes ...")
     flask_app.change_detector = ChangeDetector(flask_app.camera_controller, flask_app.user_config, flask_app.logger)
     flask_app.file_saver = FileSaver(flask_app.user_config, flask_app.logger)
 
+    flask_app.logger.debug("Initialisation finished")
     return flask_app

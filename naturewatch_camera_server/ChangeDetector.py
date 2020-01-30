@@ -41,7 +41,7 @@ class ChangeDetector(Thread):
         self.isMinActive = False
         self.currentImage = None
 
-        self.logger.info("Change detector set up")
+        self.logger.info("ChangeDetector: initialised")
 
     def run(self):
         """
@@ -61,7 +61,7 @@ class ChangeDetector(Thread):
         :return: none
         """
         self.cancelled = True
-        self.camera.close()
+        self.camera_controller.stop()
 
     @staticmethod
     def save_photo(image):
@@ -77,7 +77,7 @@ class ChangeDetector(Thread):
         try:
             cv2.imwrite("photos/" + filename, image)
         except Exception as e:
-            self.logger.error('save_photo() error: ')
+            self.logger.error('ChangeDetector: save_photo() error: ')
             self.logger.exception(e)
             pass
 
@@ -120,7 +120,7 @@ class ChangeDetector(Thread):
                 return True
 
         return False
-    
+
     @staticmethod
     def get_largest_contour(contours):
         """
@@ -142,47 +142,59 @@ class ChangeDetector(Thread):
         self.maxHeight = max_width
 
     def start_photo_session(self):
-        self.logger.info('Starting photo capturing')
+        self.logger.info('ChangeDetector: starting photo capture')
         self.mode = "photo"
         self.session_start_time = self.get_fake_time()
 
     def start_video_session(self):
-        self.logger.info('Starting Video Capture')
+        self.logger.info('ChangeDetector: starting video capture')
         self.mode = "video"
+        self.camera_controller.start_video_stream()
         self.session_start_time = self.get_fake_time()
 
     def stop_session(self):
-        self.logger.info('Ending photo capturing')
+        self.logger.info('ChangeDetector: ending capture')
+        if self.mode == "video":
+            self.camera_controller.stop_video_stream()
+        elif self.mode == "photo":
+            pass
         self.mode = "inactive"
-        self.session_start_time = self.get_fake_time()
 
+# TODO: whether to use the video-port or not does not directly depend on the mode
+# In case video is requested, the video port will always be used for both resolutions
+# In case photo is requested, the video port can be used, but need not. It should be left a matter of configuration
     def update(self):
         time.sleep(0.02)
-        if self.mode == "photo":
-            img = self.camera_controller.get_image()
-            if self.detect_change_contours(img) is True:
-                timestamp = self.get_formatted_time()
-                self.logger.info("ChangeDetector: Detected motion. Taking photo...")
-                self.file_saver.save_image(self.camera_controller.get_splitter_image(), timestamp)
-                self.file_saver.save_thumb(img, timestamp, self.mode)
-                self.lastPhotoTime = self.get_fake_time()
-        elif self.mode == "video":
-            self.camera_controller.wait_recording(1)
-            img = self.camera_controller.get_image()
-            if self.detect_change_contours(img) is True: 
-                self.logger.info("ChangeDetector: Detected motion. Capturing Video...")
-                timestamp = self.get_formatted_time()
-                self.file_saver.save_thumb(img, timestamp, self.mode)
-                try:
-                    start = self.get_fake_time()
-                    while self.get_fake_time() - start < self.config["video_duration_after_motion"]:
-                        self.camera_controller.wait_recording(1)
-                finally:
-                    self.logger.info("Video capture completed")
-                    with self.camera_controller.circularStream.lock:
-                        self.file_saver.save_video(self.camera_controller.circularStream, timestamp)
-                    self.lastPhotoTime = self.get_fake_time()
-                    self.logger.info("Video timer reset")
+        # only check for motion while a session is active
+        if self.mode in ["photo", "video"]:
+            # get an md image
+            img = self.camera_controller.get_md_image()
+            # only proceed if there is an image
+            if img is not None:
+                if self.detect_change_contours(img) is True:
+                    self.logger.info("ChangeDetector: detected motion. Starting capture...")
+                    timestamp = self.get_formatted_time()
+        # TODO: Thumb should be created from the photo itself, not the image that triggered the motion detection
+                    self.file_saver.save_thumb(img, timestamp, self.mode)
+                    if self.mode == "photo":
+                        image = self.camera_controller.get_hires_image()
+                        self.file_saver.save_image(image, timestamp)
+                        self.lastPhotoTime = self.get_fake_time()
+                        self.logger.info("ChangeDetector: photo capture completed")
+                    elif self.mode == "video":
+                        self.camera_controller.wait_recording(self.config["video_duration_after_motion"])
+                        self.logger.info("ChangeDetector: video capture completed")
+                        with self.camera_controller.get_video_stream().lock:
+                            self.file_saver.save_video(self.camera_controller.get_video_stream(), timestamp)
+                        self.lastPhotoTime = self.get_fake_time()
+                        self.logger.debug("ChangeDetector: video timer reset")
+                    else:
+        # TODO: Add debug code that logs a line every x seconds so we can see the ChangeDetector is still alive
+        #            self.logger.debug("ChangeDetector: idle")
+                        pass
+            else:
+                self.logger.error("ChangeDetector: not receiving any images for motion detection!")
+                time.sleep(1)
 
     def get_fake_time(self):
         if self.device_time is not None:
@@ -195,19 +207,3 @@ class ChangeDetector(Thread):
         time_float = self.get_fake_time()
         timestamp = datetime.utcfromtimestamp(time_float).strftime('%Y-%m-%d-%H-%M-%S')
         return timestamp
-
-    @staticmethod
-    def safe_width(width):
-        div = width % 32
-        if div is 0:
-            return width
-        else:
-            return ChangeDetector.safe_width(width-1)
-
-    @staticmethod
-    def safe_height(height):
-        div = height % 16
-        if div is 0:
-            return height
-        else:
-            return ChangeDetector.safe_height(height-1)

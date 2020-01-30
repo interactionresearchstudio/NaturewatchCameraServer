@@ -1,8 +1,8 @@
 {
-    "cv_width": 320,
-    "cv_height": 180,
     "img_width": 1920,
     "img_height": 1080,
+    "md_width": 320,
+    "tn_width": 200,
     "frame_rate": 25,
     "use_video_port": false,
     "camera_warmup": 2.5,
