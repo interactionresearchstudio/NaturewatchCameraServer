@@ -36,7 +36,7 @@ def run_around_tests():
 
 def test_image_save():
     timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-    filename = file_saver.save_image(app.camera_controller.get_image(), timestamp)
+    filename = file_saver.save_image(app.camera_controller.get_md_image(), timestamp)
     assert os.path.isfile(app.user_config["photos_path"] + filename)
     assert os.path.getsize(app.user_config["photos_path"] + filename) != 0
     os.remove(app.user_config["photos_path"] + filename)

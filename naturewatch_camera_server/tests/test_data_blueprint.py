@@ -22,10 +22,12 @@ def test_client():
 
     file_saver = FileSaver(app.user_config)
 
+    # Start camera controller
     while app.camera_controller.is_alive() is False:
         app.camera_controller.start()
         time.sleep(1)
 
+    # Take photos and record their filenames
     for x in range(2):
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
         filename = file_saver.save_image(app.camera_controller.get_image(), timestamp)

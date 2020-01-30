@@ -176,8 +176,11 @@ def stop_session_handler():
 @api.route('/time/<time_string>', methods=['POST'])
 def update_time(time_string):
     if current_app.change_detector.device_time is None:
-        current_app.change_detector.device_time = float(time_string)
-        current_app.change_detector.device_time_start = time.time()
-        return Response('{"SUCCESS": "' + time_string + '"}', status=200, mimetype='application/json')
+        if float(time_string) > 1580317004:
+            current_app.change_detector.device_time = float(time_string)
+            current_app.change_detector.device_time_start = time.time()
+            return Response('{"SUCCESS": "' + time_string + '"}', status=200, mimetype='application/json')
+        else:
+            return Response('{"ERROR": "' + time_string + '"}', status=400, mimetype='application/json')
     else:
         return Response('{"NOT_MODIFIED": "' + time_string + '"}', status=304, mimetype='application/json')

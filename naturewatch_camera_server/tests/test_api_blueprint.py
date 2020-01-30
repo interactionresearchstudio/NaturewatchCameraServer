@@ -153,3 +153,14 @@ def test_incorrect_time(test_client):
     assert "ERROR" in response_dict
     assert response_dict["ERROR"] == "1234"
 
+def test_correct_time(test_client):
+    """
+    GIVEN a Flask application
+    WHEN '/api/time/<time_string>' is sent a time from the client
+    THEN system time should be updated.
+    """
+    response = test_client.post('/api/time/1580317005')
+    assert response.status_code == 200
+    response_dict = json.loads(response.data.decode('utf8'))
+    assert "SUCCESS" in response_dict
+    assert response_dict == "1580317004"
