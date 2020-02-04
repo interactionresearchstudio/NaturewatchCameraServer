@@ -1,6 +1,7 @@
 import pytest
 import sys
 import json
+import time
 from naturewatch_camera_server import create_app
 
 
@@ -115,25 +116,37 @@ def test_session_status(test_client):
     assert response_dict["mode"] == "inactive"
 
 
-def test_session_start_photo(test_client):
+def test_session_photo(test_client):
     """
     GIVEN a Flask application
     WHEN '/api/session/start/photo' is requested (POST)
-    THEN photo session should start and new status object should be returned
+    THEN photo session should start and new status object should be returned. Session should then be stopped.
     """
     response = test_client.post('/api/session/start/photo')
     assert response.status_code == 200
     response_dict = json.loads(response.data.decode('utf8'))
     assert "time_started" in response_dict
     assert response_dict["mode"] == "photo"
+    time.sleep(1)
+    response = test_client.post('/api/session/stop')
+    assert response.status_code == 200
+    response_dict = json.loads(response.data.decode('utf8'))
+    assert "time_started" in response_dict
+    assert response_dict["mode"] == "inactive"
 
 
-def test_session_stop(test_client):
+def test_session_video(test_client):
     """
     GIVEN a Flask application
-    WHEN '/api/session/stop' is requested (POST)
-    THEN session should stop and new status object should be returned
+    WHEN '/api/session/start/video' is requested (POST)
+    THEN video session should start and new status object should be returned. Session should then be stopped.
     """
+    response = test_client.post('/api/session/start/video')
+    assert response.status_code == 200
+    response_dict = json.loads(response.data.decode('utf8'))
+    assert "time_started" in response_dict
+    assert response_dict["mode"] == "video"
+    time.sleep(1)
     response = test_client.post('/api/session/stop')
     assert response.status_code == 200
     response_dict = json.loads(response.data.decode('utf8'))
@@ -152,6 +165,7 @@ def test_incorrect_time(test_client):
     response_dict = json.loads(response.data.decode('utf8'))
     assert "ERROR" in response_dict
     assert response_dict["ERROR"] == "1234"
+
 
 def test_correct_time(test_client):
     """
