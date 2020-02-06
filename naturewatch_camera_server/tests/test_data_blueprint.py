@@ -108,3 +108,42 @@ def test_delete_photo(test_client):
     assert response_dict["SUCCESS"] == photos_list[0]
     del photos_list[0]
     del photos_thumb_list[0]
+
+
+def test_videos(test_client):
+    """
+    GIVEN a Flask application
+    WHEN '/data/videos' is requested (GET)
+    THEN list of videos should be returned.
+    """
+    response = test_client.get('/data/videos')
+    assert response.status_code == 200
+    response_list = json.loads(response.data.decode('utf8'))
+    assert isinstance(response_list, list)
+    for f in videos_list:
+        assert f in response_list
+
+
+def test_video(test_client):
+    """
+    GIVEN a Flask application
+    WHEN '/data/video/<video>' is requested (GET)
+    THEN a single video should be returned.
+    """
+    response = test_client.get('/data/videos/' + videos_list[0])
+    assert response.status_code == 200
+
+
+def test_delete_video(test_client):
+    """
+    GIVEN a Flask application
+    WHEN '/data/video/<video>' is requested (GET)
+    THEN a single video should be returned.
+    """
+    global videos_list
+    response = test_client.delete('/data/videos/' + videos_list[0])
+    assert response.status_code == 200
+    response_dict = json.loads(response.data.decode('utf8'))
+    assert response_dict["SUCCESS"] == videos_list[0]
+    del videos_list[0]
+    del videos_thumb_list[0]

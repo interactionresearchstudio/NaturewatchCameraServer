@@ -73,6 +73,7 @@ def get_video(filename):
 def delete_video(filename):
     file_path = current_app.user_config["videos_path"] + filename
     thumb_path = current_app.user_config["videos_path"] + "thumb_" + filename
+    thumb_path = thumb_path.replace(".mp4", ".jpg")
     if os.path.isfile(os.path.join(file_path)):
         os.remove(file_path)
         os.remove(thumb_path)
