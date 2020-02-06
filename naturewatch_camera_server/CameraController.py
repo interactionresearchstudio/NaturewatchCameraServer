@@ -197,7 +197,7 @@ class CameraController(threading.Thread):
 
         # Set camera parameters
         self.camera.framerate = self.config["frame_rate"]
-        self.camera.resolution = (self.width,self.height)
+        self.camera.resolution = (self.width, self.height)
 
         picamera.PiCamera.CAPTURE_TIMEOUT = 60
 
@@ -208,30 +208,33 @@ class CameraController(threading.Thread):
             self.camera.rotation = 0
             self.rotated_camera = False
 
-        self.logger.info('CameraController: camera initialised with a resolution of {} and a framerate of {}'.format(self.camera.resolution, self.camera.framerate))
+        self.logger.info('CameraController: camera initialised with a resolution of {} and a framerate of {}'.format(
+            self.camera.resolution, self.camera.framerate))
 
 # TODO: use correct port fitting the requested resolution
         # Set up low res stream for motion detection
         self.picamera_md_output = picamera.array.PiRGBArray(self.camera, size=(self.md_width, self.md_height))
         self.picamera_md_stream = self.camera.capture_continuous(self.picamera_md_output, format="bgr",
-                                                              use_video_port=True, splitter_port=2,
-                                                              resize=(self.md_width, self.md_height))
-        self.logger.debug('CameraController: low res stream prepared with resolution {}x{}.'.format(self.md_width, self.md_height))
+                                                                 use_video_port=True, splitter_port=2,
+                                                                 resize=(self.md_width, self.md_height))
+        self.logger.debug('CameraController: low res stream prepared with resolution {}x{}.'.format(self.md_width,
+                                                                                                    self.md_height))
 
         # Set up high res stream for actual recording
         # Bitrate has to be specified so size can be calculated from the seconds specified
-        # Unfortunately the effective bitrate depends on the quality-parameter specified with start_recording, so the effective duration can not be predicted well
+        # Unfortunately the effective bitrate depends on the quality-parameter specified with start_recording,
+        # so the effective duration can not be predicted well
         self.picamera_video_stream = picamera.PiCameraCircularIO(self.camera,
-                                                          bitrate=self.video_bitrate,
-                                                          seconds=self.config["video_duration_before_motion"] +
-                                                          self.config["video_duration_after_motion"])
+                                                                 bitrate=self.video_bitrate,
+                                                                 seconds=self.config["video_duration_before_motion"] +
+                                                                 self.config["video_duration_after_motion"])
         self.logger.debug('CameraController: circular stream prepared for video.')
 
         time.sleep(2)
 
 # TODO: Understand
     # initialise webcam
-    def initialise_webcam():
+    def initialise_webcam(self):
         self.capture = cv2.VideoCapture(0)
 
         self.shutter_speed = 0

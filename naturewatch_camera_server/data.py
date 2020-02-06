@@ -47,8 +47,10 @@ def download_all():
 @data.route('/photos/<filename>', methods=["DELETE"])
 def delete_photo(filename):
     file_path = current_app.user_config["photos_path"] + filename
+    thumb_path = current_app.user_config["photos_path"] + "thumb_" + filename
     if os.path.isfile(os.path.join(file_path)):
         os.remove(file_path)
+        os.remove(thumb_path)
         if os.path.isfile(os.path.join(file_path)) is False:
             return Response('{"SUCCESS": "' + filename + '"}', status=200, mimetype='application/json')
         else:
@@ -70,8 +72,11 @@ def get_video(filename):
 @data.route('/videos/<filename>', methods=["DELETE"])
 def delete_video(filename):
     file_path = current_app.user_config["videos_path"] + filename
+    thumb_path = current_app.user_config["videos_path"] + "thumb_" + filename
+    thumb_path = thumb_path.replace(".mp4", ".jpg")
     if os.path.isfile(os.path.join(file_path)):
         os.remove(file_path)
+        os.remove(thumb_path)
         if os.path.isfile(os.path.join(file_path)) is False:
             return Response('{"SUCCESS": "' + filename + '"}', status=200, mimetype='application/json')
         else:

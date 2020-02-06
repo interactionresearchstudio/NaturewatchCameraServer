@@ -124,6 +124,7 @@ class FileSaver(Thread):
             call(["MP4Box", "-fps", str(self.config["frame_rate"]), "-add", input_video, output_video])
             os.remove(input_video)
             self.logger.debug('FileSaver: removed interim file ' + filename)
+            return filenameMp4
         else:
             self.logger.error('FileSaver: not enough space to save video')
             return None
