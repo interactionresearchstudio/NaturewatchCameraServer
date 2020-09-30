@@ -39,7 +39,7 @@ Be sure to replace `raspberrypi.local` with whatever hostname the Pi has.
 ## Running tests
 
 You can run tests directly on the Raspberry pi to test the various functions of the
-software as well as the API. After building the container, run the tests with pytest.
+software as well as the API. After building the container, run the tests with pytest and get the most out of it.
 
     docker run \
     --device /dev/vcsm --device /dev/vchiq \
