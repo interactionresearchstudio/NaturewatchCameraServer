@@ -29,6 +29,7 @@ class CameraController(threading.Thread):
 # Desired image resolution
         self.width = self.config["img_width"]
         self.height = self.config["img_height"]
+        
 
 # Image resolution used for motion detection, same aspect ratio as desired image
         self.md_width = self.config["md_width"]
