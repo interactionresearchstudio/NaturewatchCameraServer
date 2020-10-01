@@ -1,4 +1,4 @@
-# NaturewatchCameraServer
+# NatureWatchCameraServer
 
 This is a Python server script that captures a video stream from a Pi Camera and serves it as a .mjpg through a control website to another device. Part of the My Naturewatch project in collaboration with the RCA.
 
