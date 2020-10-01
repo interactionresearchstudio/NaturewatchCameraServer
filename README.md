@@ -65,3 +65,7 @@ testing your PR against the `dev` branch, which has more experimental features.
 
 If you require support, please head over to the [My Naturewatch Forum](https://mynaturewatch.net/forum).
 
+## Contributing
+
+Please read [CONTRIBUTING](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests.
+
