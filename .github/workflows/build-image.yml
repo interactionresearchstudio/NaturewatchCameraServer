@@ -29,7 +29,7 @@ jobs:
       run: cd repository/os && ../../CustomPiOS/src/update-custompios-paths
 
     - name: Copy NaturewatchCameraServer to CustomPiOS directory
-      run: cp repository repository/os/modules/naturewatchcamera/filesystem/home/pi/NaturewatchCameraServer
+      run: cp -r repository repository/os/modules/naturewatchcamera/filesystem/home/pi/NaturewatchCameraServer
 
     - name: Build Image
       run: export BASE_IMAGE_ENLARGEROOT=1200 && export AUTO_HOTSPOT_NAME=MyNaturewatch && export AUTO_HOTSPOT_PASSWORD=badgersandfoxes && sudo modprobe loop && cd repository/os && sudo bash -x ./build_dist
