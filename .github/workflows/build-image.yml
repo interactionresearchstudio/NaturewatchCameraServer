@@ -1,10 +1,4 @@
-on:
-  push:
-    tags:
-      - '*'
-
 name: Build Image
-
 on:
   push:
     tags:
