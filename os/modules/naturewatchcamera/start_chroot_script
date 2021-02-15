@@ -25,7 +25,7 @@ echo "$NATUREWATCHCAMERA_VAR"
  apt-get upgrade -y
  apt-get dist-upgrade -y
  apt-get autoremove -y
-# For some reason I couldn't install libgtk2.0-dev or libgtk-3-dev without running the 
+# For some reason I couldn't install libgtk2.0-dev or libgtk-3-dev without running the
 # following line
 # See https://www.raspberrypi.org/forums/viewtopic.php?p=1254646#p1254665 for issue and resolution
  apt-get install -y devscripts debhelper cmake libldap2-dev libgtkmm-3.0-dev libarchive-dev \
@@ -48,9 +48,6 @@ echo "Installing OpenCV"
 pip3 install opencv-python-headless
 
 pushd /home/pi
-	echo "Checking out repo"
-	git clone https://github.com/interactionresearchstudio/NaturewatchCameraServer.git
-
 	pushd NaturewatchCameraServer
 
 		echo "Installing repo dependencies"
