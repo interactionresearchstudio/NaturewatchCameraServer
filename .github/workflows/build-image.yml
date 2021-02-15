@@ -35,14 +35,14 @@ jobs:
       run: export BASE_IMAGE_ENLARGEROOT=1200 && export AUTO_HOTSPOT_NAME=MyNaturewatch && export AUTO_HOTSPOT_PASSWORD=badgersandfoxes && sudo modprobe loop && cd repository/os && sudo bash -x ./build_dist
 
     - name: Copy Output
-      run: cp ${{ github.workspace }}/repository/os/workspace/*-raspbian-buster-lite.img build.img
+      run: cp ${{ github.workspace }}/repository/os/workspace/*-raspbian-buster-lite.img mynaturewatch-camera.img
 
     - name: Zip Output
-      run: gzip build.img
+      run: gzip mynaturewatch-camera.img
     - uses: actions/upload-artifact@v1
       with:
-        name: build.img.gz
-        path: build.img.gz
+        name: mynaturewatch-camera.img.gz
+        path: mynaturewatch-camera.img.gz
 
     - name: Create Release
       id: create_release
@@ -64,6 +64,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-        asset_path: build.img.gz
-        asset_name: build.img.gz
+        asset_path: mynaturewatch-camera.img.gz
+        asset_name: mynaturewatch-camera.img.gz
         asset_content_type: application/octet-stream
