@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# My Naturewatch Camera Builder
+# Builds NaturewatchCameraServer and dependencies
+# Written by Mike Vanis
+# GPL V3
+########
+
+
+# Source error handling, leave this in place
+set -x
+set -e
+
+source /common.sh
+install_cleanup_trap
+
+unpack /filesystem/home/pi /home/"${BASE_USER}" "${BASE_USER}"
+unpack /filesystem/home/root /root root
+unpack /filesystem/boot /boot
+
+echo "-----------------------------------------"
+echo "$NATUREWATCHCAMERA_VAR"
+ apt-get purge -y libreoffice*
+ apt-get clean
+ apt-get update
+ apt-get upgrade -y
+ apt-get dist-upgrade -y
+ apt-get autoremove -y
+# For some reason I couldn't install libgtk2.0-dev or libgtk-3-dev without running the
+# following line
+# See https://www.raspberrypi.org/forums/viewtopic.php?p=1254646#p1254665 for issue and resolution
+ apt-get install -y devscripts debhelper cmake libldap2-dev libgtkmm-3.0-dev libarchive-dev \
+                        libcurl4-openssl-dev intltool
+ apt-get install -y build-essential cmake pkg-config libjpeg-dev libtiff5-dev libjasper-dev \
+                        libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
+                        libxvidcore-dev libx264-dev libgtk2.0-dev libgtk-3-dev \
+                        libatlas-base-dev libblas-dev libeigen{2,3}-dev liblapack-dev \
+                        gfortran \
+                        python2.7-dev python3-dev python-pip python3-pip python python3
+ apt-get install -y libilmbase23
+ apt-get install -y libopenexr-dev
+ apt-get install -y libgstreamer1.0-dev
+ apt install -y gpac
+ pip2 install -U pip
+ pip3 install -U pip
+ pip2 install numpy
+ pip3 install numpy
+echo "Installing OpenCV"
+pip3 install opencv-python-headless
+
+pushd /home/pi
+	pushd NaturewatchCameraServer
+
+		echo "Installing repo dependencies"
+		pip3 install -r requirements-pi.txt
+
+		echo "Adding service"
+		mv helpers/python.naturewatch.service /etc/systemd/system/python.naturewatch.service
+
+	popd
+popd
+
+echo "Enabling service"
+chmod 644 /etc/systemd/system/python.naturewatch.service
+systemctl enable python.naturewatch.service
+
+unpack /filesystem/home/pi /home/"${BASE_USER}" "${BASE_USER}"
+# Unpack root at the end, so files are modified before
+unpack /filesystem/root /
