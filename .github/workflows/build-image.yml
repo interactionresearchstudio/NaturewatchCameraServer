@@ -28,6 +28,12 @@ jobs:
     - name: Update CustomPiOS Paths
       run: cd repository/os && ../../CustomPiOS/src/update-custompios-paths
 
+    - name: Build React frontend
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+      run: pushd repository/naturewatch_camera_server/static/client && npm ci && npm run build && popd
+
     - name: Copy NaturewatchCameraServer to CustomPiOS directory
       run: cp -r repository /tmp/NaturewatchCameraServer && rm -rf /tmp/NaturewatchCameraServer/os && mv /tmp/NaturewatchCameraServer repository/os/modules/naturewatchcamera/filesystem/home/pi/NaturewatchCameraServer && ls repository/os/modules/naturewatchcamera/filesystem/home/pi/NaturewatchCameraServer
 
