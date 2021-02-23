@@ -4,6 +4,7 @@ import {Modal, Button} from 'react-bootstrap';
 import LazyLoad from 'react-lazy-load';
 import {CheckCircle, Cancel} from '@material-ui/icons'
 import {GridList, GridListTile} from "@material-ui/core";
+import {BrowserView, MobileView} from 'react-device-detect';
 
 class GalleryGrid extends React.Component {
     constructor(props) {
@@ -108,7 +109,6 @@ class GalleryGrid extends React.Component {
         return (
             <div className="gallery-grid">
                 <GridList
-                    cellHeight={100}
                     className={"gallery-grid-list"}
                     cols={3}
                 >
