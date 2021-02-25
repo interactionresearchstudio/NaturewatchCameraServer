@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button, ButtonGroup } from 'react-bootstrap';
+import {isBrowser} from 'react-device-detect';
 import PropTypes from 'prop-types';
 
 class ContentSelect extends React.Component {
@@ -38,7 +39,7 @@ class ContentSelect extends React.Component {
         }
         else {
             this.setState({
-                deleteAllText: "Tap Again To Delete All",
+                deleteAllText: isBrowser ? "Click Again to Delete All" : "Tap Again to Delete All",
                 isDeleteActive: true,
             });
         }
