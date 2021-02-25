@@ -266,7 +266,6 @@ input:checked + .slider:before {
 
 .gallery-thumbnail img {
     width: 100%;
-    height: 100px;
     object-fit: cover;
 }
 
@@ -291,9 +290,17 @@ input:checked + .slider:before {
     border-radius: 7px;
 }
 
-.modal-footer button {
+.modal-footer button.btn-icon {
     padding: 0;
     background: none;
+}
+
+.modal-footer {
+    display: flex;
+}
+
+.modal-footer .footer-content {
+    align-self: flex-start !important;
 }
 
 .modal-footer .MuiSvgIcon-root {

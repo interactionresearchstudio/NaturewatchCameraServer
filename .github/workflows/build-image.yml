@@ -3,11 +3,11 @@ on: [push, pull_request]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
 
     - name: Install Dependencies
-      run: sudo apt install coreutils p7zip-full qemu-user-static
+      run: sudo apt-get update && sudo apt install coreutils p7zip-full qemu-user-static
 
     - name: Checkout CustomPiOS
       uses: actions/checkout@v2
@@ -28,7 +28,7 @@ jobs:
         node-version: 12.x
 
     - name: Build React frontend
-      run: pushd repository/naturewatch_camera_server/static/client && npm ci && npm run build && popd
+      run: pushd repository/naturewatch_camera_server/static/client && npm i -y && npm run build && popd
 
     - name: Download Raspbian Image
       run: cd repository/os/image && wget -q -c --trust-server-names 'https://downloads.raspberrypi.org/raspbian_lite_latest'

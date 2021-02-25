@@ -90,12 +90,12 @@ class FileSaver(Thread):
         filename = filename + ".jpg"
         self.logger.debug('FileSaver: saving thumb')
         try:
-            if media_type is "photo":
+            if media_type == "photo":
 # TODO: Build a proper downscaling routine for the thumbnails
 #                self.logger.debug('Scaling by a factor of {}'.format(self.thumbnail_factor))
 #                thumb = cv2.resize(image, 0, fx=self.thumbnail_factor, fy=self.thumbnail_factor, interpolation=cv2.INTER_AREA)
                 cv2.imwrite(os.path.join(self.config["photos_path"], filename), image)
-                self.logger.debug("FileSaver: saved thumbnail to " + os.path.join(self.config["photos_path"], filename))
+                self.logger.info("FileSaver: saved thumbnail to " + os.path.join(self.config["photos_path"], filename))
             else:
                 cv2.imwrite(os.path.join(self.config["videos_path"], filename), image)
             return filename

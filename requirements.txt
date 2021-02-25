@@ -12,4 +12,4 @@ py==1.8.0
 pytest==4.5.0
 six==1.12.0
 wcwidth==0.1.7
-Werkzeug==0.15.3
+Werkzeug==0.15.5
