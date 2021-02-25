@@ -290,9 +290,17 @@ input:checked + .slider:before {
     border-radius: 7px;
 }
 
-.modal-footer button {
+.modal-footer button.btn-icon {
     padding: 0;
     background: none;
+}
+
+.modal-footer {
+    display: flex;
+}
+
+.modal-footer .footer-content {
+    align-self: flex-start !important;
 }
 
 .modal-footer .MuiSvgIcon-root {

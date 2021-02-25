@@ -80,9 +80,18 @@ class GalleryGrid extends React.Component {
                 </Modal.Body>
                 <Modal.Footer>
                     {this.state.activeContent.endsWith(".jpg") &&
-                        <p className="mr-auto">Press and hold photo to download.</p>
+                        <div className="footer-content">
+                            <MobileView>
+                                <p className="mr-auto">Press and hold photo to download.</p>
+                            </MobileView>
+                            <BrowserView>
+                                <p className="mr-auto">
+                                    <a href={this.state.activeContent} download={this.state.activeContent.substring(this.state.activeContent.lastIndexOf('/')+1)}>Download Photo</a>
+                                </p>
+                            </BrowserView>
+                        </div>
                     }
-                    <Button variant="primary" onClick={this.handleModalExit}>
+                    <Button variant="primary" className="btn-icon" onClick={this.handleModalExit}>
                         <Cancel/>
                     </Button>
                 </Modal.Footer>
