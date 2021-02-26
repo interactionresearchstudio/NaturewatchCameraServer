@@ -106,15 +106,12 @@ class GalleryComponent extends React.Component {
             if (tempContent[i].selected) {
                 axios.delete(tempContent[i].src)
                     .then((res) => {
-                        axios.delete(tempContent[i].thumbnail)
-                            .then((_res) => {
-                                console.log("Deleted " + tempContent[i].src);
-                                if (this.state.showingVideos) {
-                                    this.getVideos();
-                                } else {
-                                    this.getPhotos();
-                                }
-                            });
+                        console.log("Deleted " + tempContent[i].src);
+                        if (this.state.showingVideos) {
+                            this.getVideos();
+                        } else {
+                            this.getPhotos();
+                        }
                     });
             }
         }
@@ -123,17 +120,14 @@ class GalleryComponent extends React.Component {
     onDeleteAll() {
         let tempContent = this.state.content;
         for (let i=0; i<tempContent.length; i++) {
-            axios.delete(tempContent[i].thumbnail)
-                .then((res) => {
-                    axios.delete(tempContent[i].src)
-                        .then((_res) => {
-                            console.log("Deleted " + tempContent[i].src);
-                            if (this.state.showingVideos) {
-                                this.getVideos();
-                            } else {
-                                this.getPhotos();
-                            }
-                        });
+            axios.delete(tempContent[i].src)
+                .then((_res) => {
+                    console.log("Deleted " + tempContent[i].src);
+                    if (this.state.showingVideos) {
+                        this.getVideos();
+                    } else {
+                        this.getPhotos();
+                    }
                 });
         }
 

@@ -82,7 +82,7 @@ class GalleryGrid extends React.Component {
                     {this.state.activeContent.endsWith(".jpg") &&
                         <div className="footer-content">
                             <MobileView>
-                                <p className="mr-auto">Press and hold photo to download.</p>
+                                <p className="mr-auto">Press and hold photo for download options.</p>
                             </MobileView>
                             <BrowserView>
                                 <p className="mr-auto">
