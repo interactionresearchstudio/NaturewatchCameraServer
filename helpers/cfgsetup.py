@@ -20,7 +20,7 @@ print("hostapd configuration - SSID: " + currentSSID)
 #configFilePassphrase = nwConfigFile[3].strip()
 #if "myNatureWatchCam" in configFileSSID :
 unique_id = subprocess.check_output("sed -n 's/^Serial\s*: 0*//p' /proc/cpuinfo", shell=True)
-configFileSSID = "myNatureWatchCam-" + unique_id.strip().decode('utf-8')
+configFileSSID = "MyNaturewatch-" + unique_id.strip().decode('utf-8')
 print("Wifi Updated to unique name")
 
 #print("Boot configuration - SSID: " + configFileSSID)
