@@ -53,15 +53,19 @@ pushd /home/pi
 		echo "Installing repo dependencies"
 		pip3 install -r requirements-pi.txt
 
-		echo "Adding service"
+		echo "Adding services"
 		mv helpers/python.naturewatch.service /etc/systemd/system/python.naturewatch.service
+		mv helpers/wifisetup.service /etc/systemd/system/wifisetup.service
+		
 
 	popd
 popd
 
-echo "Enabling service"
+echo "Enabling services"
 chmod 644 /etc/systemd/system/python.naturewatch.service
 systemctl enable python.naturewatch.service
+chmod 644 /etc/systemd/system/wifisetup.service
+systemctl enable wifisetup.service
 
 unpack /filesystem/home/pi /home/"${BASE_USER}" "${BASE_USER}"
 # Unpack root at the end, so files are modified before
