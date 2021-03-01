@@ -49,4 +49,4 @@ if changedSettings == 1:
     with open(hostConfigFileName, "w") as file:
         file.writelines(hostConfigFile)
     print("Updated hostapd.conf.")
-    os.system("sudo reboot now")
+#    os.system("sudo reboot now")
