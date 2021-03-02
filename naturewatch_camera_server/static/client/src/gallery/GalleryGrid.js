@@ -91,6 +91,13 @@ class GalleryGrid extends React.Component {
                             </BrowserView>
                         </div>
                     }
+                    {this.state.activeContent.endsWith(".mp4") &&
+                        <div className="footer-content">
+                            <p className="mr-auto">
+                               <a href={this.state.activeContent} download={this.state.activeContent.substring(this.state.activeContent.lastIndexOf('/')+1)}>Download Video</a>
+                            </p>
+                        </div>
+                    }
                     <Button variant="primary" className="btn-icon" onClick={this.handleModalExit}>
                         <Cancel/>
                     </Button>
