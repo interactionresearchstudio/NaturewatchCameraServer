@@ -4,7 +4,6 @@ import {Modal, Button} from 'react-bootstrap';
 import LazyLoad from 'react-lazy-load';
 import {CheckCircle, Cancel} from '@material-ui/icons'
 import {GridList, GridListTile} from "@material-ui/core";
-import {BrowserView, MobileView} from 'react-device-detect';
 
 class GalleryGrid extends React.Component {
     constructor(props) {
@@ -81,14 +80,9 @@ class GalleryGrid extends React.Component {
                 <Modal.Footer>
                     {this.state.activeContent.endsWith(".jpg") &&
                         <div className="footer-content">
-                            <MobileView>
-                                <p className="mr-auto">Press and hold photo for download options.</p>
-                            </MobileView>
-                            <BrowserView>
-                                <p className="mr-auto">
-                                    <a href={this.state.activeContent} download={this.state.activeContent.substring(this.state.activeContent.lastIndexOf('/')+1)}>Download Photo</a>
-                                </p>
-                            </BrowserView>
+                            <p className="mr-auto">
+                                <a href={this.state.activeContent} download={this.state.activeContent.substring(this.state.activeContent.lastIndexOf('/')+1)}>Download Photo</a>
+                            </p>
                         </div>
                     }
                     {this.state.activeContent.endsWith(".mp4") &&
