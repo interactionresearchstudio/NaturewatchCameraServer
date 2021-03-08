@@ -1,9 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {Modal, Button} from 'react-bootstrap';
-import LazyLoad from 'react-lazy-load';
+import LazyLoad from 'react-lazyload';
 import {CheckCircle, Cancel} from '@material-ui/icons'
-import {GridList, GridListTile} from "@material-ui/core";
 
 class GalleryGrid extends React.Component {
     constructor(props) {
@@ -40,14 +39,12 @@ class GalleryGrid extends React.Component {
 
     renderItem(item, index) {
         return (
-            <GridListTile key={index} cols={1}>
             <div key={item.thumbnail} className="gallery-thumbnail">
+                {this.renderSelectIcon(item)}
                 <LazyLoad>
                     <img alt="Captured by Naturewatch Camera" src={item.thumbnail} onClick={this.handleThumbnailClick.bind(this, item)}/>
                 </LazyLoad>
-                {this.renderSelectIcon(item)}
             </div>
-            </GridListTile>
         );
 
     }
@@ -118,12 +115,7 @@ class GalleryGrid extends React.Component {
     render() {
         return (
             <div className="gallery-grid">
-                <GridList
-                    className={"gallery-grid-list"}
-                    cols={3}
-                >
-                    {this.props.content.map((item, index) => this.renderItem(item, index))}
-                </GridList>
+                {this.props.content.map((item, index) => this.renderItem(item, index))}
                 {this.renderModal()}
             </div>
         );
