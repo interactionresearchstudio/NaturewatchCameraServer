@@ -150,10 +150,10 @@ class Settings extends React.Component {
                 <Collapse in={this.props.isOpen}>
                     <Accordion>
                         <Card>
-                            <Accordion.Toggle as={Card.Header} eventKey={0}>
+                            <Accordion.Toggle as={Card.Header} eventKey={1}>
                                 Sensitivity
                             </Accordion.Toggle>
-                            <Accordion.Collapse eventKey={0}>
+                            <Accordion.Collapse eventKey={1}>
                                 <Card.Body>
                                     <SensitivitySetting
                                         onValueChange={this.onSensitivityChange}
@@ -163,10 +163,10 @@ class Settings extends React.Component {
                             </Accordion.Collapse>
                         </Card>
                         <Card>
-                            <Accordion.Toggle as={Card.Header} eventKey={1}>
+                            <Accordion.Toggle as={Card.Header} eventKey={2}>
                                 Image Orientation
                             </Accordion.Toggle>
-                            <Accordion.Collapse eventKey={1}>
+                            <Accordion.Collapse eventKey={2}>
                                 <Card.Body>
                                     <Button
                                         variant="primary"
@@ -178,10 +178,10 @@ class Settings extends React.Component {
                             </Accordion.Collapse>
                         </Card>
                         <Card>
-                            <Accordion.Toggle as={Card.Header} eventKey={2}>
+                            <Accordion.Toggle as={Card.Header} eventKey={3}>
                                 Exposure
                             </Accordion.Toggle>
-                            <Accordion.Collapse eventKey={2}>
+                            <Accordion.Collapse eventKey={3}>
                                 <Card.Body>
                                     <ExposureSetting
                                         mode={this.state.settings.exposure.mode}
