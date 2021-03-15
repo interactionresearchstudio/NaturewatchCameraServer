@@ -14,6 +14,8 @@ class Settings extends React.Component {
         this.onShutterChange = this.onShutterChange.bind(this);
         this.onShutterChangeEnd = this.onShutterChangeEnd.bind(this);
         this.onModeChange = this.onModeChange.bind(this);
+        this.onIntervalChange = this.onIntervalChange.bind(this);
+        this.onIntervalChangeEnd = this.onIntervalChangeEnd.bind(this);
 
         this.state = {
             isOpen: false,
@@ -135,6 +137,24 @@ class Settings extends React.Component {
         });
     }
 
+    onIntervalChange(event) {
+        let currentSettings = this.state.settings;
+        currentSettings.timelapse = event.target.valueAsNumber;
+        this.setState({
+            settings: currentSettings
+        });
+    }
+
+    onIntervalChangeEnd(event) {
+        let currentSettings = this.state.settings;
+        currentSettings.timelapse = event.target.valueAsNumber;
+        this.setState({
+            settings: currentSettings
+        }, () => {
+            this.postSettings();
+        });
+    }
+    
     render() {
         return (
             <div className="settings">
@@ -189,6 +209,26 @@ class Settings extends React.Component {
                                         onShutterChange={this.onShutterChange}
                                         onShutterChangeEnd={this.onShutterChangeEnd}
                                         onModeChange={this.onModeChange}
+                                    />
+                                </Card.Body>
+                            </Accordion.Collapse>
+                        </Card>
+                        <Card>
+                            <Accordion.Toggle as={Card.Header} eventKey={4}>
+                                Timelapse
+                            </Accordion.Toggle>
+                            <Accordion.Collapse eventKey={4}>
+                                <Card.Body>
+                                    <input
+                                      type="range"
+                                      defaultValue={300}
+                                      step={30}
+                                      min={30}
+                                      max={7200}
+                                      value={this.state.settings.timelapse}
+                                      onChange={this.onIntervalChange}
+                                      onMouseUp={this.onIntervalChangeEnd}
+                                      onTouchEnd={this.onIntervalChangeEnd}
                                     />
                                 </Card.Body>
                             </Accordion.Collapse>

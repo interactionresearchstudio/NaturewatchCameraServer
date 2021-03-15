@@ -90,7 +90,7 @@ class FileSaver(Thread):
         filename = filename + ".jpg"
         self.logger.debug('FileSaver: saving thumb')
         try:
-            if media_type == "photo":
+            if media_type in ["photo", "timelapse"]:
 # TODO: Build a proper downscaling routine for the thumbnails
 #                self.logger.debug('Scaling by a factor of {}'.format(self.thumbnail_factor))
 #                thumb = cv2.resize(image, 0, fx=self.thumbnail_factor, fy=self.thumbnail_factor, interpolation=cv2.INTER_AREA)
