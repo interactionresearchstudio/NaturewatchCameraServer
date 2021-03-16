@@ -5,25 +5,11 @@
 
 This is a Python server script that captures a video stream from a Pi Camera and serves it as a .mjpg through a control website to another device. Part of the My Naturewatch project in collaboration with the RCA.
 
+# How to install
 
-## Enable SSH (to be automated)
+To use the image, download the lastest zip build from [Releases](https://github.com/interactionresearchstudio/NaturewatchCameraServer/releases)
 
-Add a blank file named `ssh` to the boot folder on the SD card
-
-## Set up OTG ethernet (to be automated)
-
-Follow the guide created by gbaman to set up OTG ethernet over USB serial https://gist.github.com/gbaman/975e2db164b3ca2b51ae11e45e8fd40a
-
-## Requirements
-
-- Docker installed on Raspbian Stretch
-https://gist.github.com/mikevanis/e360f45e394674b59d663fdf0470d42f
-
-## Running the server
-
-Build the docker container
-
-	docker-compose build
+Uncompress and burn this to an SD card. We recommend using [Balena Etcher](https://www.balena.io/etcher/) for this.
 
 ## Configuring the wifi setup
 
@@ -35,21 +21,9 @@ Run the config setup python script. This will reboot the pi
 
 The website is then accessible through its hostname:
 
-	http://raspberrypi.local/
+	http://naturewatchcamera.local/
 
 Be sure to replace `raspberrypi.local` with whatever hostname the Pi has.
-
-## Running tests
-
-You can run tests directly on the Raspberry pi to test the various functions of the
-software as well as the API. After building the container, run the tests with pytest.
-
-    docker run \
-    --device /dev/vcsm --device /dev/vchiq \
-    -p 5000:5000 \
-    -v ~/data:/naturewatch_camera_server/static/data \
-    naturewatchcameraserver \
-    pytest -v naturewatch_camera_server/
 
 ## Reporting bugs
 
