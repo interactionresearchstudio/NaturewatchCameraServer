@@ -3,6 +3,7 @@ import axios from 'axios';
 import {Button, Collapse, Accordion, Card} from 'react-bootstrap';
 import SensitivitySetting from './SensitivitySetting';
 import ExposureSetting from './ExposureSetting';
+import TimelapseSetting from './TimelapseSetting';
 import PropTypes from "prop-types";
 
 class Settings extends React.Component {
@@ -26,7 +27,8 @@ class Settings extends React.Component {
                     iso: "",
                     shutter_speed: ""
                 },
-                sensitivity: ""
+                sensitivity: "",
+                timelapse: 0,
             }
         };
     }
@@ -140,6 +142,7 @@ class Settings extends React.Component {
     onIntervalChange(event) {
         let currentSettings = this.state.settings;
         currentSettings.timelapse = event.target.valueAsNumber;
+        console.log("Interval: " + currentSettings.timelapse);
         this.setState({
             settings: currentSettings
         });
@@ -215,11 +218,18 @@ class Settings extends React.Component {
                         </Card>
                         <Card>
                             <Accordion.Toggle as={Card.Header} eventKey={4}>
-                                Timelapse
+                                Timelapse Mode
                             </Accordion.Toggle>
                             <Accordion.Collapse eventKey={4}>
                                 <Card.Body>
-                                    <input
+                                    <TimelapseSetting
+                                        isActive={this.props.isTimelapseActive}
+                                        onChange={this.onIntervalChange}
+                                        onChangeEnd={this.onIntervalChangeEnd}
+                                        onActiveChange={this.props.onTimelapseActiveChange}
+                                        interval={this.state.settings.timelapse}
+                                    />
+                                    {/*<input
                                       type="range"
                                       defaultValue={300}
                                       step={30}
@@ -229,7 +239,7 @@ class Settings extends React.Component {
                                       onChange={this.onIntervalChange}
                                       onMouseUp={this.onIntervalChangeEnd}
                                       onTouchEnd={this.onIntervalChangeEnd}
-                                    />
+                                    />*/}
                                 </Card.Body>
                             </Accordion.Collapse>
                         </Card>
