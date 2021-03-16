@@ -193,6 +193,13 @@ class Index extends React.Component {
                                         sessionStatus={this.state.sessionStatus.mode}
                                     />
                                 </Col>
+                                <Col xs={6}>
+                                    <SessionButton
+                                        type={"timelapse"}
+                                        onButtonClick={this.onSessionButtonClick}
+                                        sessionStatus={this.state.sessionStatus.mode}
+                                    />
+                                </Col>
                             </Row>}
                             <Settings
                                 isOpen={this.state.isSettingsOpen}
