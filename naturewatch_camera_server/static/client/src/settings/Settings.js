@@ -229,17 +229,6 @@ class Settings extends React.Component {
                                         onActiveChange={this.props.onTimelapseActiveChange}
                                         interval={this.state.settings.timelapse}
                                     />
-                                    {/*<input
-                                      type="range"
-                                      defaultValue={300}
-                                      step={30}
-                                      min={30}
-                                      max={7200}
-                                      value={this.state.settings.timelapse}
-                                      onChange={this.onIntervalChange}
-                                      onMouseUp={this.onIntervalChangeEnd}
-                                      onTouchEnd={this.onIntervalChangeEnd}
-                                    />*/}
                                 </Card.Body>
                             </Accordion.Collapse>
                         </Card>
