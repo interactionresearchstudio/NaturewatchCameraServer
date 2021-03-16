@@ -23,7 +23,7 @@ The website is then accessible through its IP address:
 
 	http://192.168.50.1.local/
 	
-If you device has Bonjour installed, you can also use:
+If your device has Bonjour installed, you can also use:
 
 	http://naturewatchcamera.local/
 	
