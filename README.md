@@ -13,17 +13,20 @@ Uncompress and burn this to an SD card. We recommend using [Balena Etcher](https
 
 ## Configuring the wifi setup
 
-Run the config setup python script. This will reboot the pi
+The device automatically creates a hotspot network named MyNatureWatch-12345, with the numbers being a unique ID. 
 
-	sudo python3 NaturewatchCameraServer/cfgsetup.py
+You can also connect the device directly to a home network by following this [guide](https://mynaturewatch.net/instructions-homenetwork)
 
 ## Access the interface
 
-The website is then accessible through its hostname:
+The website is then accessible through its IP address:
+
+	http://192.168.50.1.local/
+	
+If you device has Bonjour installed, you can also use:
 
 	http://naturewatchcamera.local/
-
-Be sure to replace `raspberrypi.local` with whatever hostname the Pi has.
+	
 
 ## Reporting bugs
 
