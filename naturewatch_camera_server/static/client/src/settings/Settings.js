@@ -31,6 +31,13 @@ class Settings extends React.Component {
                 timelapse: 0,
             }
         };
+
+        this.timeslapse = [
+            [24,10],
+            [24,30],
+            [24,60],
+            [16,300],
+        ];
     }
 
     componentDidMount() {
@@ -142,7 +149,8 @@ class Settings extends React.Component {
     onIntervalChange(event) {
         let currentSettings = this.state.settings;
         currentSettings.timelapse = this.intervalPosToValue(event.target.valueAsNumber);
-        console.log("Interval: " + currentSettings.timelapse);
+        console.log("Interval: " + currentSettings.timelapse
+                    + "; slider.value = " + event.target.valueAsNumber);
         this.setState({
             settings: currentSettings
         });
@@ -158,40 +166,40 @@ class Settings extends React.Component {
         });
     }
 
-    intervalValueToPos(pos) {
-        // position will be between 0 and 100
-        const minp = 0;
-        const maxp = 100;
+    intervalValueToPos(val) {
 
-        // The result should be between 100 an 10000000
-        const minv = Math.log(10);
-        const maxv = Math.log(7200);
+        var position = 0;
+        for (var i=0; i<this.timeslapse.length; i++) {
 
-        // calculate adjustment factor
-        const scale = (maxv-minv) / (maxp-minp);
+            let lookup = this.timeslapse[i];
+            if (val <= lookup[0] * lookup[1]) {
+                position += Math.floor(val / lookup[1]);
+                console.log("position = " + String(position));
+                return position
+            }
+            val -= lookup[0] * lookup[1];
+            position += lookup[0];
+        }
 
-        return Math.round((Math.log(pos)-minv) / scale + minp);
+        console.log("position = " + String(position));
+        return position;
     }
 
     intervalPosToValue(position) {
-        // position will be between 0 and 100
-        const minp = 0;
-        const maxp = 100;
 
-        // The result should be between 100 an 10000000
-        const minv = Math.log(10);
-        const maxv = Math.log(7200);
+        var res = 0;
+        for (var i=0; i<this.timeslapse.length; i++) {
 
-        // calculate adjustment factor
-        const scale = (maxv-minv) / (maxp-minp);
-
-        const value = Math.round(Math.exp(minv + scale*(position-minp)));
-
-        if (value > 60) {
-            return value - (value % 60);
-        } else {
-            return value;
+            let lookup = this.timeslapse[i];
+            if (position <= lookup[0]) {
+                res += position * lookup[1];
+                return res;
+            }
+            res += lookup[0] * lookup[1];
+            position -= lookup[0];
         }
+
+        return res;
     }
     
     render() {
