@@ -21,11 +21,11 @@ You can also connect the device directly to a home network by following this [gu
 
 The website is then accessible through its IP address:
 
-	http://192.168.50.1.local/
+	http://192.168.50.1
 	
 If your device has Bonjour installed, you can also use:
 
-	http://naturewatchcamera.local/
+	http://mynaturewatchcamera.local/
 	
 
 ## Reporting bugs
