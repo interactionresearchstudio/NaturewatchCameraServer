@@ -19,6 +19,13 @@ class TimelapseSetting extends React.Component {
         }
     }
 
+    calculateSliderStep(seconds) {
+        if (seconds >= 3600) return 600;
+        if (seconds >= 600) return 300;
+        if (seconds >= 120) return 60;
+        return 10;
+    }
+
     renderDetailedSettings() {
         if (this.props.isActive) {
             return (
@@ -30,11 +37,11 @@ class TimelapseSetting extends React.Component {
                     <input
                         type="range"
                         id="interval"
-                        min="10"
-                        max="3600"
-                        defaultValue="10"
-                        step="10"
-                        value={this.props.interval}
+                        min="0"
+                        max="100"
+                        defaultValue="1"
+                        step="1"
+                        value={this.props.intervalPos}
                         onChange={this.props.onChange}
                         onMouseUp={this.props.onChangeEnd}
                         onTouchEnd={this.props.onChangeEnd}

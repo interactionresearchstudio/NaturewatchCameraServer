@@ -141,7 +141,7 @@ class Settings extends React.Component {
 
     onIntervalChange(event) {
         let currentSettings = this.state.settings;
-        currentSettings.timelapse = event.target.valueAsNumber;
+        currentSettings.timelapse = this.intervalPosToValue(event.target.valueAsNumber);
         console.log("Interval: " + currentSettings.timelapse);
         this.setState({
             settings: currentSettings
@@ -150,12 +150,48 @@ class Settings extends React.Component {
 
     onIntervalChangeEnd(event) {
         let currentSettings = this.state.settings;
-        currentSettings.timelapse = event.target.valueAsNumber;
+        currentSettings.timelapse = this.intervalPosToValue(event.target.valueAsNumber);
         this.setState({
             settings: currentSettings
         }, () => {
             this.postSettings();
         });
+    }
+
+    intervalValueToPos(pos) {
+        // position will be between 0 and 100
+        const minp = 0;
+        const maxp = 100;
+
+        // The result should be between 100 an 10000000
+        const minv = Math.log(10);
+        const maxv = Math.log(7200);
+
+        // calculate adjustment factor
+        const scale = (maxv-minv) / (maxp-minp);
+
+        return Math.round((Math.log(pos)-minv) / scale + minp);
+    }
+
+    intervalPosToValue(position) {
+        // position will be between 0 and 100
+        const minp = 0;
+        const maxp = 100;
+
+        // The result should be between 100 an 10000000
+        const minv = Math.log(10);
+        const maxv = Math.log(7200);
+
+        // calculate adjustment factor
+        const scale = (maxv-minv) / (maxp-minp);
+
+        const value = Math.round(Math.exp(minv + scale*(position-minp)));
+
+        if (value > 60) {
+            return value - (value % 60);
+        } else {
+            return value;
+        }
     }
     
     render() {
@@ -227,6 +263,7 @@ class Settings extends React.Component {
                                         onChange={this.onIntervalChange}
                                         onChangeEnd={this.onIntervalChangeEnd}
                                         onActiveChange={this.props.onTimelapseActiveChange}
+                                        intervalPos={this.intervalValueToPos(this.state.settings.timelapse)}
                                         interval={this.state.settings.timelapse}
                                     />
                                 </Card.Body>
