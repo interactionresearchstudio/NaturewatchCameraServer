@@ -20,7 +20,7 @@ class TimelapseSetting extends React.Component {
             var h = Math.floor(seconds / 3600);
             seconds = seconds % 3600;
 
-            it += String(h) + " hour" + (h > 1 : "s" : "")
+            it += String(h) + " hour" + (h > 1 ? "s" : "")
                 + (seconds > 0 ? " and " : "");
         }
 
@@ -29,7 +29,7 @@ class TimelapseSetting extends React.Component {
             var m = Math.floor(seconds / 60);
             seconds = seconds % 60;
 
-            it += String(m) + " minute" + (m > 1 : "s" : "")
+            it += String(m) + " minute" + (m > 1 ? "s" : "")
                 + ( seconds > 0 ? " and " : "");
         }
 
