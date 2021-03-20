@@ -4,6 +4,8 @@ import time
 import json
 import os
 
+from .ZipfileGenerator import ZipfileGenerator
+
 data = Blueprint('data', __name__)
 
 
@@ -46,9 +48,11 @@ def download_all():
 @data.route('/download/photos.zip')
 def download_all_photos():
     # just for now... we should take an array of file names
-    photos_list = construct_directory_list(current_app, current_app.user_config["photos_path"])
-    return Response(current_app.file_saver.download_all_photos(photos_list),
-                    mimetype='application/zip')
+    photos_path = current_app.user_config["photos_path"]
+    photos_list = construct_directory_list(current_app, photos_path)
+
+    paths = list(map(lambda fn : {'filename': os.path.join(photos_path, fn), 'arcname': fn }, photos_list))
+    return Response(ZipfileGenerator(paths).get(), mimetype='application/zip')
 
 
 @data.route('/photos/<filename>', methods=["DELETE"])

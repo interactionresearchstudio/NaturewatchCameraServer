@@ -24,8 +24,12 @@ class ZipfileGenerator():
             return chunk
 
     # Constructor
-    def __init__(self, paths):
-        self.paths   = paths
+    def __init__(self,
+                 paths = [], # { 'filename':'', 'arcname':'' }
+                 chunk_size = 0x8000):
+
+        self.paths      = paths
+        self.chunk_size = chunk_size
 
     # Generator
     def get(self):
@@ -36,17 +40,29 @@ class ZipfileGenerator():
 
             for path in self.paths:
 
-                z_info = ZipInfo.from_file(path,os.path.join('photos',os.path.basename(path)))
-                # it's not worth the resources, achieves max 0.1% on JPEGs...
-                #z_info.compress_type = ZIP_DEFLATED
+                try:
+                    if len(path['arcname']) == 0:
+                        path['arcname'] = path['filename']
 
-                with open(path, 'rb') as entry, zf.open(z_info, mode='w') as dest:
+                    z_info = ZipInfo.from_file(path['filename'], path['arcname'])
 
-                    for chunk in iter(lambda: entry.read(16384), b''):
-                        dest.write(chunk)
-                        # Yield chunk of the zip file stream in bytes.
-                        yield output.get()
+                    # it's not worth the resources, achieves max 0.1% on JPEGs...
+                    #z_info.compress_type = ZIP_DEFLATED
 
-        # ZipFile was closed.
+                    # should we try to fix the disk timestamps?
+                    # or should it be solved by setting the system time with the browser time?
+                    
+                    with open(path['filename'], 'rb') as entry, zf.open(z_info, mode='w') as dest:
+
+                        for chunk in iter(lambda: entry.read(self.chunk_size), b''):
+                            dest.write(chunk)
+                            # yield chunk of the zip file stream in bytes.
+                            yield output.get()
+
+                except FileNotFoundError:
+                    # this should probably be logged, but how?
+                    pass
+
+        # ZipFile was closed: get the final bytes
         yield output.get()
 
