@@ -7,6 +7,7 @@ import datetime
 from subprocess import call
 import zipfile
 
+from naturewatch_camera_server.ZipfileGenerator import ZipfileGenerator
 
 try:
     import picamera
@@ -135,6 +136,12 @@ class FileSaver(Thread):
         filename = "video_"+timestamp.strftime('%Y-%m-%d-%H-%M-%S')
         filename = filename.strip()
         return filename
+
+    def download_all_photos(self, paths):
+        self.logger.info('download_all_photos(' + str(paths) + ')')
+        # map the names to fullpaths
+        fullpaths = map(lambda p : os.path.join(self.config["photos_path"], p), paths)
+        return ZipfileGenerator(fullpaths).get()
 
     def download_zip(self, filename):
         input_file = os.path.join(self.config["videos_path"], filename)

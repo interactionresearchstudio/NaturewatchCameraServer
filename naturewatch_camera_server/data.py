@@ -43,6 +43,13 @@ def download_all():
     current_app.file_saver.download_all_video()
     return Response("{'NOT_FOUND':'" "'}", status=404, mimetype='application/json')
 
+@data.route('/download/photos.zip')
+def download_all_photos():
+    # just for now... we should take an array of file names
+    photos_list = construct_directory_list(current_app, current_app.user_config["photos_path"])
+    return Response(current_app.file_saver.download_all_photos(photos_list),
+                    mimetype='application/zip')
+
 
 @data.route('/photos/<filename>', methods=["DELETE"])
 def delete_photo(filename):
