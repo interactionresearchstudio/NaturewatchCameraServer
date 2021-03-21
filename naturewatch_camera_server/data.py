@@ -30,31 +30,6 @@ def get_photo(filename):
         return Response("{'NOT_FOUND':'" + filename + "'}", status=404, mimetype='application/json')
 
 
-@data.route('/download/<filename>')
-def get_download(filename):
-    file_path = current_app.user_config["videos_path"] + filename + '.mp4'
-    if os.path.isfile(os.path.join(file_path)):
-        output = current_app.file_saver.download_zip(filename + '.mp4')
-        return send_from_directory(os.path.join('static/data/videos'), filename + ".mp4" + ".zip", mimetype="application/zip")
-    else:
-        return Response("{'NOT_FOUND':'" + filename + "'}", status=404, mimetype='application/json')
-
-
-@data.route('/download/video')
-def download_all():
-    current_app.file_saver.download_all_video()
-    return Response("{'NOT_FOUND':'" "'}", status=404, mimetype='application/json')
-
-@data.route('/download/photos.zip')
-def download_all_photos():
-    # just for now... we should take an array of file names
-    photos_path = current_app.user_config["photos_path"]
-    photos_list = construct_directory_list(current_app, photos_path)
-
-    paths = list(map(lambda fn : {'filename': os.path.join(photos_path, fn), 'arcname': fn }, photos_list))
-    return Response(ZipfileGenerator(paths).get(), mimetype='application/zip')
-
-
 @data.route('/photos/<filename>', methods=["DELETE"])
 def delete_photo(filename):
     file_path = current_app.user_config["photos_path"] + filename
@@ -92,6 +67,25 @@ def delete_video(filename):
             return Response('{"SUCCESS": "' + filename + '"}', status=200, mimetype='application/json')
         else:
             return Response('{"ERROR": "' + filename + '"}', status=500, mimetype='application/json')
+
+
+def get_all_files(current_app, src_path):
+    # just for now... we should take an array of file names
+    src_list = construct_directory_list(current_app, src_path)
+    paths = list(map(lambda fn : {'filename': os.path.join(src_path, fn), 'arcname': fn }, src_list))
+    return Response(ZipfileGenerator(paths).get(), mimetype='application/zip')
+
+
+@data.route('/download/videos.zip')
+def download_all_videos():
+    videos_path = current_app.user_config["videos_path"]
+    return get_all_files(current_app,videos_path)
+
+
+@data.route('/download/photos.zip')
+def download_all_photos():
+    photos_path = current_app.user_config["photos_path"]
+    return get_all_files(current_app,videos_path)
 
 
 def construct_directory_list(current_app, path):
