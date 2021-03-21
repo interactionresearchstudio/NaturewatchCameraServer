@@ -3,13 +3,7 @@ import {ToggleButtonGroup, ToggleButton} from 'react-bootstrap';
 
 class TimelapseSetting extends React.Component {
 
-    onIntervalChange(event) {
-        this.props.onIntervalChange(event.target.value);
-    }
 
-    onIntervalChangeEnd(event) {
-        this.props.onIntervalEnd(event.target.value);
-    }
 
     renderIntervalText(seconds) {
 
@@ -67,7 +61,11 @@ class TimelapseSetting extends React.Component {
     render() {
         return (
             <div>
-                <ToggleButtonGroup name="exposure" value={this.props.isActive ? "on" : "off" } onChange={this.props.onActiveChange}>
+                <ToggleButtonGroup
+                  name="timelapse"
+                  value={this.props.isActive ? "on" : "off" }
+                  onChange={this.props.onActiveChange}
+                >
                     <ToggleButton type="radio" value="off">Off</ToggleButton>
                     <ToggleButton type="radio" value="on">On</ToggleButton>
                 </ToggleButtonGroup>
