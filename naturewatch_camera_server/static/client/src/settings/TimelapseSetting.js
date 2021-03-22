@@ -3,27 +3,35 @@ import {ToggleButtonGroup, ToggleButton} from 'react-bootstrap';
 
 class TimelapseSetting extends React.Component {
 
-    onIntervalChange(event) {
-        this.props.onIntervalChange(event.target.value);
-    }
 
-    onIntervalChangeEnd(event) {
-        this.props.onIntervalEnd(event.target.value);
-    }
 
     renderIntervalText(seconds) {
-        if (seconds > 59) {
-            return Math.round((seconds / 60)) + " minutes";
-        } else {
-            return seconds + " seconds";
-        }
-    }
 
-    calculateSliderStep(seconds) {
-        if (seconds >= 3600) return 600;
-        if (seconds >= 600) return 300;
-        if (seconds >= 120) return 60;
-        return 10;
+        var it = "";
+        
+        if (seconds >= 3600) {
+
+            var h = Math.floor(seconds / 3600);
+            seconds = seconds % 3600;
+
+            it += String(h) + " hour" + (h > 1 ? "s" : "")
+                + (seconds > 0 ? " and " : "");
+        }
+
+        if (seconds >= 60) {
+
+            var m = Math.floor(seconds / 60);
+            seconds = seconds % 60;
+
+            it += String(m) + " minute" + (m > 1 ? "s" : "")
+                + ( seconds > 0 ? " and " : "");
+        }
+
+        if (seconds > 0) {
+            it += String(seconds) + " second" + (seconds > 1 ? "s" : "");
+        }
+
+        return it;
     }
 
     renderDetailedSettings() {
@@ -37,9 +45,8 @@ class TimelapseSetting extends React.Component {
                     <input
                         type="range"
                         id="interval"
-                        min="0"
-                        max="100"
-                        defaultValue="1"
+                        min="1"
+                        max="88"
                         step="1"
                         value={this.props.intervalPos}
                         onChange={this.props.onChange}
@@ -54,7 +61,11 @@ class TimelapseSetting extends React.Component {
     render() {
         return (
             <div>
-                <ToggleButtonGroup name="exposure" value={this.props.isActive ? "on" : "off" } onChange={this.props.onActiveChange}>
+                <ToggleButtonGroup
+                  name="timelapse"
+                  value={this.props.isActive ? "on" : "off" }
+                  onChange={this.props.onActiveChange}
+                >
                     <ToggleButton type="radio" value="off">Off</ToggleButton>
                     <ToggleButton type="radio" value="on">On</ToggleButton>
                 </ToggleButtonGroup>

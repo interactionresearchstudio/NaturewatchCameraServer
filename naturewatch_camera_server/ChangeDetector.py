@@ -41,7 +41,8 @@ class ChangeDetector(Thread):
         self.isMinActive = False
         self.currentImage = None
 
-        self.timelapse = self.config["default_timelapse"]
+        self.timelapse_active = False
+        self.timelapse        = self.config["default_timelapse"]
 
         self.logger.info("ChangeDetector: initialised")
 

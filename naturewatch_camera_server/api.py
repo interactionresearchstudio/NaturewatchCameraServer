@@ -98,7 +98,8 @@ def settings_handler():
                                                            settings["exposure"]["iso"])
         if "timelapse" in settings:
             current_app.logger.info("Changing timelapse settings to " + str(settings["timelapse"]))
-            current_app.change_detector.timelapse = settings["timelapse"]
+            current_app.change_detector.timelapse_active = settings["timelapse"]["active"]
+            current_app.change_detector.timelapse = settings["timelapse"]["interval"]
         
         new_settings = construct_settings_object(current_app.camera_controller, current_app.change_detector)
         return Response(json.dumps(new_settings), mimetype='application/json')
@@ -128,7 +129,10 @@ def construct_settings_object(camera_controller, change_detector):
             "shutter_speed": camera_controller.get_shutter_speed(),
         },
         "sensitivity": sensitivity,
-        "timelapse": current_app.change_detector.timelapse
+        "timelapse": {
+            "active": current_app.change_detector.timelapse_active,
+            "interval": current_app.change_detector.timelapse,
+        }
     }
     return settings
 
