@@ -1,12 +1,13 @@
 import React from 'react';
 import {Container, Row, Col} from 'react-bootstrap';
 import { Link } from 'react-router-dom';
-//import Gallery from 'react-grid-gallery';
 import axios from 'axios';
+import FileDownload from 'js-file-download';
 import Header from '../common/Header';
 import ContentTypeSelector from './ContentTypeSelector';
-import ContentSelect from './ContentSelect';
+import ContentDelete from './ContentDelete';
 import GalleryGrid from './GalleryGrid';
+import ContentDownload from "./ContentDownload";
 
 class GalleryComponent extends React.Component {
     constructor(props, context) {
@@ -17,13 +18,17 @@ class GalleryComponent extends React.Component {
         this.onSelectStart = this.onSelectStart.bind(this);
         this.onDelete = this.onDelete.bind(this);
         this.onDeleteAll = this.onDeleteAll.bind(this);
+        this.onDownload = this.onDownload.bind(this);
+        this.onDownloadAll = this.onDownloadAll.bind(this);
         this.onClearSelection = this.onClearSelection.bind(this);
         this.onContentSelect = this.onContentSelect.bind(this);
+        this.downloadPaths = this.downloadPaths.bind(this);
 
         this.state = {
             content: [],
             showingVideos: false,
-            isSelectActive: false
+            isSelectActive: false,
+            selectType: "none"
         }
 
     }
@@ -94,9 +99,9 @@ class GalleryComponent extends React.Component {
         }
     }
 
-    onSelectStart() {
+    onSelectStart(type) {
         this.setState({
-            isSelectActive: true
+            selectType: type
         });
     }
 
@@ -133,9 +138,48 @@ class GalleryComponent extends React.Component {
 
     }
 
+    onDownloadAll() {
+        axios({
+            url: this.state.showingVideos ? '/data/download/videos.zip' : '/data/download/photos.zip',
+            method: 'GET',
+            responseType: 'blob'
+        }).then((res) => {
+                FileDownload(res.data, this.state.showingVideos ? 'videos.zip' : 'photos.zip');
+                console.log("Downloaded all content.");
+        });
+    }
+
+    onDownload() {
+        let tempContent = this.state.content;
+        let paths = [];
+        tempContent.forEach((c) => {
+            if (c.selected)
+                paths.push(c.src.substr(c.src.lastIndexOf('/') + 1));
+        });
+        console.log(paths);
+        this.downloadPaths(paths);
+    }
+
+    downloadPaths(paths) {
+        axios({
+            url: this.state.showingVideos ? '/data/download/videos.zip' : '/data/download/photos.zip',
+            method: 'POST',
+            responseType: 'blob',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            data: {
+                paths: paths
+            }
+        }).then((res) => {
+            FileDownload(res.data, this.state.showingVideos ? 'videos.zip' : 'photos.zip');
+            console.log("Downloaded content.");
+        });
+    }
+
     onClearSelection() {
         this.setState({
-            isSelectActive: false
+            selectType: 'none'
         }, () => {
             if (this.state.showingVideos) {
                 this.getVideos();
@@ -179,12 +223,19 @@ class GalleryComponent extends React.Component {
                         <Link to="/" className="btn btn-secondary">Back</Link>
                     </Col>
                     <Col xs={6}>
-                        <ContentSelect
+                        <ContentDelete
                             onSelectStart={this.onSelectStart}
                             onDelete={this.onDelete}
                             onDeleteAll={this.onDeleteAll}
                             onClearSelection={this.onClearSelection}
-                            isSelectActive={this.state.isSelectActive}
+                            isSelectActive={this.state.selectType === 'delete'}
+                        />
+                        <ContentDownload
+                            isSelectActive={this.state.selectType === 'download'}
+                            onSelectStart={this.onSelectStart}
+                            onDownload={this.onDownload}
+                            onDownloadAll={this.onDownloadAll}
+                            onClearSelection={this.onClearSelection}
                         />
                     </Col>
                 </Row>
@@ -193,7 +244,7 @@ class GalleryComponent extends React.Component {
                         <GalleryGrid
                             content={this.state.content}
                             onContentClick={this.onContentSelect}
-                            isSelectActive={this.state.isSelectActive}
+                            isSelectActive={this.state.selectType !== 'none'}
                         />
                     </Col>
                 </Row>
