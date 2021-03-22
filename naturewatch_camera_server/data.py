@@ -78,7 +78,11 @@ def get_all_files(app, src_path):
 @data.route('/download/videos.zip')
 def download_videos():
     videos_path = current_app.user_config["videos_path"]
-    paths = get_all_files(current_app, videos_path)
+    if request.is_json:
+        body = request.get_json()
+        paths = list(map(lambda fn: {'filename': os.path.join(videos_path, fn), 'arcname': fn}, body["paths"]))
+    else:
+        paths = get_all_files(current_app, videos_path)
     return Response(ZipfileGenerator(paths).get(), mimetype='application/zip')
 
 
