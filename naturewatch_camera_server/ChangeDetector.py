@@ -41,6 +41,9 @@ class ChangeDetector(Thread):
         self.isMinActive = False
         self.currentImage = None
 
+        self.timelapse_active = False
+        self.timelapse        = self.config["default_timelapse"]
+
         self.logger.info("ChangeDetector: initialised")
 
     def run(self):
@@ -152,11 +155,17 @@ class ChangeDetector(Thread):
         self.camera_controller.start_video_stream()
         self.session_start_time = self.get_fake_time()
 
+    def start_timelapse_session(self):
+        self.logger.info('ChangeDetector: starting timelapse capture')
+        self.mode = "timelapse"
+        self.session_start_time = self.get_fake_time()
+        
+        
     def stop_session(self):
         self.logger.info('ChangeDetector: ending capture')
         if self.mode == "video":
             self.camera_controller.stop_video_stream()
-        elif self.mode == "photo":
+        elif self.mode == "photo" or self.mode == "timelapse":
             pass
         self.mode = "inactive"
 
@@ -195,6 +204,19 @@ class ChangeDetector(Thread):
             else:
                 self.logger.error("ChangeDetector: not receiving any images for motion detection!")
                 time.sleep(1)
+
+        # TODO: implement periodic pictures
+        elif self.mode == "timelapse":
+            # take one picture every minute
+            if self.get_fake_time() - self.lastPhotoTime >= self.timelapse:
+                self.logger.info("ChangeDetector: " + str(self.timelapse) + "s elapsed -> capturing...")
+                # TODO: no magic numbers! (make it configurable)
+                timestamp = self.get_formatted_time()
+                image = self.camera_controller.get_hires_image()
+                self.file_saver.save_image(image, timestamp)
+                self.file_saver.save_thumb(imutils.resize(image, width=self.config["md_width"]), timestamp, self.mode)
+                self.lastPhotoTime = self.get_fake_time()
+                self.logger.info("ChangeDetector: photo capture completed")
 
     def get_fake_time(self):
         if self.device_time is not None:
