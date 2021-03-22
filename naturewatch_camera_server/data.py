@@ -75,7 +75,7 @@ def get_all_files(app, src_path):
     return paths
 
 
-@data.route('/download/videos.zip')
+@data.route('/download/videos.zip', methods=["POST", "GET"])
 def download_videos():
     videos_path = current_app.user_config["videos_path"]
     if request.is_json:
@@ -86,7 +86,7 @@ def download_videos():
     return Response(ZipfileGenerator(paths).get(), mimetype='application/zip')
 
 
-@data.route('/download/photos.zip')
+@data.route('/download/photos.zip', methods=["POST", "GET"])
 def download_photos():
     photos_path = current_app.user_config["photos_path"]
     if request.is_json:
