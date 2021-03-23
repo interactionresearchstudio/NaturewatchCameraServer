@@ -3,7 +3,14 @@
 ![GitHub all releases](https://img.shields.io/github/downloads/interactionresearchstudio/NaturewatchCameraServer/total)
 # NaturewatchCameraServer
 
-This is a Python server script that captures a video stream from a Pi Camera and serves it as a .mjpg through a control website to another device. Part of the My Naturewatch project in collaboration with the RCA.
+This is the main software for the My Naturewatch Camera. It is a Python server 
+script that captures a video stream from a Pi Camera and serves it as a .mjpg 
+through a control website to another device. The website can be used to start 
+a photo capture or video capture based on motion detected in the frame. The 
+software is designed to run on a Raspberry Pi Zero W so that you can make your 
+own low-cost wildlife camera.
+
+Part of the My Naturewatch project by the Interaction Research Studio, in collaboration with the RCA.
 
 # How to install
 
