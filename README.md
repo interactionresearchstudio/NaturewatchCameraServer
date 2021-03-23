@@ -31,15 +31,16 @@ If your device has Bonjour installed, you can also use:
 ## Reporting bugs
 
 Please provide as much information as possible. If you'd like to open an issue about a
-possible bug, please do so here and include as much information as possible.
+possible bug, please do so here and include as much information as possible. You can 
+also open an issue if you would like to request a new feature. 
 
 ## Pull requests
 
 If you'd like to submit a pull request, please let us know whether you're submitting a
-new feature, or a bug fix. We have an internal release schedule, so please don't be
-offended if it takes us some time to fit your PR in! We will respond to every single
-one of them and let you know if we're evaluating it for a full release. It's also worth
-testing your PR against the `dev` branch, which has more experimental features.
+new feature, or a bug fix. Make sure to do a self review, and test on at least one type 
+of Raspberry Pi. Please don't be offended if it takes us some time to fit your PR in! 
+We will respond to every single one of them and let you know if we're evaluating it for 
+a full release.
 
 ## Support
 
