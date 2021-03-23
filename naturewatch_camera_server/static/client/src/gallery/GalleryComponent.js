@@ -28,7 +28,8 @@ class GalleryComponent extends React.Component {
             content: [],
             showingVideos: false,
             isSelectActive: false,
-            selectType: "none"
+            selectType: "none",
+            isDownloading: false,
         }
 
     }
@@ -139,17 +140,23 @@ class GalleryComponent extends React.Component {
     }
 
     onDownloadAll() {
+        this.setState({isDownloading: true});
         axios({
             url: this.state.showingVideos ? '/data/download/videos.zip' : '/data/download/photos.zip',
             method: 'GET',
             responseType: 'blob'
         }).then((res) => {
-                FileDownload(res.data, this.state.showingVideos ? 'videos.zip' : 'photos.zip');
-                console.log("Downloaded all content.");
+            FileDownload(res.data, this.state.showingVideos ? 'videos.zip' : 'photos.zip');
+            console.log("Downloaded all content.");
+            this.setState({isDownloading: false});
+        }).catch((err) => {
+            console.error(err);
+            this.setState({isDownloading: false});
         });
     }
 
     onDownload() {
+        this.setState({isDownloading: true});
         let tempContent = this.state.content;
         let paths = [];
         tempContent.forEach((c) => {
@@ -174,6 +181,10 @@ class GalleryComponent extends React.Component {
         }).then((res) => {
             FileDownload(res.data, this.state.showingVideos ? 'videos.zip' : 'photos.zip');
             console.log("Downloaded content.");
+            this.setState({isDownloading: false});
+        }).catch((err) => {
+            console.error(err);
+            this.setState({isDownloading: false});
         });
     }
 
@@ -236,6 +247,7 @@ class GalleryComponent extends React.Component {
                             onDownload={this.onDownload}
                             onDownloadAll={this.onDownloadAll}
                             onClearSelection={this.onClearSelection}
+                            isDownloading={this.state.isDownloading}
                         />
                     </Col>
                 </Row>
