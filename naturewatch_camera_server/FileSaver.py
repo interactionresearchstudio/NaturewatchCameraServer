@@ -7,7 +7,6 @@ import datetime
 from subprocess import call
 import zipfile
 
-
 try:
     import picamera
     import picamera.array

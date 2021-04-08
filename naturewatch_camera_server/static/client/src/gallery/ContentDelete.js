@@ -3,7 +3,7 @@ import { Button, ButtonGroup } from 'react-bootstrap';
 import {isBrowser} from 'react-device-detect';
 import PropTypes from 'prop-types';
 
-class ContentSelect extends React.Component {
+class ContentDelete extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -25,7 +25,7 @@ class ContentSelect extends React.Component {
 
     renderSelectButton() {
         return(
-            <Button variant="primary" onClick={this.props.onSelectStart}>Select</Button>
+            <Button variant="primary" onClick={() => {this.props.onSelectStart('delete')}}>Delete</Button>
         );
     }
 
@@ -63,7 +63,7 @@ class ContentSelect extends React.Component {
         return(
             <ButtonGroup aria-label="delete">
                 <Button variant="primary" onClick={this.onDeleteAll}>{this.state.deleteAllText}</Button>
-                <Button variant="primary" onClick={this.onDelete}>Delete</Button>
+                <Button variant="primary" onClick={this.onDelete}>Delete Selected</Button>
                 <Button variant="primary" onClick={this.onClearSelection}>Cancel</Button>
             </ButtonGroup>
         );
@@ -78,7 +78,7 @@ class ContentSelect extends React.Component {
     }
 }
 
-ContentSelect.propTypes = {
+ContentDelete.propTypes = {
     isSelectActive: PropTypes.bool.isRequired,
     onSelectStart: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,
@@ -86,4 +86,4 @@ ContentSelect.propTypes = {
     onClearSelection: PropTypes.func.isRequired
 };
 
-export default ContentSelect;
+export default ContentDelete;
