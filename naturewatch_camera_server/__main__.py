@@ -1,4 +1,4 @@
-from naturewatch_camera_server import create_app
+from naturewatch_camera_server import create_app, create_error_app
 import argparse
 
 parser = argparse.ArgumentParser(description='Launch My Naturewatch Camera')
