@@ -7,7 +7,11 @@ parser.add_argument('-p', action='store', dest='port', default=5000,
 args = parser.parse_args()
 
 if __name__ == '__main__':
-    app = create_app()
-    app.camera_controller.start()
-    app.change_detector.start()
+    try:
+        app = create_app()
+        app.camera_controller.start()
+        app.change_detector.start()
+    except e:
+        app = create_error_app(e)
+
     app.run(debug=False, threaded=True, port=args.port, host='0.0.0.0')
