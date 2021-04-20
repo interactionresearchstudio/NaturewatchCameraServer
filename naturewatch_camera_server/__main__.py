@@ -11,7 +11,7 @@ if __name__ == '__main__':
         app = create_app()
         app.camera_controller.start()
         app.change_detector.start()
-    except e:
+    except Exception as e:
         app = create_error_app(e)
 
     app.run(debug=False, threaded=True, port=args.port, host='0.0.0.0')
