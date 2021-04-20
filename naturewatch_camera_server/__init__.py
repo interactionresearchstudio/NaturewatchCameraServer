@@ -94,3 +94,5 @@ def create_error_app(e):
     @flask_app.route('/')
     def index():
         return f"An error occurred: {e}"
+
+    return flask_app
