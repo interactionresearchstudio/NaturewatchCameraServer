@@ -93,6 +93,6 @@ def create_error_app(e):
 
     @flask_app.route('/')
     def index():
-        return f"An error occurred: {e}"
+        return f"<html><body><h1>Unable to start NaturewatchCameraServer.</h1>An error occurred:<pre>{e}</pre></body></html>"
 
     return flask_app
