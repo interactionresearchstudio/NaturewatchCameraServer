@@ -94,11 +94,13 @@ class FileSaver(Thread):
 # TODO: Build a proper downscaling routine for the thumbnails
 #                self.logger.debug('Scaling by a factor of {}'.format(self.thumbnail_factor))
 #                thumb = cv2.resize(image, 0, fx=self.thumbnail_factor, fy=self.thumbnail_factor, interpolation=cv2.INTER_AREA)
-                cv2.imwrite(os.path.join(self.config["photos_path"], filename), image)
+                output_thumb = os.path.join(self.config["photos_path"], filename)
+                cv2.imwrite(output_thumb, image)
                 self.logger.info("FileSaver: saved thumbnail to " + os.path.join(self.config["photos_path"], filename))
             else:
-                cv2.imwrite(os.path.join(self.config["videos_path"], filename), image)
-            return filename
+                output_thumb = os.path.join(self.config["videos_path"], filename)
+                cv2.imwrite(output_thumb, image)
+            return output_thumb
         except Exception as e:
             self.logger.error('FileSaver: save_photo() error: ')
             self.logger.exception(e)
@@ -124,7 +126,7 @@ class FileSaver(Thread):
             call(["MP4Box", "-fps", str(self.config["frame_rate"]), "-add", input_video, output_video])
             os.remove(input_video)
             self.logger.debug('FileSaver: removed interim file ' + filename)
-            return filenameMp4
+            return output_video
         else:
             self.logger.error('FileSaver: not enough space to save video')
             return None

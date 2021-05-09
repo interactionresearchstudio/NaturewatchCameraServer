@@ -6,6 +6,7 @@ import time
 import imutils
 import logging
 from naturewatch_camera_server.FileSaver import FileSaver
+from naturewatch_camera_server.Publisher import Publisher
 
 
 class ChangeDetector(Thread):
@@ -21,6 +22,7 @@ class ChangeDetector(Thread):
         self.logger = logger
 
         self.file_saver = FileSaver(self.config, logger=self.logger)
+        self.publisher = Publisher(self.config, logger=self.logger)
 
         self.minWidth = self.config["min_width"]
         self.maxWidth = self.config["max_width"]
@@ -181,11 +183,12 @@ class ChangeDetector(Thread):
                         self.lastPhotoTime = self.get_fake_time()
                         self.logger.info("ChangeDetector: photo capture completed")
                     elif self.mode == "video":
-                        self.file_saver.save_thumb(img, timestamp, self.mode)
+                        thumb_file = self.file_saver.save_thumb(img, timestamp, self.mode)
                         self.camera_controller.wait_recording(self.config["video_duration_after_motion"])
                         self.logger.info("ChangeDetector: video capture completed")
                         with self.camera_controller.get_video_stream().lock:
-                            self.file_saver.save_video(self.camera_controller.get_video_stream(), timestamp)
+                            video_file = self.file_saver.save_video(self.camera_controller.get_video_stream(), timestamp)
+                            self.publisher.publish_video(video_file, thumb_file)
                         self.lastPhotoTime = self.get_fake_time()
                         self.logger.debug("ChangeDetector: video timer reset")
                     else:
