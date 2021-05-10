@@ -188,9 +188,9 @@ class ChangeDetector(Thread):
                         self.logger.info("ChangeDetector: video capture completed")
                         with self.camera_controller.get_video_stream().lock:
                             video_file = self.file_saver.save_video(self.camera_controller.get_video_stream(), timestamp)
-                            self.publisher.publish_video(video_file, thumb_file)
                         self.lastPhotoTime = self.get_fake_time()
                         self.logger.debug("ChangeDetector: video timer reset")
+                        self.publisher.publish_video(video_file, thumb_file)
                     else:
         # TODO: Add debug code that logs a line every x seconds so we can see the ChangeDetector is still alive
         #            self.logger.debug("ChangeDetector: idle")

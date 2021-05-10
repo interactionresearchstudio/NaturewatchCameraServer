@@ -1,5 +1,8 @@
 from telegram.ext import Updater, CommandHandler
+from subprocess import call
 import logging
+import threading
+import os
 
 class Publisher():
 
@@ -18,12 +21,19 @@ class Publisher():
         self.updater.start_polling()
         self.logger.info("Telegram publisher started")
 
-    def publish_image(self, file_name):
-        pass
+    def shrinkAndSend(self, video_file_name, thumb_file_name):
+        self.logger.info("Shrinking video for publishing: " + video_file_name)
+        
+        shrunk_file_name = video_file_name.replace(".mp4", "_shrunk.mp4")
+        call(["ffmpeg", 
+            "-hide_banner",
+            "-nostats",
+            "-i", video_file_name, 
+            "-vf", "scale=iw/2:ih/2", 
+            "-crf" , "25", 
+            shrunk_file_name])
 
-    def publish_video(self, video_file_name, thumb_file_name):
-        self.logger.info("Publishing video in " + video_file_name + " with thumbnail " + thumb_file_name)
-        with open(video_file_name, 'rb') as video_file:
+        with open(shrunk_file_name, 'rb') as video_file:
             with open(thumb_file_name, 'rb') as thumbnail_file:
                 self.logger.info("sending video file")
                 self.updater.bot.send_video(
@@ -34,3 +44,13 @@ class Publisher():
                     height=1080,
                     supports_streaming=True)
                 self.logger.info("send completed")
+        
+        os.remove(shrunk_file_name)
+
+    def publish_image(self, file_name):
+        pass
+
+    def publish_video(self, video_file_name, thumb_file_name):
+        thread = threading.Thread(target=self.shrinkAndSend, args=(video_file_name, thumb_file_name))
+        thread.start()
+        self.logger.info("Will publish using thread " + str(thread))
