@@ -1,5 +1,5 @@
 from telegram.ext import Updater, CommandHandler
-from subprocess import call
+from subprocess import check_call
 import logging
 import threading
 import os
@@ -30,11 +30,12 @@ class Publisher():
 
     def doPublish(self, video_file_name, thumb_file_name):
         with self.ffmpegSemaphore:
+            # The original video is 17-18MB big, too heavy to be easily shared.
             self.logger.info("Shrinking video for publishing: " + video_file_name)
             
             shrunk_file_name = video_file_name.replace(".mp4", "_shrunk.mp4")
             try:
-                call(["ffmpeg", 
+                check_call(["ffmpeg", 
                     "-hide_banner",
                     "-nostats",
                     "-i", video_file_name, 
