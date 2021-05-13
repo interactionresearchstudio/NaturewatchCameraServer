@@ -175,26 +175,30 @@ class ChangeDetector(Thread):
             if img is not None:
                 if self.detect_change_contours(img) is True:
                     self.logger.info("ChangeDetector: detected motion. Starting capture...")
-                    timestamp = self.get_formatted_time()
-                    if self.mode == "photo":
-                        image = self.camera_controller.get_hires_image()
-                        self.file_saver.save_image(image, timestamp)
-                        self.file_saver.save_thumb(imutils.resize(image, width=self.config["md_width"]), timestamp, self.mode)
-                        self.lastPhotoTime = self.get_fake_time()
-                        self.logger.info("ChangeDetector: photo capture completed")
-                    elif self.mode == "video":
-                        thumb_file = self.file_saver.save_thumb(img, timestamp, self.mode)
-                        self.camera_controller.wait_recording(self.config["video_duration_after_motion"])
-                        self.logger.info("ChangeDetector: video capture completed")
-                        with self.camera_controller.get_video_stream().lock:
-                            video_file = self.file_saver.save_video(self.camera_controller.get_video_stream(), timestamp)
-                        self.lastPhotoTime = self.get_fake_time()
-                        self.logger.debug("ChangeDetector: video timer reset")
-                        self.publisher.publish_video(video_file, thumb_file)
-                    else:
-        # TODO: Add debug code that logs a line every x seconds so we can see the ChangeDetector is still alive
-        #            self.logger.debug("ChangeDetector: idle")
-                        pass
+                    try:
+                        timestamp = self.get_formatted_time()
+                        if self.mode == "photo":
+                            image = self.camera_controller.get_hires_image()
+                            self.file_saver.save_image(image, timestamp)
+                            self.file_saver.save_thumb(imutils.resize(image, width=self.config["md_width"]), timestamp, self.mode)
+                            self.lastPhotoTime = self.get_fake_time()
+                            self.logger.info("ChangeDetector: photo capture completed")
+                        elif self.mode == "video":
+                            thumb_file = self.file_saver.save_thumb(img, timestamp, self.mode)
+                            self.camera_controller.wait_recording(self.config["video_duration_after_motion"])
+                            self.logger.info("ChangeDetector: video capture completed")
+                            with self.camera_controller.get_video_stream().lock:
+                                video_file = self.file_saver.save_video(self.camera_controller.get_video_stream(), timestamp)
+                            self.lastPhotoTime = self.get_fake_time()
+                            self.logger.debug("ChangeDetector: video timer reset")
+                            self.publisher.publish_video(video_file, thumb_file)
+                        else:
+            # TODO: Add debug code that logs a line every x seconds so we can see the ChangeDetector is still alive
+            #            self.logger.debug("ChangeDetector: idle")
+                            pass
+                    except Exception as e:
+                        self.logger.exception('Error during/after capture')
+
             else:
                 self.logger.error("ChangeDetector: not receiving any images for motion detection!")
                 time.sleep(1)

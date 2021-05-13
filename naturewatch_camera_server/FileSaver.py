@@ -71,17 +71,11 @@ class FileSaver(Thread):
             filename = timestamp
             filename = filename + ".jpg"
             self.logger.debug('FileSaver: saving file')
-            try:
-                cv2.imwrite(os.path.join(self.config["photos_path"], filename), image)
-                self.logger.info("FileSaver: saved file to " + os.path.join(self.config["photos_path"], filename))
-                return filename
-            except Exception as e:
-                self.logger.error('FileSaver: save_photo() error: ')
-                self.logger.exception(e)
-                pass
+            cv2.imwrite(os.path.join(self.config["photos_path"], filename), image)
+            self.logger.info("FileSaver: saved file to " + os.path.join(self.config["photos_path"], filename))
+            return filename
         else:
-            self.logger.error('FileSaver: not enough space to save image')
-            return None
+            raise Exception('FileSaver: not enough space to save image')
 
     def save_thumb(self, image, timestamp, media_type):
 
@@ -89,22 +83,17 @@ class FileSaver(Thread):
         filename = filename + timestamp
         filename = filename + ".jpg"
         self.logger.debug('FileSaver: saving thumb')
-        try:
-            if media_type == "photo":
+        if media_type == "photo":
 # TODO: Build a proper downscaling routine for the thumbnails
 #                self.logger.debug('Scaling by a factor of {}'.format(self.thumbnail_factor))
 #                thumb = cv2.resize(image, 0, fx=self.thumbnail_factor, fy=self.thumbnail_factor, interpolation=cv2.INTER_AREA)
-                output_thumb = os.path.join(self.config["photos_path"], filename)
-                cv2.imwrite(output_thumb, image)
-                self.logger.info("FileSaver: saved thumbnail to " + os.path.join(self.config["photos_path"], filename))
-            else:
-                output_thumb = os.path.join(self.config["videos_path"], filename)
-                cv2.imwrite(output_thumb, image)
-            return output_thumb
-        except Exception as e:
-            self.logger.error('FileSaver: save_photo() error: ')
-            self.logger.exception(e)
-            pass
+            output_thumb = os.path.join(self.config["photos_path"], filename)
+            cv2.imwrite(output_thumb, image)
+            self.logger.info("FileSaver: saved thumbnail to " + os.path.join(self.config["photos_path"], filename))
+        else:
+            output_thumb = os.path.join(self.config["videos_path"], filename)
+            cv2.imwrite(output_thumb, image)
+        return output_thumb
 
     def save_video(self, stream, timestamp):
         """
@@ -128,8 +117,7 @@ class FileSaver(Thread):
             self.logger.debug('FileSaver: removed interim file ' + filename)
             return output_video
         else:
-            self.logger.error('FileSaver: not enough space to save video')
-            return None
+            raise Exception('FileSaver: not enough space to save video')
 
     @staticmethod
     def download_all_video():
