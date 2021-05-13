@@ -1,8 +1,9 @@
 from flask import Blueprint, Response, request, json, send_from_directory
 from flask import current_app
-import time
 import json
 import os
+
+from .ZipfileGenerator import ZipfileGenerator
 
 data = Blueprint('data', __name__)
 
@@ -26,22 +27,6 @@ def get_photo(filename):
         return send_from_directory(os.path.join('static/data/photos'), filename, mimetype="image/jpg")
     else:
         return Response("{'NOT_FOUND':'" + filename + "'}", status=404, mimetype='application/json')
-
-
-@data.route('/download/<filename>')
-def get_download(filename):
-    file_path = current_app.user_config["videos_path"] + filename + '.mp4'
-    if os.path.isfile(os.path.join(file_path)):
-        output = current_app.file_saver.download_zip(filename + '.mp4')
-        return send_from_directory(os.path.join('static/data/videos'), filename + ".mp4" + ".zip", mimetype="application/zip")
-    else:
-        return Response("{'NOT_FOUND':'" + filename + "'}", status=404, mimetype='application/json')
-
-
-@data.route('/download/video')
-def download_all():
-    current_app.file_saver.download_all_video()
-    return Response("{'NOT_FOUND':'" "'}", status=404, mimetype='application/json')
 
 
 @data.route('/photos/<filename>', methods=["DELETE"])
@@ -83,15 +68,45 @@ def delete_video(filename):
             return Response('{"ERROR": "' + filename + '"}', status=500, mimetype='application/json')
 
 
-def construct_directory_list(current_app, path):
+def get_all_files(app, src_path):
+    # just for now... we should take an array of file names
+    src_list = construct_directory_list(app, src_path)
+    paths = list(map(lambda fn: {'filename': os.path.join(src_path, fn), 'arcname': fn}, src_list))
+    return paths
+
+
+@data.route('/download/videos.zip', methods=["POST", "GET"])
+def download_videos():
+    videos_path = current_app.user_config["videos_path"]
+    if request.is_json:
+        body = request.get_json()
+        paths = list(map(lambda fn: {'filename': os.path.join(videos_path, fn), 'arcname': fn}, body["paths"]))
+    else:
+        paths = get_all_files(current_app, videos_path)
+    return Response(ZipfileGenerator(paths).get(), mimetype='application/zip')
+
+
+@data.route('/download/photos.zip', methods=["POST", "GET"])
+def download_photos():
+    photos_path = current_app.user_config["photos_path"]
+    if request.is_json:
+        body = request.get_json()
+        paths = list(map(lambda fn: {'filename': os.path.join(photos_path, fn), 'arcname': fn}, body["paths"]))
+    else:
+        paths = get_all_files(current_app, photos_path)
+    return Response(ZipfileGenerator(paths).get(), mimetype='application/zip')
+
+
+def construct_directory_list(app, path):
     files = [f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
     files = [f for f in files if f.lower().endswith(('.jpg', '.mp4'))]
     files = [f for f in files if not f.lower().startswith('thumb_')]
-    files.sort(key=lambda f: os.path.getmtime(os.path.join(get_correct_filepath(current_app,f))), reverse=True)
+    files.sort(key=lambda f: os.path.getmtime(os.path.join(get_correct_filepath(app, f))), reverse=True)
     return files
 
-def get_correct_filepath(current_app, path):
+
+def get_correct_filepath(app, path):
     if path.lower().endswith('.jpg'):
-        return os.path.join(current_app.user_config["photos_path"], path)
+        return os.path.join(app.user_config["photos_path"], path)
     elif path.lower().endswith('.mp4'):
-        return os.path.join(current_app.user_config["videos_path"], path)
+        return os.path.join(app.user_config["videos_path"], path)

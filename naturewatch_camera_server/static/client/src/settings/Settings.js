@@ -3,6 +3,7 @@ import axios from 'axios';
 import {Button, Collapse, Accordion, Card} from 'react-bootstrap';
 import SensitivitySetting from './SensitivitySetting';
 import ExposureSetting from './ExposureSetting';
+import TimelapseSetting from './TimelapseSetting';
 import PropTypes from "prop-types";
 
 class Settings extends React.Component {
@@ -14,6 +15,10 @@ class Settings extends React.Component {
         this.onShutterChange = this.onShutterChange.bind(this);
         this.onShutterChangeEnd = this.onShutterChangeEnd.bind(this);
         this.onModeChange = this.onModeChange.bind(this);
+        this.onTimelapseActiveChange = this.onTimelapseActiveChange.bind(this);
+        this.onIntervalChange = this.onIntervalChange.bind(this);
+        this.onIntervalChangeEnd = this.onIntervalChangeEnd.bind(this);
+        
 
         this.state = {
             isOpen: false,
@@ -24,9 +29,20 @@ class Settings extends React.Component {
                     iso: "",
                     shutter_speed: ""
                 },
-                sensitivity: ""
+                sensitivity: "",
+                timelapse : {
+                    active: false,
+                    interval: 0
+                }
             }
         };
+
+        this.timeslapse = [
+            [24,10],
+            [24,30],
+            [24,60],
+            [16,300],
+        ];
     }
 
     componentDidMount() {
@@ -40,6 +56,9 @@ class Settings extends React.Component {
                 this.setState({settings: settings});
                 console.log("INFO: settings received.");
                 console.log(this.state.settings);
+                this.props.onTimelapseActiveChange(
+                    this.state.settings.timelapse.active ? "on" : "off",
+                );
             });
     }
 
@@ -130,11 +149,78 @@ class Settings extends React.Component {
         this.setState({
             settings: currentSettings
         }, () => {
-            console.log("INFO: Changed exposure mode");
+            console.log("INFO: Changed exposure mode.");
             this.postSettings();
         });
     }
 
+    onTimelapseActiveChange(value) {
+        let currentSettings = this.state.settings;
+        currentSettings.timelapse.active = (value === "on" ? true : false);
+        this.props.onTimelapseActiveChange(value)
+        console.log("timelapse_active: " + String(currentSettings.timelapse.active));
+        this.setState({
+            settings: currentSettings
+        }, () => {
+            console.log("INFO: Changed timelapse_active.");
+            this.postSettings();
+        });
+    }
+
+    onIntervalChange(event) {
+        let currentSettings = this.state.settings;
+        currentSettings.timelapse.interval = this.intervalPosToValue(event.target.valueAsNumber);
+        console.log("Interval: " + currentSettings.timelapse.interval
+                    + "; slider.value = " + event.target.valueAsNumber);
+        this.setState({
+            settings: currentSettings
+        });
+    }
+
+    onIntervalChangeEnd(event) {
+        let currentSettings = this.state.settings;
+        currentSettings.timelapse.duration = this.intervalPosToValue(event.target.valueAsNumber);
+        this.setState({
+            settings: currentSettings
+        }, () => {
+            this.postSettings();
+        });
+    }
+
+    intervalValueToPos(val) {
+
+        var position = 0;
+        for (var i=0; i<this.timeslapse.length; i++) {
+
+            let lookup = this.timeslapse[i];
+            if (val <= lookup[0] * lookup[1]) {
+                position += Math.floor(val / lookup[1]);
+                return position
+            }
+            val -= lookup[0] * lookup[1];
+            position += lookup[0];
+        }
+
+        return position;
+    }
+
+    intervalPosToValue(position) {
+
+        var res = 0;
+        for (var i=0; i<this.timeslapse.length; i++) {
+
+            let lookup = this.timeslapse[i];
+            if (position <= lookup[0]) {
+                res += position * lookup[1];
+                return res;
+            }
+            res += lookup[0] * lookup[1];
+            position -= lookup[0];
+        }
+
+        return res;
+    }
+    
     render() {
         return (
             <div className="settings">
@@ -189,6 +275,23 @@ class Settings extends React.Component {
                                         onShutterChange={this.onShutterChange}
                                         onShutterChangeEnd={this.onShutterChangeEnd}
                                         onModeChange={this.onModeChange}
+                                    />
+                                </Card.Body>
+                            </Accordion.Collapse>
+                        </Card>
+                        <Card>
+                            <Accordion.Toggle as={Card.Header} eventKey={4}>
+                                Timelapse Mode
+                            </Accordion.Toggle>
+                            <Accordion.Collapse eventKey={4}>
+                                <Card.Body>
+                                    <TimelapseSetting
+                                        isActive={this.props.isTimelapseActive}
+                                        onChange={this.onIntervalChange}
+                                        onChangeEnd={this.onIntervalChangeEnd}
+                                        onActiveChange={this.onTimelapseActiveChange}
+                                        intervalPos={this.intervalValueToPos(this.state.settings.timelapse.interval)}
+                                        interval={this.state.settings.timelapse.interval}
                                     />
                                 </Card.Body>
                             </Accordion.Collapse>

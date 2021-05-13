@@ -147,11 +147,11 @@ button.startsession:disabled {
     border-radius: 0;
 }
 
-.settings #shutter-speed {
+.settings #shutter-speed, .settings #interval {
     width: 100%;
 }
 
-.settings label.shutter-speed-label {
+.settings label.shutter-speed-label, .settings label.interval-label {
     margin-top: 5px;
 }
 

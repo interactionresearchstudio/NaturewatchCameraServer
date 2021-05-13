@@ -8,6 +8,7 @@
     "camera_warmup": 2.5,
     "stream_delay": 0.2,
     "rotate_camera": 0,
+    "default_timelapse": 30,
     "delta_threshold": 5,
     "min_width": 100,
     "min_height": 100,
