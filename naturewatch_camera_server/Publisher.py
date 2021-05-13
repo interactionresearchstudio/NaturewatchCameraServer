@@ -21,12 +21,20 @@ class Publisher():
         # Increase it at your own risk.
         self.ffmpegSemaphore = threading.Semaphore(1)
 
-        self.updater = Updater(self.config["telegram_api_key"])
-        # dp = updater.dispatcher
-        self.logger.info("Starting Telegram publisher")
-        # dp.add_handler(CommandHandler('bop',bop))
-        self.updater.start_polling()
-        self.logger.info("Telegram publisher started")
+        self.is_active = False
+        try:
+            api_key = self.config["telegram_api_key"]
+            self.chat_id = self.config['telegram_chat_id']
+
+            self.updater = Updater(api_key)
+
+            self.logger.info("Starting Telegram publisher")
+            self.updater.start_polling()
+            
+            self.is_active = True
+            self.logger.info("Telegram publisher started")
+        except KeyError:
+            self.logger.info("Telegram API key or chat ID not found, won't publish")
 
     def doPublish(self, video_file_name, thumb_file_name):
         with self.ffmpegSemaphore:
@@ -47,7 +55,7 @@ class Publisher():
                     with open(thumb_file_name, 'rb') as thumbnail_file:
                         self.logger.info("sending video file")
                         self.updater.bot.send_video(
-                            chat_id=self.config['telegram_chat_id'],
+                            chat_id=self.chat_id,
                             video=video_file,
                             thumb=thumbnail_file,
                             width=960,
@@ -62,6 +70,9 @@ class Publisher():
         pass
 
     def publish_video(self, video_file_name, thumb_file_name):
+        if not self.is_active:
+            return
+
         thread = threading.Thread(target=self.doPublish, args=(video_file_name, thumb_file_name))
         self.logger.info("Will publish using thread " + str(thread))
         thread.start()
