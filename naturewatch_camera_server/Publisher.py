@@ -4,6 +4,8 @@ import logging
 import threading
 import os
 import os.path
+import pathlib
+import datetime
 
 class Publisher():
 
@@ -65,6 +67,14 @@ class Publisher():
             finally:
                 if os.path.isfile(shrunk_file_name):      
                     os.remove(shrunk_file_name)
+
+            video_path = pathlib.Path(video_file_name)
+            creation_time = datetime.datetime.fromtimestamp(video_path.stat().st_ctime)
+            time = creation_time.ctime()
+            self.updater.bot.send_message(
+                chat_id=self.chat_id,
+                text=f"New video taken at {time} ⬆️"
+            )
 
     def publish_image(self, file_name):
         pass
