@@ -1,6 +1,8 @@
 #!../venv/bin/python
 import json
 import logging
+from naturewatch_camera_server.Publisher import DummyPublisher
+from naturewatch_camera_server.TelegramBot import TelegramBot
 import os
 import sys
 from shutil import copyfile
@@ -79,7 +81,16 @@ def create_app():
     # Instantiate classes
     flask_app.logger.debug("Instantiating classes ...")
     flask_app.camera_controller = CameraController(flask_app.logger, flask_app.user_config)
-    flask_app.publisher = TelegramPublisher(flask_app.user_config, flask_app.logger)
+    try:
+        flask_app.telegram_bot = TelegramBot(flask_app.logger, flask_app.user_config)
+        flask_app.publisher = TelegramPublisher(flask_app.telegram_bot, flask_app.user_config, flask_app.logger)
+    except KeyError:
+        flask_app.logger.info("Telegram API key or chat ID not found, won't publish")
+        flask_app.publisher = DummyPublisher()
+    except:
+        flask_app.logger.exception("Unable to start Telegram publisher")
+        flask_app.publisher = DummyPublisher()
+
     flask_app.change_detector = ChangeDetector(
         flask_app.camera_controller, 
         flask_app.publisher,
