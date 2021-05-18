@@ -11,7 +11,7 @@ from naturewatch_camera_server.Publisher import Publisher
 
 class ChangeDetector(Thread):
 
-    def __init__(self, camera_controller, config, logger):
+    def __init__(self, camera_controller, publisher, config, logger):
         super(ChangeDetector, self).__init__()
         self.config = config
         self.daemon = True
@@ -22,7 +22,7 @@ class ChangeDetector(Thread):
         self.logger = logger
 
         self.file_saver = FileSaver(self.config, logger=self.logger)
-        self.publisher = Publisher(self.config, logger=self.logger)
+        self.publisher = publisher
 
         self.minWidth = self.config["min_width"]
         self.maxWidth = self.config["max_width"]
