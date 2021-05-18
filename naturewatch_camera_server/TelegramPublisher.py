@@ -2,7 +2,6 @@ from naturewatch_camera_server.Publisher import Publisher
 from telegram.ext import Updater, CommandHandler
 from telegram import ParseMode
 from subprocess import check_call
-import logging
 import threading
 import os
 import os.path
@@ -11,14 +10,10 @@ import datetime
 
 class TelegramPublisher(Publisher):
 
-    def __init__(self, config, logger=None):
+    def __init__(self, config, logger):
         super().__init__()
         self.config = config
-
-        if logger is not None:
-            self.logger = logger
-        else:
-            self.logger = logging
+        self.logger = logger
 
         # The semaphore number sets how many publishing tasks to do at the same time.
         # Since FFmpeg is multi-threaded, there's no benefit in running more than one at the same time.
