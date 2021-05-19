@@ -1,5 +1,6 @@
 from telegram.ext import Updater, CommandHandler
 from telegram import ParseMode
+import socket
 
 class TelegramBot():
     def __init__(self, logger, config):
@@ -15,6 +16,9 @@ class TelegramBot():
         self.updater.start_polling()
         
         self.logger.info("Telegram publisher started")
+        
+        url = "http://%s" % (getLocalAddress())
+        self.send_message(f"I'm ready\\. Go to [my webpage]({url}) to start capture\\.")
 
     def send_video(self, video_file, thumbnail_file, width, height):
         self.updater.bot.send_video(
@@ -31,3 +35,8 @@ class TelegramBot():
             text=text,
             parse_mode=ParseMode.MARKDOWN_V2
         )
+
+def getLocalAddress():
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+        s.connect(("8.8.8.8", 80))
+        return s.getsockname()[0]
