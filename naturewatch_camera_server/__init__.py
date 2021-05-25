@@ -83,3 +83,16 @@ def create_app():
 
     flask_app.logger.debug("Initialisation finished")
     return flask_app
+
+def create_error_app(e):
+    """
+    Create flask app about an error occurred in the main app
+    :return: Flask app object
+    """
+    flask_app = Flask(__name__, static_folder="static/client/build")
+
+    @flask_app.route('/')
+    def index():
+        return f"<html><body><h1>Unable to start NaturewatchCameraServer.</h1>An error occurred:<pre>{e}</pre></body></html>"
+
+    return flask_app
