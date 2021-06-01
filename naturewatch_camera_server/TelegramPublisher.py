@@ -26,30 +26,8 @@ class TelegramPublisher(Publisher):
             # The original video is 17-18MB big, too heavy to be easily shared.
             self.logger.info("Shrinking video for publishing: " + video_file_name)
                         
-            if (canDoSoftwareEncoding()):
-                (width, height) = (960, 540)
-                encoder_options = [
-                    "-crf", "25"
-                ]
-            else:
-                (width, height) = (384, 216)
-                encoder_options = [
-                    "-c:v", "h264_omx",
-                    "-profile:v", "main",
-                    "-b:v", "450000"
-                ]
-
-            ffmpeg_cmdline = ["ffmpeg", "-hide_banner", "-nostats"]
-            if (canUseHardwareDecoding()):
-                ffmpeg_cmdline.extend(["-c:v", "h264_mmal"])
-            ffmpeg_cmdline.extend([
-                "-i", video_file_name,
-                "-vf", f"scale={width}:{height}"
-            ])
-            ffmpeg_cmdline.extend(encoder_options)
-
             shrunk_file_name = video_file_name.replace(".mp4", "_shrunk.mp4")
-            ffmpeg_cmdline.append(shrunk_file_name)
+            (ffmpeg_cmdline, width, height) = getFFmpegCommandLine(video_file_name, shrunk_file_name)
             
             self.logger.info("ffmpeg cmdline: " + " ".join(ffmpeg_cmdline))
 
@@ -80,6 +58,36 @@ class TelegramPublisher(Publisher):
         thread = threading.Thread(target=self.doPublish, args=(video_file_name, thumb_file_name))
         self.logger.info("Will publish using thread " + str(thread))
         thread.start()
+
+def getFFmpegCommandLine(input_video, output_video):
+    if (canDoSoftwareEncoding()):
+        (width, height) = (960, 540)
+        encoder_options = [
+            "-crf", "25"
+        ]
+    else:
+        (width, height) = (384, 216)
+        encoder_options = [
+            "-c:v", "h264_omx",
+            "-profile:v", "main",
+            "-b:v", "450000"
+        ]
+
+    args = ["ffmpeg", "-hide_banner", "-nostats"]
+
+    if (canUseHardwareDecoding()):
+        args.extend(["-c:v", "h264_mmal"])
+    
+    args.extend([
+        "-i", input_video,
+        "-vf", f"scale={width}:{height}"
+    ])
+    
+    args.extend(encoder_options)
+
+    args.append(output_video)
+
+    return (args, width, height)
 
 def canUseHardwareDecoding():
     vcgencmd_result = subprocess.run(['/opt/vc/bin/vcgencmd', 'get_mem', 'gpu'], stdout=subprocess.PIPE)
