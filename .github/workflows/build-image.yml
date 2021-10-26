@@ -40,7 +40,7 @@ jobs:
       run: cp -r repository /tmp/NaturewatchCameraServer && rm -rf /tmp/NaturewatchCameraServer/os && rm -rf /tmp/NaturewatchCameraServer/naturewatch_camera_server/static/client/node_modules && mv /tmp/NaturewatchCameraServer repository/os/modules/naturewatchcamera/filesystem/home/pi/NaturewatchCameraServer && ls repository/os/modules/naturewatchcamera/filesystem/home/pi/NaturewatchCameraServer
 
     - name: Build Image
-      run: export BASE_IMAGE_ENLARGEROOT=1200 && export AUTO_HOTSPOT_NAME=MyNaturewatch && export AUTO_HOTSPOT_PASSWORD=badgersandfoxes && sudo modprobe loop && cd repository/os && sudo bash -x ./build_dist
+      run: export BASE_IMAGE_ENLARGEROOT=2500 && export AUTO_HOTSPOT_NAME=MyNaturewatch && export AUTO_HOTSPOT_PASSWORD=badgersandfoxes && sudo modprobe loop && cd repository/os && sudo bash -x ./build_dist
 
     - name: Copy Output
       run: cp ${{ github.workspace }}/repository/os/workspace/*-raspbian-buster-lite.img mynaturewatch-camera.img

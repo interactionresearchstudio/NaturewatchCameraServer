@@ -40,6 +40,7 @@ echo "$NATUREWATCHCAMERA_VAR"
  apt-get install -y libopenexr-dev
  apt-get install -y libgstreamer1.0-dev
  apt install -y gpac
+ apt install -y ffmpeg
  pip2 install -U pip
  pip3 install -U pip
  pip2 install numpy
