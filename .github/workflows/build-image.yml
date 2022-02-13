@@ -63,7 +63,7 @@ jobs:
         sudo bash -x ./build_dist
 
     - name: Copy Output
-      run: cp ${{ github.workspace }}/repository/os/workspace/*-raspbian-buster-lite.img mynaturewatch-camera.img
+      run: cp ${{ github.workspace }}/repository/os/workspace/*lite.img mynaturewatch-camera.img
 
     - name: Zip Output
       run: gzip mynaturewatch-camera.img
