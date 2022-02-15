@@ -40,7 +40,8 @@ echo "$NATUREWATCHCAMERA_VAR"
  apt-get install -y gpac
 
 echo "Enabling legacy camera support for Pi Zero W 2"
-raspi-config nonint do_legacy 1
+raspi-config nonint do_camera 1
+echo "start_x=1" >> /boot/config.txt
 
 echo "Installing OpenCV"
 pip3 install -U pip numpy opencv-python-headless
