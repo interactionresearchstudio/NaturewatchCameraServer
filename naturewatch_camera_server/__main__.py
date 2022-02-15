@@ -13,7 +13,7 @@ class CameraNotFoundException(Exception):
 
 def is_camera_enabled():
     # inspired by https://stackoverflow.com/questions/58250817/raspberry-pi-camera-module-check-if-connected#comment102874971_58250817
-    vcgencmd_result = subprocess.run(['/opt/vc/bin/vcgencmd', 'get_camera'], stdout=subprocess.PIPE)
+    vcgencmd_result = subprocess.run(['vcgencmd', 'get_camera'], stdout=subprocess.PIPE)
     result_text = vcgencmd_result.stdout.decode('utf-8').strip()
     properties = dict(pair.split('=') for pair in result_text.split(' '))
     return properties['supported'] == '1'

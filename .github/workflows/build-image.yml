@@ -1,13 +1,15 @@
 name: Build Image
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
 
     - name: Install Dependencies
-      run: sudo apt-get update && sudo apt install coreutils p7zip-full qemu-user-static
+      run: |
+        sudo apt-get update
+        sudo apt-get install coreutils p7zip-full qemu-user-static
 
     - name: Checkout CustomPiOS
       uses: actions/checkout@v2
@@ -28,22 +30,40 @@ jobs:
         node-version: 12.x
 
     - name: Build React frontend
-      run: pushd repository/naturewatch_camera_server/static/client && npm i -y && npm run build && popd
+      run: |
+        pushd repository/naturewatch_camera_server/static/client
+        npm i -y
+        npm run build
+        popd
 
     - name: Download Raspbian Image
-      run: cd repository/os/image && wget -q -c --trust-server-names 'https://downloads.raspberrypi.org/raspbian_lite_latest'
+      run: |
+        cd repository/os/image
+        wget -q -c --trust-server-names 'https://downloads.raspberrypi.org/raspios_lite_armhf_latest'
 
     - name: Update CustomPiOS Paths
-      run: cd repository/os && ../../CustomPiOS/src/update-custompios-paths
+      run: |
+        cd repository/os
+        ../../CustomPiOS/src/update-custompios-paths
 
     - name: Copy NaturewatchCameraServer to CustomPiOS directory
-      run: cp -r repository /tmp/NaturewatchCameraServer && rm -rf /tmp/NaturewatchCameraServer/os && rm -rf /tmp/NaturewatchCameraServer/naturewatch_camera_server/static/client/node_modules && mv /tmp/NaturewatchCameraServer repository/os/modules/naturewatchcamera/filesystem/home/pi/NaturewatchCameraServer && ls repository/os/modules/naturewatchcamera/filesystem/home/pi/NaturewatchCameraServer
+      run: |
+        cp -r repository /tmp/NaturewatchCameraServer
+        rm -rf /tmp/NaturewatchCameraServer/os
+        rm -rf /tmp/NaturewatchCameraServer/naturewatch_camera_server/static/client/node_modules
+        mv /tmp/NaturewatchCameraServer repository/os/modules/naturewatchcamera/filesystem/home/pi/NaturewatchCameraServer
+        ls repository/os/modules/naturewatchcamera/filesystem/home/pi/NaturewatchCameraServer
 
     - name: Build Image
-      run: export BASE_IMAGE_ENLARGEROOT=2000 && export AUTO_HOTSPOT_NAME=MyNaturewatch && export AUTO_HOTSPOT_PASSWORD=badgersandfoxes && sudo modprobe loop && cd repository/os && sudo bash -x ./build_dist
+      run: |
+        export BASE_IMAGE_ENLARGEROOT=2000
+        export AUTO_HOTSPOT_NAME=MyNaturewatch
+        export AUTO_HOTSPOT_PASSWORD=badgersandfoxes
+        sudo modprobe loop && cd repository/os
+        sudo bash -x ./build_dist
 
     - name: Copy Output
-      run: cp ${{ github.workspace }}/repository/os/workspace/*-raspbian-buster-lite.img mynaturewatch-camera.img
+      run: cp ${{ github.workspace }}/repository/os/workspace/*lite.img mynaturewatch-camera.img
 
     - name: Zip Output
       run: gzip mynaturewatch-camera.img
