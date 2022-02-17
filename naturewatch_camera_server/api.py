@@ -228,7 +228,8 @@ def get_version(argument: str = 'date', destination: str = ''):
         return git('remote', 'get-url', 'origin')
     elif argument == 'commit_url':
         url = git('remote', 'get-url', 'origin')
-        url = url[:-4]
+        if url.endswith('.git'):
+            url = url[:url.rfind('.git')]
         commit_hash = git('rev-parse', 'HEAD')
         return f'{url}/commit/{commit_hash}'
     else:  # argument == 'date'
@@ -247,13 +248,21 @@ def git(*parameters: str):
 @api.route('/reboot')
 def reboot():
     # TODO: redirect to / after 1 or 2 minutes.
-    return maintenance('reboot')
+    try:
+        return "Rebooting (refresh the page in 1 or 2 minutes)."
+    finally:
+        from time import sleep
+        sleep(3)
+        maintenance('reboot')
 
 
 @api.route('/shutdown')
 def shutdown():
     # TODO: announce shutdown
-    return maintenance('shutdown', 'now')
+    try:
+        return "Shutdown ..."
+    finally:
+        maintenance('shutdown', 'now')
 
 
 def maintenance(*parameters: str):
