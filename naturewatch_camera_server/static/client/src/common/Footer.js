@@ -11,7 +11,7 @@ import {
 
 const Footer = () => {
     return (
-        <Box>
+        <Box onload='load_version_info()'>
             <h1 style={{
                 // color: "green",
                 textAlign: "center",

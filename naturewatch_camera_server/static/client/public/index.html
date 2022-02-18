@@ -41,8 +41,10 @@
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
   <script>
-    document.getElementById("version_date").innerHTML = '{{ version_date }}';
-    document.getElementById("version_hash").innerHTML = '{{ version_hash }}';
+    function load_version_info() {
+      document.getElementById("version_date").innerHTML = '{{ version_date }}';
+      document.getElementById("version_hash").innerHTML = '{{ version_hash }}';
+    }
   </script>
 </body>
 
