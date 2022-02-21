@@ -18,6 +18,7 @@ Please also list any relevant details for your test configuration.
 
 **Tested on the following devices**:
 - [ ] Development environment (Linux, Windows, or MacOS)
+- [ ] Pi Zero 2 W
 - [ ] Pi Zero W
 - [ ] Pi 3A+
 - [ ] Pi 3B+
