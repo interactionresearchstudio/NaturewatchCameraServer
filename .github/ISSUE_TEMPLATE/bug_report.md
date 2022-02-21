@@ -35,7 +35,7 @@ If applicable, add screenshots to help explain your problem.
  - Version [e.g. 22]
 
 **Hardware**
-- Device: [e.g. Pi Zero W]
+- Device: [e.g. Pi Zero 2 W]
 - Camera: [e.g. ZeroCam v1.0]
 - Naturewatch Camera software version: [e.g. v1.4.1]
 - Power supply used: [e.g. Official Pi Adapter]
