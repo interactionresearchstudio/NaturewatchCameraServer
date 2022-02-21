@@ -1,11 +1,8 @@
-#TODO: create "getSpace" api call when filesaver is global 
+# TODO: create "getSpace" api call when filesaver is global
 
 
-from flask import Blueprint, Response, request, json
-from flask import current_app
+from flask import Blueprint, Response, request, json, current_app, redirect
 import time
-import json
-import os
 import subprocess
 
 api = Blueprint('api', __name__)
@@ -33,7 +30,8 @@ def generate_mjpg(camera_controller):
         time.sleep(1)
     while camera_controller.is_alive():
         latest_frame = camera_controller.get_image_binary()
-        response = b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + bytearray(latest_frame) + b'\r\n'
+        response = b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + \
+            bytearray(latest_frame) + b'\r\n'
         yield(response)
         time.sleep(0.2)
 
@@ -55,7 +53,8 @@ def generate_jpg(camera_controller):
         time.sleep(1)
     try:
         latest_frame = camera_controller.get_image_binary()
-        response = b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + bytearray(latest_frame) + b'\r\n'
+        response = b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + \
+            bytearray(latest_frame) + b'\r\n'
         return response
     except Exception as e:
         # TODO send a error.jpg image as the frame instead.
@@ -72,42 +71,53 @@ def settings_handler():
     :return: settings json object
     """
     if request.method == 'GET':
-        settings = construct_settings_object(current_app.camera_controller, current_app.change_detector)
+        settings = construct_settings_object(
+            current_app.camera_controller, current_app.change_detector)
         return Response(json.dumps(settings), mimetype='application/json')
     elif request.method == 'POST':
         settings = request.json
         if "rotation" in settings:
-            current_app.camera_controller.set_camera_rotation(settings["rotation"])
+            current_app.camera_controller.set_camera_rotation(
+                settings["rotation"])
         if "sensitivity" in settings:
             if settings["sensitivity"] == "less":
-                current_app.change_detector.set_sensitivity(current_app.user_config["less_sensitivity"],
-                                                            current_app.user_config["max_width"])
+                current_app.change_detector.set_sensitivity(
+                    current_app.user_config["less_sensitivity"],
+                    current_app.user_config["max_width"])
             elif settings["sensitivity"] == "default":
-                current_app.change_detector.set_sensitivity(current_app.user_config["min_width"],
-                                                            current_app.user_config["max_width"])
+                current_app.change_detector.set_sensitivity(
+                    current_app.user_config["min_width"],
+                    current_app.user_config["max_width"])
             elif settings["sensitivity"] == "more":
-                current_app.change_detector.set_sensitivity(current_app.user_config["more_sensitivity"],
-                                                            current_app.user_config["max_width"])
+                current_app.change_detector.set_sensitivity(
+                    current_app.user_config["more_sensitivity"],
+                    current_app.user_config["max_width"])
         if "mode" in settings["exposure"]:
             if settings["exposure"]["mode"] == "auto":
                 current_app.camera_controller.auto_exposure()
             elif settings["exposure"]["mode"] == "off":
                 if settings["exposure"]["shutter_speed"] == 0:
                     settings["exposure"]["shutter_speed"] = 5000
-                current_app.camera_controller.set_exposure(settings["exposure"]["shutter_speed"],
-                                                           settings["exposure"]["iso"])
+                current_app.camera_controller.set_exposure(
+                    settings["exposure"]["shutter_speed"],
+                    settings["exposure"]["iso"])
         if "timelapse" in settings:
-            current_app.logger.info("Changing timelapse settings to " + str(settings["timelapse"]))
-            current_app.change_detector.timelapse_active = settings["timelapse"]["active"]
-            current_app.change_detector.timelapse = settings["timelapse"]["interval"]
-        
-        new_settings = construct_settings_object(current_app.camera_controller, current_app.change_detector)
+            current_app.logger.info(
+                "Changing timelapse settings to " + str(settings["timelapse"]))
+            current_app.change_detector.timelapse_active = settings[
+                "timelapse"]["active"]
+            current_app.change_detector.timelapse = settings[
+                "timelapse"]["interval"]
+
+        new_settings = construct_settings_object(
+            current_app.camera_controller, current_app.change_detector)
         return Response(json.dumps(new_settings), mimetype='application/json')
 
 
 def construct_settings_object(camera_controller, change_detector):
     """
-    Construct a dictionary populated with the current settings of the camera controller and change detector.
+    Construct a dictionary populated with the current settings
+    of the camera controller and change detector.
     :param camera_controller: Running camera controller object
     :param change_detector: Running change detector object
     :return: settings dictionary
@@ -118,7 +128,8 @@ def construct_settings_object(camera_controller, change_detector):
         sensitivity = "less"
     elif change_detector.minWidth == current_app.user_config["min_width"]:
         sensitivity = "default"
-    elif change_detector.minWidth == current_app.user_config["more_sensitivity"]:
+    elif change_detector.minWidth == current_app.user_config[
+            "more_sensitivity"]:
         sensitivity = "more"
 
     settings = {
@@ -190,8 +201,74 @@ def update_time(time_string):
         if float(time_string) > 1580317004:
             current_app.change_detector.device_time = float(time_string)
             current_app.change_detector.device_time_start = time.time()
-            return Response('{"SUCCESS": "' + time_string + '"}', status=200, mimetype='application/json')
+            return Response(
+                '{"SUCCESS": "' + time_string + '"}',
+                status=200, mimetype='application/json')
         else:
-            return Response('{"ERROR": "' + time_string + '"}', status=400, mimetype='application/json')
+            return Response(
+                '{"ERROR": "' + time_string + '"}',
+                status=400, mimetype='application/json')
     else:
-        return Response('{"NOT_MODIFIED": "' + time_string + '"}', status=304, mimetype='application/json')
+        return Response(
+            '{"NOT_MODIFIED": "' + time_string + '"}',
+            status=304, mimetype='application/json')
+
+
+@api.route('/version')
+@api.route('/version/<argument>')
+@api.route('/version/redirect_to/<destination>')
+def get_version(argument: str = 'date', destination: str = ''):
+    if destination != '' and 'url' in destination:
+        return redirect(get_version(destination))
+    if argument == 'hash':
+        return git('rev-parse', 'HEAD')
+    if argument == 'short_hash':
+        return git('rev-parse', '--short', 'HEAD')
+    elif argument == 'url':
+        return git('remote', 'get-url', 'origin')
+    elif argument == 'commit_url':
+        url = git('remote', 'get-url', 'origin')
+        if url.endswith('.git'):
+            url = url[:url.rfind('.git')]
+        commit_hash = git('rev-parse', 'HEAD')
+        return f'{url}/commit/{commit_hash}'
+    else:  # argument == 'date'
+        commit_hash = git('rev-parse', 'HEAD')
+        return git('show', '-s', r'--format=%ci', commit_hash)
+
+
+def git(*parameters: str):
+    command = ['git']
+    command.extend(parameters)
+
+    git_result = subprocess.run(command, stdout=subprocess.PIPE)
+    return git_result.stdout.decode('utf-8').replace('\n', '')
+
+
+@api.route('/reboot')
+def reboot():
+    # TODO: redirect to / after 1 or 2 minutes.
+    try:
+        return "Rebooting (refresh the page in 1 or 2 minutes)."
+    finally:
+        from time import sleep
+        sleep(3)
+        maintenance('reboot')
+
+
+@api.route('/shutdown')
+def shutdown():
+    # TODO: announce shutdown
+    try:
+        return "Shutdown ..."
+    finally:
+        maintenance('shutdown', 'now')
+
+
+def maintenance(*parameters: str):
+    # The service is already started has root...
+    command = ['sudo']
+    command.extend(parameters)
+
+    git_result = subprocess.run(command, stdout=subprocess.PIPE)
+    return git_result.stdout.decode('utf-8').replace('\n', '')
