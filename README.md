@@ -1,6 +1,7 @@
 ![Build Image](https://github.com/interactionresearchstudio/NaturewatchCameraServer/workflows/Build%20Image/badge.svg)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/interactionresearchstudio/NaturewatchCameraServer)
 ![GitHub all releases](https://img.shields.io/github/downloads/interactionresearchstudio/NaturewatchCameraServer/total)
+
 # NaturewatchCameraServer
 
 This is the main software for the My Naturewatch Camera. It is a Python server 
