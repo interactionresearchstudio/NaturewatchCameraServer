@@ -43,6 +43,8 @@ echo "Enabling legacy camera support for Pi Zero W 2"
 raspi-config nonint do_legacy 0
 
 echo "Installing OpenCV"
+pip3 install --upgrade pip3
+pip3 install --upgrade pip3 setuptools wheel
 pip3 install -U pip numpy opencv-python-headless
 
 pushd /home/pi
