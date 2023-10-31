@@ -118,7 +118,7 @@ class FileSaver(Thread):
             filenameMp4 = filenameMp4 + ".mp4"
             self.logger.info('FileSaver: done writing video ' + filename)
             input_video = os.path.join(self.config["videos_path"], filename)
-            stream.copy_to(input_video, seconds=15)
+            stream.copy_to(input_video, seconds = self.config["video_duration_before_motion"] + self.config["video_duration_after_motion"])
             output_video = os.path.join(self.config["videos_path"], filenameMp4)
             call(["MP4Box", "-fps", str(self.config["frame_rate"]), "-add", input_video, output_video])
             os.remove(input_video)
