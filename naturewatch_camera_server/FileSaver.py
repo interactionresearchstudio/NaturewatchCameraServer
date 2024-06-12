@@ -8,11 +8,10 @@ from subprocess import call
 import zipfile
 
 try:
-    import picamera
-    import picamera.array
+    from picamera2 import Picamera2
     picamera_exists = True
 except ImportError:
-    picamera = None
+    Picamera2 = None
     picamera_exists = False
 
 
@@ -103,12 +102,11 @@ class FileSaver(Thread):
             self.logger.exception(e)
             pass
 
-    def save_video(self, stream, timestamp):
+    def create_video_filename(self, timestamp):
         """
-        Save raw video stream to disk
-        :param stream: raw picamera stream object
+        Generate filename and path for video
         :param timestamp: formatted timestamp string
-        :return: none
+        :return: filename
         """
         if self.checkStorage() < 99:
             self.logger.info('FileSaver: Writing video...')
@@ -116,17 +114,24 @@ class FileSaver(Thread):
             filenameMp4 = filename
             filename = filename + ".h264"
             filenameMp4 = filenameMp4 + ".mp4"
-            self.logger.info('FileSaver: done writing video ' + filename)
-            input_video = os.path.join(self.config["videos_path"], filename)
-            stream.copy_to(input_video, seconds=15)
-            output_video = os.path.join(self.config["videos_path"], filenameMp4)
-            call(["MP4Box", "-fps", str(self.config["frame_rate"]), "-add", input_video, output_video])
-            os.remove(input_video)
-            self.logger.debug('FileSaver: removed interim file ' + filename)
-            return filenameMp4
+            fullpath = os.path.join(self.config["videos_path"], filename)
+            return filename, fullpath, filenameMp4
         else:
             self.logger.error('FileSaver: not enough space to save video')
             return None
+
+    def H264_to_MP4(self, input_video, output_video):
+        """
+        Wrap H264 video file in an MP4 container
+        :param input_video: H264 file to wrap
+        :param output_video: MP4 file to output
+        """
+        self.logger.info('FileSaver: converting H264 video to MP4...')
+        output_video = os.path.join(self.config["videos_path"], output_video) 
+        call(["ffmpeg", "-r", str(self.config["frame_rate"]), "-i", input_video, "-vcodec", "copy", output_video])
+        os.remove(input_video)
+        self.logger.debug('FileSaver: removed interim file ' + input_video)           
+
 
     @staticmethod
     def download_all_video():

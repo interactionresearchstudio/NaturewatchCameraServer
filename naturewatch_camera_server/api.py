@@ -69,6 +69,7 @@ def generate_jpg(camera_controller):
 def settings_handler():
     """
     Settings endpoint
+    This section runs only when changes are made to the settings through the web interface
     :return: settings json object
     """
     if request.method == 'GET':
@@ -88,6 +89,23 @@ def settings_handler():
             elif settings["sensitivity"] == "more":
                 current_app.change_detector.set_sensitivity(current_app.user_config["more_sensitivity"],
                                                             current_app.user_config["max_width"])
+
+        if "resolution" in settings:
+            current_app.camera_controller.set_resolution(settings["resolution"])
+
+        if "LED" in settings:
+            current_app.camera_controller.set_LED(settings["LED"])
+
+        if "timestamp" in settings:
+            current_app.camera_controller.set_TimestampMode(settings["timestamp"])
+
+        if "sharpness" in settings:
+            current_app.camera_controller.set_sharpness(settings["sharpness"]["sharpness_val"],
+                                                        settings["sharpness"]["sharpness_mode"])
+
+        if "Shutdown" in settings:
+            current_app.camera_controller.set_Shutdown(settings["Shutdown"])
+
         if "mode" in settings["exposure"]:
             if settings["exposure"]["mode"] == "auto":
                 current_app.camera_controller.auto_exposure()
@@ -95,7 +113,7 @@ def settings_handler():
                 if settings["exposure"]["shutter_speed"] == 0:
                     settings["exposure"]["shutter_speed"] = 5000
                 current_app.camera_controller.set_exposure(settings["exposure"]["shutter_speed"],
-                                                           settings["exposure"]["iso"])
+                                                           settings["exposure"]["analogue_gain"])
         if "timelapse" in settings:
             current_app.logger.info("Changing timelapse settings to " + str(settings["timelapse"]))
             current_app.change_detector.timelapse_active = settings["timelapse"]["active"]
@@ -108,12 +126,14 @@ def settings_handler():
 def construct_settings_object(camera_controller, change_detector):
     """
     Construct a dictionary populated with the current settings of the camera controller and change detector.
+    This section runs when the web page is opened, but also after changes are made to the settings.
     :param camera_controller: Running camera controller object
     :param change_detector: Running change detector object
     :return: settings dictionary
     """
 
     sensitivity = "default"
+
     if change_detector.minWidth == current_app.user_config["less_sensitivity"]:
         sensitivity = "less"
     elif change_detector.minWidth == current_app.user_config["min_width"]:
@@ -121,14 +141,30 @@ def construct_settings_object(camera_controller, change_detector):
     elif change_detector.minWidth == current_app.user_config["more_sensitivity"]:
         sensitivity = "more"
 
+    resolution = current_app.user_config["resolution"]
+    LED = current_app.user_config["LED"]
+    timestamp = current_app.user_config["timestamp"]
+
+    # Get CPU temperature
+    temp = os.popen("vcgencmd measure_temp").readline()
+    CPUTemp = (temp.replace("temp=","").replace("'C",""))
+
     settings = {
         "rotation": camera_controller.rotated_camera,
         "exposure": {
             "mode": camera_controller.get_exposure_mode(),
-            "iso": camera_controller.get_iso(),
-            "shutter_speed": camera_controller.get_shutter_speed(),
+            "analogue_gain": camera_controller.get_MetaData("AnalogueGain"),
+            "shutter_speed": camera_controller.get_MetaData("ExposureTime")
         },
         "sensitivity": sensitivity,
+        "resolution": resolution,
+        "LED": LED,
+        "timestamp": timestamp,
+        "sharpness": {
+            "sharpness_val": current_app.user_config["sharpness_val"],
+            "sharpness_mode": current_app.user_config["sharpness_mode"],
+        },
+        "CPUTemp": CPUTemp,
         "timelapse": {
             "active": current_app.change_detector.timelapse_active,
             "interval": current_app.change_detector.timelapse,

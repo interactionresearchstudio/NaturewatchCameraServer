@@ -145,22 +145,24 @@ class ChangeDetector(Thread):
         self.maxHeight = max_width
 
     def start_photo_session(self):
+        self.camera_controller.run_autofocus()
         self.logger.info('ChangeDetector: starting photo capture')
         self.mode = "photo"
         self.session_start_time = self.get_fake_time()
 
     def start_video_session(self):
+        self.camera_controller.run_autofocus()
         self.logger.info('ChangeDetector: starting video capture')
         self.mode = "video"
-        self.camera_controller.start_video_stream()
+        self.output = self.camera_controller.start_video_stream()
         self.session_start_time = self.get_fake_time()
 
     def start_timelapse_session(self):
+        self.camera_controller.run_autofocus()
         self.logger.info('ChangeDetector: starting timelapse capture')
         self.mode = "timelapse"
         self.session_start_time = self.get_fake_time()
-        
-        
+          
     def stop_session(self):
         self.logger.info('ChangeDetector: ending capture')
         if self.mode == "video":
@@ -191,10 +193,12 @@ class ChangeDetector(Thread):
                         self.logger.info("ChangeDetector: photo capture completed")
                     elif self.mode == "video":
                         self.file_saver.save_thumb(img, timestamp, self.mode)
+                        filename, fullpath, filenameMp4 = self.file_saver.create_video_filename(timestamp)
+                        self.camera_controller.start_saving_video(fullpath)
                         self.camera_controller.wait_recording(self.config["video_duration_after_motion"])
-                        self.logger.info("ChangeDetector: video capture completed")
-                        with self.camera_controller.get_video_stream().lock:
-                            self.file_saver.save_video(self.camera_controller.get_video_stream(), timestamp)
+                        self.camera_controller.stop_saving_video()
+                        self.file_saver.H264_to_MP4(fullpath, filenameMp4)
+                        self.logger.info('ChangeDetector: finished capturing video')
                         self.lastPhotoTime = self.get_fake_time()
                         self.logger.debug("ChangeDetector: video timer reset")
                     else:

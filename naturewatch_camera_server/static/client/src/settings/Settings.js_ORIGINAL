@@ -4,11 +4,6 @@ import {Button, Collapse, Accordion, Card} from 'react-bootstrap';
 import SensitivitySetting from './SensitivitySetting';
 import ExposureSetting from './ExposureSetting';
 import TimelapseSetting from './TimelapseSetting';
-import ResolutionSetting from './ResolutionSetting';
-import LEDSetting from './LEDSetting';
-import TimestampSetting from './TimestampSetting';
-import SharpnessSetting from './SharpnessSetting';
-import ShutdownSetting from './ShutdownSetting';
 import PropTypes from "prop-types";
 
 class Settings extends React.Component {
@@ -23,33 +18,22 @@ class Settings extends React.Component {
         this.onTimelapseActiveChange = this.onTimelapseActiveChange.bind(this);
         this.onIntervalChange = this.onIntervalChange.bind(this);
         this.onIntervalChangeEnd = this.onIntervalChangeEnd.bind(this);
-        this.onSharpnessChange = this.onSharpnessChange.bind(this);
-        this.onSharpnessChangeEnd = this.onSharpnessChangeEnd.bind(this);
-        this.onSharpnessModeChange = this.onSharpnessModeChange.bind(this);
-        this.onResolutionChange = this.onResolutionChange.bind(this);
-        this.onLEDChange = this.onLEDChange.bind(this);
-        this.onTimestampChange = this.onTimestampChange.bind(this);
-        this.onShutdownChange = this.onShutdownChange.bind(this);
         
+
         this.state = {
             isOpen: false,
             settings: {
                 rotation: null,
                 exposure: {
                     mode: "",
-                    analogue_gain: "",
+                    iso: "",
                     shutter_speed: ""
                 },
                 sensitivity: "",
-                sharpness: {
-                    sharpness_mode: "",
-                    sharpness_val: 1
-                },
                 timelapse : {
                     active: false,
                     interval: 0
-                },
-                timestamp: ""
+                }
             }
         };
 
@@ -72,7 +56,6 @@ class Settings extends React.Component {
                 this.setState({settings: settings});
                 console.log("INFO: settings received.");
                 console.log(this.state.settings);
-                global.config.CPUTemp=this.state.settings.CPUTemp;
                 this.props.onTimelapseActiveChange(
                     this.state.settings.timelapse.active ? "on" : "off",
                 );
@@ -125,90 +108,6 @@ class Settings extends React.Component {
             settings: currentSettings
         }, () => {
             console.log("INFO: Changed sensitivity.");
-            console.log(this.state.settings);
-            this.postSettings();
-        });
-    }
-
-    onResolutionChange(value) {
-        console.log("INFO: Received resolution value");
-        console.log(value);
-        let currentSettings = this.state.settings;
-
-        console.log("Current settings: ");
-        console.log(currentSettings);
-
-        currentSettings.resolution = value;
-
-        console.log("Changed settings: ");
-        console.log(currentSettings);
-        this.setState({
-            settings: currentSettings
-        }, () => {
-            console.log("INFO: Changed resolution.");
-            console.log(this.state.settings);
-            this.postSettings();
-        });
-    }
-
-    onLEDChange(value) {
-        console.log("INFO: Received LED value");
-        console.log(value);
-        let currentSettings = this.state.settings;
-
-        console.log("Current settings: ");
-        console.log(currentSettings);
-
-        currentSettings.LED = value;
-
-        console.log("Changed settings: ");
-        console.log(currentSettings);
-        this.setState({
-            settings: currentSettings
-        }, () => {
-            console.log("INFO: Changed LED.");
-            console.log(this.state.settings);
-            this.postSettings();
-        });
-    }
-
-    onTimestampChange(value) {
-        console.log("INFO: Received Timestamp value");
-        console.log(value);
-        let currentSettings = this.state.settings;
-
-        console.log("Current settings: ");
-        console.log(currentSettings);
-
-        currentSettings.timestamp = value;
-
-        console.log("Changed settings: ");
-        console.log(currentSettings);
-        this.setState({
-            settings: currentSettings
-        }, () => {
-            console.log("INFO: Changed timestamp value.");
-            console.log(this.state.settings);
-            this.postSettings();
-        });
-    }
-
-    onShutdownChange(value) {
-        console.log("INFO: Received Shutdown value");
-        console.log(value);
-        let currentSettings = this.state.settings;
-
-        console.log("Current settings: ");
-        console.log(currentSettings);
-
-        currentSettings.Shutdown = value;
-
-        console.log("Changed settings: ");
-        console.log(currentSettings);
-        this.setState({
-            settings: currentSettings
-        }, () => {
-            console.log("INFO: Changed Shutdown.");
             console.log(this.state.settings);
             this.postSettings();
         });
@@ -321,36 +220,6 @@ class Settings extends React.Component {
 
         return res;
     }
-
-    onSharpnessChange(val) {
-        let currentSettings = this.state.settings;
-        currentSettings.sharpness.sharpness_val = val;
-        this.setState({
-            settings: currentSettings
-        });
-    }
-
-    onSharpnessChangeEnd(val) {
-        let currentSettings = this.state.settings;
-        currentSettings.sharpness.sharpness_val = val;
-        this.setState({
-            settings: currentSettings
-        }, () => {
-            console.log("INFO: Changed sharpness.");
-            this.postSettings();
-        });
-    }
-
-    onSharpnessModeChange(value) {
-        let currentSettings = this.state.settings;
-        currentSettings.sharpness.sharpness_mode = value;
-        this.setState({
-            settings: currentSettings
-        }, () => {
-            console.log("INFO: Changed sharpness mode.");
-            this.postSettings();
-        });
-    }
     
     render() {
         return (
@@ -423,74 +292,6 @@ class Settings extends React.Component {
                                         onActiveChange={this.onTimelapseActiveChange}
                                         intervalPos={this.intervalValueToPos(this.state.settings.timelapse.interval)}
                                         interval={this.state.settings.timelapse.interval}
-                                    />
-                                </Card.Body>
-                            </Accordion.Collapse>
-                        </Card>
-                        <Card>
-                            <Accordion.Toggle as={Card.Header} eventKey={5}>
-                                Resolution
-                            </Accordion.Toggle>
-                            <Accordion.Collapse eventKey={5}>
-                                <Card.Body>
-                                    <ResolutionSetting
-                                        onValueChange={this.onResolutionChange}
-                                        value={this.state.settings.resolution}
-                                    />
-                                </Card.Body>
-                            </Accordion.Collapse>
-                        </Card>
-                        <Card>
-                            <Accordion.Toggle as={Card.Header} eventKey={6}>
-                                LED
-                            </Accordion.Toggle>
-                            <Accordion.Collapse eventKey={6}>
-                                <Card.Body>
-                                    <LEDSetting
-                                        onValueChange={this.onLEDChange}
-                                        value={this.state.settings.LED}
-                                    />
-                                </Card.Body>
-                            </Accordion.Collapse>
-                        </Card>
-                        <Card>
-                            <Accordion.Toggle as={Card.Header} eventKey={7}>
-                                Timestamp
-                            </Accordion.Toggle>
-                            <Accordion.Collapse eventKey={7}>
-                                <Card.Body>
-                                    <TimestampSetting
-                                        onValueChange={this.onTimestampChange}
-                                        value={this.state.settings.timestamp}
-                                    />
-                                </Card.Body>
-                            </Accordion.Collapse>
-                        </Card>
-                        <Card>
-                            <Accordion.Toggle as={Card.Header} eventKey={8}>
-                                Sharpness
-                            </Accordion.Toggle>
-                            <Accordion.Collapse eventKey={8}>
-                                <Card.Body>
-                                    <SharpnessSetting
-                                        sharpnessMode={this.state.settings.sharpness.sharpness_mode}
-                                        sharpnessVal={this.state.settings.sharpness.sharpness_val}
-                                        onSharpnessChange={this.onSharpnessChange}
-                                        onSharpnessChangeEnd={this.onSharpnessChangeEnd}
-                                        onSharpnessModeChange={this.onSharpnessModeChange}
-                                    />
-                                </Card.Body>
-                            </Accordion.Collapse>
-                        </Card>
-                        <Card>
-                            <Accordion.Toggle as={Card.Header} eventKey={9}>
-                                Shutdown Options
-                            </Accordion.Toggle>
-                            <Accordion.Collapse eventKey={9}>
-                                <Card.Body>
-                                    <ShutdownSetting
-                                        onValueChange={this.onShutdownChange}
-                                        value={this.state.settings.Shutdown}
                                     />
                                 </Card.Body>
                             </Accordion.Collapse>

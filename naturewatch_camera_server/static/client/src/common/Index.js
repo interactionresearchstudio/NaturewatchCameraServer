@@ -64,6 +64,11 @@ class Index extends React.Component {
         }
     }
 
+    getCPUTemp() {
+        let returnvar=global.config.CPUTemp;
+        return returnvar;
+    }
+
     getSessionButtonText(type) {
         // Deal with terminology...
         if (type === "photo") type = "image";
@@ -185,6 +190,7 @@ class Index extends React.Component {
                                 onClick={this.handleFeedRefresh}
                             />
                             {this.captureStatus()}
+                            <p className="feed-status">CPU Temp: {this.getCPUTemp()}C</p>
                         </Col>
                         <Col sm={4}>
                             {!this.state.isSettingsOpen && <Row>
