@@ -91,15 +91,20 @@ class CameraController(threading.Thread):
         self.video_bitrate = 10000000
 
 # Define the font style for the timestamps
-        self.colour = (0, 255, 0)
-        self.origin = (0, 30)
-        self.lores_origin = (0, 10)
-        self.font = cv2.FONT_HERSHEY_SIMPLEX
-        self.lores_font = cv2.FONT_HERSHEY_PLAIN
-        self.scale = 1
-        self.lores_scale = 0.6
-        self.thickness = 2
-        self.lores_thickness = 1
+        self.colour = (0, 255, 0) # text colour
+        self.bgcolour = (0, 0, 0) # background colour
+        self.origin = (0, 28) # bottom left hand corner of text on hires images
+        self.lores_origin = (0, 8) # bottom left hand corner of text on lores stream
+        self.bgend = (390, 35) # bottom right corner of background on hi res images
+        self.lores_bgend = (115, 8) # bottom right corner of background on lores stream
+        self.bgstart = (0, 0) # top left corner of background on hi res images
+        self.lores_bgstart = (0, 0) # top left corner of background on lores stream
+        self.font = cv2.FONT_HERSHEY_SIMPLEX # hires font
+        self.lores_font = cv2.FONT_HERSHEY_PLAIN #lores font
+        self.scale = 1 # hires font size
+        self.lores_scale = 0.6 # lores font size
+        self.thickness = 2 # hires font thickness
+        self.lores_thickness = 1 # lores font thickness
 
         self.camera = None
         self.rotated_camera = False
@@ -133,6 +138,7 @@ class CameraController(threading.Thread):
                         self.image = cv2.cvtColor(self.yuvimage, cv2.COLOR_YUV420p2RGB)
                         if self.timestamp == 1:
                             timestamp = time.strftime("%d/%m/%Y %H:%M:%S")
+                            cv2.rectangle(self.image, self.lores_bgstart, self.lores_bgend, self.bgcolour, -1)
                             cv2.putText(self.image, timestamp, self.lores_origin, self.lores_font, fontScale=self.lores_scale, thickness=self.lores_thickness, color=self.colour)
                         if self.image is None:
                             self.logger.warning("CameraController: got empty image.")
@@ -150,6 +156,7 @@ class CameraController(threading.Thread):
         if self.timestamp == 1:
             timestamp = time.strftime("%d/%m/%Y %H:%M:%S")
             with MappedArray(request, "main") as m:
+                cv2.rectangle(m.array, self.bgstart, self.bgend, self.bgcolour, -1)
                 cv2.putText(m.array, timestamp, self.origin, self.font, self.scale, self.colour, self.thickness)
   
     # Stop thread

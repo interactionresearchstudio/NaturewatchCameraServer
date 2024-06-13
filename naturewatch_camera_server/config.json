@@ -12,7 +12,7 @@
     "img_height": 1080,
     "img_width": 1920,
     "less_sensitivity": 150,
-    "log_level": "DEBUG",
+    "log_level": "INFO",
     "max_height": 200,
     "max_width": 200,
     "md_width": 320,
