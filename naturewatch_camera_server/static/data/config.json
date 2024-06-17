@@ -25,7 +25,7 @@
     "rotate_camera": 0,
     "sharpness_mode": "manual",
     "sharpness_val": 1,
-    "shutter_speed": 25000,
+    "shutter_speed": 10000,
     "stream_delay": 0.2,
     "timestamp": "on",
     "tn_width": 200,
