@@ -90,6 +90,12 @@ def settings_handler():
                 current_app.change_detector.set_sensitivity(current_app.user_config["more_sensitivity"],
                                                             current_app.user_config["max_width"])
 
+        #This section stores the new sensitivity setting in the config.json file
+        new_config = current_app.camera_controller.config
+        new_config["sensitivity"] = settings["sensitivity"]
+        module_path = os.path.abspath(os.path.dirname(__file__))
+        current_app.camera_controller.config = current_app.camera_controller.update_config(new_config, os.path.join(module_path, current_app.camera_controller.config["data_path"], 'config.json'))
+
         if "resolution" in settings:
             current_app.camera_controller.set_resolution(settings["resolution"])
 
@@ -132,15 +138,7 @@ def construct_settings_object(camera_controller, change_detector):
     :return: settings dictionary
     """
 
-    sensitivity = "default"
-
-    if change_detector.minWidth == current_app.user_config["less_sensitivity"]:
-        sensitivity = "less"
-    elif change_detector.minWidth == current_app.user_config["min_width"]:
-        sensitivity = "default"
-    elif change_detector.minWidth == current_app.user_config["more_sensitivity"]:
-        sensitivity = "more"
-
+    sensitivity = current_app.user_config["sensitivity"]
     resolution = current_app.user_config["resolution"]
     LED = current_app.user_config["LED"]
     timestamp = current_app.user_config["timestamp"]

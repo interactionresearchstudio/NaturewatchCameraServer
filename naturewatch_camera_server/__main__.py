@@ -32,4 +32,4 @@ if __name__ == '__main__':
 
         app = create_error_app(e)
 
-    app.run(debug=True, use_reloader=False, use_debugger=True, threaded=True, port=args.port, host='0.0.0.0')
+    app.run(debug=False, threaded=True, port=args.port, host='0.0.0.0')

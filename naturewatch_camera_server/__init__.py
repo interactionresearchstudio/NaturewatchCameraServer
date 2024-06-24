@@ -26,10 +26,10 @@ def create_app():
 
     # Setup logger
     flask_app.logger = logging.getLogger(__name__)
-    flask_app.logger.setLevel(logging.DEBUG)
+    flask_app.logger.setLevel(logging.INFO)
     # setup logging handler for stderr
     stderr_handler = logging.StreamHandler()
-    stderr_handler.setLevel(logging.DEBUG)
+    stderr_handler.setLevel(logging.INFO)
     flask_app.logger.addHandler(stderr_handler)
 
     # Load configuration json

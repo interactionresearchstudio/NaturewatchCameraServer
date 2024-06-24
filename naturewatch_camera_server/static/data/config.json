@@ -23,6 +23,7 @@
     "photos_path": "/home/pi/NaturewatchCameraServer/naturewatch_camera_server/static/data/photos/",
     "resolution": "1920x1080",
     "rotate_camera": 0,
+    "sensitivity": "default",
     "sharpness_mode": "manual",
     "sharpness_val": 1,
     "shutter_speed": 10000,
