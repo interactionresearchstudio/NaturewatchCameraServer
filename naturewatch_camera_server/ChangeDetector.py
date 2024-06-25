@@ -175,7 +175,7 @@ class ChangeDetector(Thread):
 # In case video is requested, the video port will always be used for both resolutions
 # In case photo is requested, the video port can be used, but need not. It should be left a matter of configuration
     def update(self):
-        time.sleep(0.02)
+        time.sleep(0.03)
         # only check for motion while a session is active
         if self.mode in ["photo", "video"]:
             # get an md image

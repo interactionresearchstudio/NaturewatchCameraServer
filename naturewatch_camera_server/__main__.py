@@ -10,10 +10,9 @@ args = parser.parse_args()
 class CameraNotFoundException(Exception):
     pass
 
-def is_camera_enabled():
+def detect_camera():
     camcheck_process = subprocess.Popen(['libcamera-hello', '--list-cameras'], stdout=subprocess.PIPE, text=True)
-    grep_process = subprocess.Popen(["grep", "-c", "0 : imx"], stdin=camcheck_process.stdout, stdout=subprocess.PIPE, text=True) 
-    output, error = grep_process.communicate()
+    output, error = camcheck_process.communicate()
     return output.strip()
 
 if __name__ == '__main__':
@@ -22,13 +21,12 @@ if __name__ == '__main__':
         app.camera_controller.start()
         app.change_detector.start()
     except Exception as e:
-        if isinstance(e) and "Camera is not enabled" in str(e):
-            # This error message appears even if the camera _is_ enabled, but the camera is not found.
-            # e.g. due to a connection problem.
-            # We don't want to mislead users into messing with raspi-config, so check if the
-            # camera interface is really disabled.
-            if (is_camera_enabled()):
+        if "Unable to connect to camera" in str(e):
+            camcheck = detect_camera()
+            if camcheck == "No cameras available!":
                 e = CameraNotFoundException("Unable to access camera. Is the cable properly connected?")
+            else:
+                e = CameraNotFoundException("Unable to access camera. Here is the list of cameras detected:\n\n" + camcheck)
 
         app = create_error_app(e)
 

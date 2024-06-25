@@ -111,7 +111,6 @@ class CameraController(threading.Thread):
         self.af_enabled = False
 
         if picamera_exists:
-            self.logger.info("CameraController: picamera module detected.")
             self.initialise_picamera()
             # We use a pre_callback function to add the timestamp to images and videos recorded. This doesn't apply to the live stream viewed through the web interface
             self.camera.pre_callback = self.apply_timestamp
@@ -245,8 +244,13 @@ class CameraController(threading.Thread):
         if self.camera is not None:
             self.camera.close()
 
-        # Create a new instance
-        self.camera = Picamera2()
+        # Create a new instance of Picamera2 and attempt to connect to the camera
+        try:
+            self.camera = Picamera2()
+        except Exception as e:
+            self.logger.error('CameraController: Unable to connect to camera')
+            raise Exception("Unable to connect to camera")
+
         # Check for module revision
         # TODO: set maximum resolution based on module revision
         self.camera_model = self.camera.camera_properties['Model']
