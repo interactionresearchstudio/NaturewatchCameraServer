@@ -211,14 +211,6 @@ class CameraController(threading.Thread):
         if picamera_exists:
             time.sleep(delay)
 
-    # TODO: Not used?
-    def get_thumb_image(self):
-        self.logger.debug("CameraController: lores image requested.")
-        if picamera_exists:
-            return self.get_image_binary()
-        else:
-            return None
-
     # Get high res image
     def get_hires_image(self):
         self.logger.debug("CameraController: hires image requested.")
@@ -474,6 +466,18 @@ class CameraController(threading.Thread):
                 module_path = os.path.abspath(os.path.dirname(__file__))
                 self.config = self.update_config(new_config,
                                                  os.path.join(module_path, self.config["data_path"], 'config.json'))
+
+
+    # Synchronise time with client
+    def set_Time(self, clienttime):
+        self.logger.info('CameraController: Synchronising time with client')
+        timesync_process = subprocess.Popen(['/bin/date', '-s', clienttime], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        output, error = timesync_process.communicate()
+        if error == "":
+            self.logger.info('CameraController: Time successfully synchronised with client. New time is {}'.format(clienttime))
+        else:
+            self.logger.warning('CameraController: Failed to synchronise time with client.')
+
 
     # Set Timestamp Mode
     def set_TimestampMode(self, timestamp):

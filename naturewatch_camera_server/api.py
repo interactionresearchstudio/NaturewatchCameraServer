@@ -105,6 +105,9 @@ def settings_handler():
         if "timestamp" in settings:
             current_app.camera_controller.set_TimestampMode(settings["timestamp"])
 
+        if "timesync" in settings:
+            current_app.camera_controller.set_Time(settings["timesync"])
+
         if "sharpness" in settings:
             current_app.camera_controller.set_sharpness(settings["sharpness"]["sharpness_val"],
                                                         settings["sharpness"]["sharpness_mode"])

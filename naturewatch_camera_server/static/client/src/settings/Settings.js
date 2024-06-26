@@ -29,6 +29,7 @@ class Settings extends React.Component {
         this.onResolutionChange = this.onResolutionChange.bind(this);
         this.onLEDChange = this.onLEDChange.bind(this);
         this.onTimestampChange = this.onTimestampChange.bind(this);
+        this.onTimeSyncChange = this.onTimeSyncChange.bind(this);
         this.onShutdownChange = this.onShutdownChange.bind(this);
         
         this.state = {
@@ -49,7 +50,8 @@ class Settings extends React.Component {
                     active: false,
                     interval: 0
                 },
-                timestamp: ""
+                timestamp: "",
+                timesync: ""
             }
         };
 
@@ -210,6 +212,18 @@ class Settings extends React.Component {
         }, () => {
             console.log("INFO: Changed Shutdown.");
             console.log(this.state.settings);
+            this.postSettings();
+        });
+    }
+
+    onTimeSyncChange() {
+        let currentSettings = this.state.settings;
+        var clienttime = new Date();
+        currentSettings.timesync = clienttime;
+        this.setState({
+            settings: currentSettings
+        }, () => {
+            console.log("INFO: Time synchronisation requested.");
             this.postSettings();
         });
     }
@@ -484,9 +498,24 @@ class Settings extends React.Component {
                         </Card>
                         <Card>
                             <Accordion.Toggle as={Card.Header} eventKey={9}>
-                                Shutdown Options
+                                Set Time
                             </Accordion.Toggle>
                             <Accordion.Collapse eventKey={9}>
+                                <Card.Body>
+                                    <Button
+                                        variant="primary"
+                                        onClick={this.onTimeSyncChange}
+                                    >
+                                        Synchronise Time
+                                    </Button>
+                                </Card.Body>
+                            </Accordion.Collapse>
+                        </Card>
+                        <Card>
+                            <Accordion.Toggle as={Card.Header} eventKey={10}>
+                                Shutdown Options
+                            </Accordion.Toggle>
+                            <Accordion.Collapse eventKey={10}>
                                 <Card.Body>
                                     <ShutdownSetting
                                         onValueChange={this.onShutdownChange}
