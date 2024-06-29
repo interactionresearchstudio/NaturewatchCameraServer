@@ -58,32 +58,6 @@ class ChangeDetector(Thread):
                 self.logger.exception(e)
                 continue
 
-    def cancel(self):
-        """
-        Cancel thread
-        :return: none
-        """
-        self.cancelled = True
-        self.camera_controller.stop()
-
-    @staticmethod
-    def save_photo(image):
-        """
-        Save numpy image to a jpg file
-        :param image: numpy array image
-        :return: none
-        """
-        timestamp = datetime.datetime.now()
-        filename = timestamp.strftime('%Y-%m-%d-%H-%M-%S')
-        filename = filename + ".jpg"
-
-        try:
-            cv2.imwrite("photos/" + filename, image)
-        except Exception as e:
-            self.logger.error('ChangeDetector: save_photo() error: ')
-            self.logger.exception(e)
-            pass
-
     def detect_change_contours(self, img):
         """
         Detect changed contours in frame

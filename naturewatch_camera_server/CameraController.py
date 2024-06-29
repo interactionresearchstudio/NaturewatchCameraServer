@@ -271,7 +271,7 @@ class CameraController(threading.Thread):
         self.camera.lsize = (self.md_width, self.md_height)
         self.camera.mainsize = (self.width, self.height)
 
-        video_config = self.camera.create_video_configuration(main={"size": self.camera.mainsize, "format": "RGB888"}, lores={"size": self.camera.lsize, "format": "YUV420"}, transform=Transform(hflip=self.rotated_camera, vflip=self.rotated_camera),controls={"FrameDurationLimits": (self.frame_duration, self.frame_duration)})
+        video_config = self.camera.create_video_configuration(main={"size": self.camera.mainsize, "format": "RGB888"}, lores={"size": self.camera.lsize, "format": "YUV420"}, raw={"size": self.camera.mainsize}, transform=Transform(hflip=self.rotated_camera, vflip=self.rotated_camera),controls={"FrameDurationLimits": (self.frame_duration, self.frame_duration)})
         self.camera.configure(video_config)
         self.camera.start()
 
@@ -285,7 +285,7 @@ class CameraController(threading.Thread):
             self.logger.info('Initialising with analogue gain:  {}'.format(self.config["analogue_gain"]))
             self.set_exposure(self.config["shutter_speed"], self.config["analogue_gain"])
 
-        self.logger.info('CameraController: camera initialised with a resolution of {} and a framerate of {} fps'.format(self.camera.camera_properties['PixelArraySize'], int(1/(self.camera.capture_metadata()["FrameDuration"]/1000000))))
+        self.logger.info('CameraController: camera initialised with a resolution of {} and a framerate of {} fps'.format(self.camera.mainsize, int(1/(self.camera.capture_metadata()["FrameDuration"]/1000000))))
         self.logger.info('CameraController: Note that frame rates above 20fps have been found to lock up the Pi Zero W and Pi Zero 2W')
 
         # Set up low res stream for motion detection
