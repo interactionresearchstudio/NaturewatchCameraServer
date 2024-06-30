@@ -1,3 +1,4 @@
+---
 name: Build Image
 on: [push, pull_request, workflow_dispatch]
 
@@ -5,93 +6,96 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install coreutils p7zip-full qemu-user-static
 
-    - name: Install Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install coreutils p7zip-full qemu-user-static
+      - name: Checkout CustomPiOS
+        uses: actions/checkout@v2
+        with:
+          repository: "guysoft/CustomPiOS"
+          ref: devel
+          path: CustomPiOS
 
-    - name: Checkout CustomPiOS
-      uses: actions/checkout@v2
-      with:
-        repository: 'guysoft/CustomPiOS'
-        ref: devel
-        path: CustomPiOS
+      - name: Checkout Project Repository
+        uses: actions/checkout@v2
+        with:
+          repository: ${{ github.repository }}
+          path: repository
 
-    - name: Checkout Project Repository
-      uses: actions/checkout@v2
-      with:
-        repository: ${{ github.repository }}
-        path: repository
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
 
-    - name: Setup node
-      uses: actions/setup-node@v1
-      with:
-        node-version: 12.x
+      - name: Build React frontend
+        run: |
+          pushd repository/naturewatch_camera_server/static/client
+          npm i -y
+          npm run build
+          popd
 
-    - name: Build React frontend
-      run: |
-        pushd repository/naturewatch_camera_server/static/client
-        npm i -y
-        npm run build
-        popd
+      - name: Download Raspbian Image
+        run: |
+          cd repository/os/image
+          wget -q -c --trust-server-names 'https://downloads.raspberrypi.org/raspios_lite_armhf_latest'
 
-    - name: Download Raspbian Image
-      run: |
-        cd repository/os/image
-        wget -q -c --trust-server-names 'https://downloads.raspberrypi.org/raspios_lite_armhf_latest'
+      - name: Update CustomPiOS Paths
+        run: |
+          cd repository/os
+          ../../CustomPiOS/src/update-custompios-paths
 
-    - name: Update CustomPiOS Paths
-      run: |
-        cd repository/os
-        ../../CustomPiOS/src/update-custompios-paths
+      - name: Copy NaturewatchCameraServer to CustomPiOS directory
+        run: |
+          cp -r repository /tmp/NaturewatchCameraServer
+          rm -rf /tmp/NaturewatchCameraServer/os
+          # Remove nodejs build files
+          rm -rf /tmp/NaturewatchCameraServer/naturewatch_camera_server/static/client/node_modules
+          # Move the project within a new directory
+          cp -r /tmp/NaturewatchCameraServer repository/os/modules/naturewatchcamera/filesystem/home/pi
+          rm -rf /tmp/NaturewatchCameraServer
+          ls repository/os/modules/naturewatchcamera/filesystem/home/pi/NaturewatchCameraServer
 
-    - name: Copy NaturewatchCameraServer to CustomPiOS directory
-      run: |
-        cp -r repository /tmp/NaturewatchCameraServer
-        rm -rf /tmp/NaturewatchCameraServer/os
-        rm -rf /tmp/NaturewatchCameraServer/naturewatch_camera_server/static/client/node_modules
-        mv /tmp/NaturewatchCameraServer repository/os/modules/naturewatchcamera/filesystem/home/pi/NaturewatchCameraServer
-        ls repository/os/modules/naturewatchcamera/filesystem/home/pi/NaturewatchCameraServer
+      - name: Build Image
+        run: |
+          export BASE_IMAGE_ENLARGEROOT=2000
+          # Password set in os/config
+          # export AUTO_HOTSPOT_NAME=MyNaturewatch
+          # export AUTO_HOTSPOT_PASSWORD=badgersandfoxes
+          sudo modprobe loop && cd repository/os
+          sudo bash -x ./build_dist
 
-    - name: Build Image
-      run: |
-        export BASE_IMAGE_ENLARGEROOT=2000
-        export AUTO_HOTSPOT_NAME=MyNaturewatch
-        export AUTO_HOTSPOT_PASSWORD=badgersandfoxes
-        sudo modprobe loop && cd repository/os
-        sudo bash -x ./build_dist
+      - name: Copy Output
+        run: cp ${{ github.workspace }}/repository/os/workspace/*lite.img mynaturewatch-camera.img
 
-    - name: Copy Output
-      run: cp ${{ github.workspace }}/repository/os/workspace/*lite.img mynaturewatch-camera.img
+      - name: Zip Output
+        run: gzip mynaturewatch-camera.img
+      - uses: actions/upload-artifact@v3
+        with:
+          name: mynaturewatch-camera.img.gz
+          path: mynaturewatch-camera.img.gz
 
-    - name: Zip Output
-      run: gzip mynaturewatch-camera.img
-    - uses: actions/upload-artifact@v1
-      with:
-        name: mynaturewatch-camera.img.gz
-        path: mynaturewatch-camera.img.gz
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: My Naturewatch Camera ${{ github.ref }}
+          draft: true
+          prerelease: false
 
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      if: startsWith(github.ref, 'refs/tags/v')
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: My Naturewatch Camera ${{ github.ref }}
-        draft: true
-        prerelease: false
-
-    - name: Upload Release
-      id: upload-release-asset
-      uses: actions/upload-release-asset@v1
-      if: startsWith(github.ref, 'refs/tags/v')
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-        asset_path: mynaturewatch-camera.img.gz
-        asset_name: mynaturewatch-camera.img.gz
-        asset_content_type: application/octet-stream
+      - name: Upload Release
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          asset_path: mynaturewatch-camera.img.gz
+          asset_name: mynaturewatch-camera.img.gz
+          asset_content_type: application/octet-stream
