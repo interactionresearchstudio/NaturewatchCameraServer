@@ -42,7 +42,6 @@ apt-get install -y git=1:2.39.2-1.1 python3-pip=23.0.1+dfsg-1+rpt1 python3-libca
 
 # Setup a venv
 python -m venv --system-site-packages ${INSTALLATION_PATH}/NaturewatchCameraServer/.venv
-${INSTALLATION_PATH}/NaturewatchCameraServer/.venv/bin/pip install imutils
 
 # Remove unnecessary packages
 apt-get autoremove -y
@@ -50,8 +49,8 @@ apt-get autoremove -y
 pushd $INSTALLATION_PATH
 pushd NaturewatchCameraServer
 
-echo "Installing repo dependencies"
-python -m pip install -r requirements.txt
+# Install python dependencies
+${INSTALLATION_PATH}/NaturewatchCameraServer/.venv/bin/pip install -r requirements.txt
 
 echo "Adding services"
 # Allows to reinstall the service
