@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=${path}/NaturewatchCameraServer/python /${path}/NaturewatchCameraServer/helpers/cfgsetup.py
+ExecStart=${path}/NaturewatchCameraServer/.venv/bin/python /${path}/NaturewatchCameraServer/helpers/cfgsetup.py
 Restart=always
 User=root
 
