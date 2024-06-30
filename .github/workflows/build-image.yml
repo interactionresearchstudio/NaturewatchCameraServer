@@ -39,7 +39,7 @@ jobs:
       - name: Download Raspbian Image
         run: |
           cd repository/os/image
-          wget -q -c --trust-server-names 'https://downloads.raspberrypi.org/raspios_lite_armhf_latest'
+          wget -q -c --trust-server-names 'https://downloads.raspberrypi.org/raspios_lite_armhf/images/raspios_lite_armhf-2024-03-15/2024-03-15-raspios-bookworm-armhf-lite.img.xz'
 
       - name: Update CustomPiOS Paths
         run: |

@@ -20,7 +20,7 @@
     "min_photo_interval_s": 1,
     "min_width": 100,
     "more_sensitivity": 50,
-    "photos_path": "/home/pi/NaturewatchCameraServer/naturewatch_camera_server/static/data/photos/",
+    "photos_path": "./naturewatch_camera_server/static/data/photos/",
     "resolution": "1920x1080",
     "rotate_camera": 0,
     "sensitivity": "default",
@@ -32,5 +32,5 @@
     "tn_width": 200,
     "video_duration_after_motion": 10,
     "video_duration_before_motion": 5,
-    "videos_path": "/home/pi/NaturewatchCameraServer/naturewatch_camera_server/static/data/videos/"
+    "videos_path": "./naturewatch_camera_server/static/data/videos/"
 }
