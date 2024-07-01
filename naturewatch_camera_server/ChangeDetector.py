@@ -120,51 +120,53 @@ class ChangeDetector(Thread):
 
     def start_photo_session(self):
         self.camera_controller.run_autofocus()
-        self.logger.info('ChangeDetector: starting photo capture')
+        self.logger.info('ChangeDetector: starting photo capture mode')
         self.mode = "photo"
         self.session_start_time = self.get_fake_time()
 
     def start_video_session(self):
         self.camera_controller.run_autofocus()
-        self.logger.info('ChangeDetector: starting video capture')
+        self.logger.info('ChangeDetector: starting video capture mode')
         self.mode = "video"
         self.output = self.camera_controller.start_video_stream()
         self.session_start_time = self.get_fake_time()
 
     def start_timelapse_session(self):
         self.camera_controller.run_autofocus()
-        self.logger.info('ChangeDetector: starting timelapse capture')
+        self.logger.info('ChangeDetector: starting timelapse capture mode')
         self.mode = "timelapse"
         self.session_start_time = self.get_fake_time()
           
     def stop_session(self):
-        self.logger.info('ChangeDetector: ending capture')
+        self.logger.info('ChangeDetector: ending capture mode')
         if self.mode == "video":
             self.camera_controller.stop_video_stream()
         elif self.mode == "photo" or self.mode == "timelapse":
             pass
         self.mode = "inactive"
+        self.camera_controller.recording_active = False
 
 # TODO: whether to use the video-port or not does not directly depend on the mode
 # In case video is requested, the video port will always be used for both resolutions
 # In case photo is requested, the video port can be used, but need not. It should be left a matter of configuration
     def update(self):
         time.sleep(0.03)
-        # only check for motion while a session is active
-        if self.mode in ["photo", "video"]:
+        # only check for motion while a session is active and a recording isn't already in progress
+        if self.mode in ["photo", "video"] and self.camera_controller.recording_active is False:
             # get an md image
             img = self.camera_controller.get_md_image()
             # only proceed if there is an image
             if img is not None:
                 if self.detect_change_contours(img) is True:
-                    self.logger.info("ChangeDetector: detected motion. Starting capture...")
+                    self.logger.info('ChangeDetector: detected motion. Saving...')
                     timestamp = self.get_formatted_time()
+                    self.camera_controller.recording_active = True
                     if self.mode == "photo":
                         image = self.camera_controller.get_hires_image()
                         self.file_saver.save_image(image, timestamp)
                         self.file_saver.save_thumb(imutils.resize(image, width=self.config["md_width"]), timestamp, self.mode)
                         self.lastPhotoTime = self.get_fake_time()
-                        self.logger.info("ChangeDetector: photo capture completed")
+                        self.logger.info('ChangeDetector: photo capture completed')
                     elif self.mode == "video":
                         self.file_saver.save_thumb(img, timestamp, self.mode)
                         filename, fullpath, filenameMp4 = self.file_saver.create_video_filename(timestamp)
@@ -172,29 +174,30 @@ class ChangeDetector(Thread):
                         self.camera_controller.wait_recording(self.config["video_duration_after_motion"])
                         self.camera_controller.stop_saving_video()
                         self.file_saver.H264_to_MP4(fullpath, filenameMp4)
-                        self.logger.info('ChangeDetector: finished capturing video')
+                        self.logger.info('ChangeDetector: video capture completed')
                         self.lastPhotoTime = self.get_fake_time()
-                        self.logger.debug("ChangeDetector: video timer reset")
+                        self.logger.debug('ChangeDetector: video timer reset')
                     else:
         # TODO: Add debug code that logs a line every x seconds so we can see the ChangeDetector is still alive
-        #            self.logger.debug("ChangeDetector: idle")
+        #            self.logger.debug('ChangeDetector: idle')
                         pass
+                    self.camera_controller.recording_active = False
             else:
-                self.logger.error("ChangeDetector: not receiving any images for motion detection!")
+                self.logger.error('ChangeDetector: not receiving any images for motion detection!')
                 time.sleep(1)
 
         # TODO: implement periodic pictures
         elif self.mode == "timelapse":
             # take one picture every minute
             if self.get_fake_time() - self.lastPhotoTime >= self.timelapse:
-                self.logger.info("ChangeDetector: " + str(self.timelapse) + "s elapsed -> capturing...")
+                self.logger.info('ChangeDetector: ' + str(self.timelapse) + 's elapsed -> capturing...')
                 # TODO: no magic numbers! (make it configurable)
                 timestamp = self.get_formatted_time()
                 image = self.camera_controller.get_hires_image()
                 self.file_saver.save_image(image, timestamp)
                 self.file_saver.save_thumb(imutils.resize(image, width=self.config["md_width"]), timestamp, self.mode)
                 self.lastPhotoTime = self.get_fake_time()
-                self.logger.info("ChangeDetector: photo capture completed")
+                self.logger.info('ChangeDetector: photo capture completed')
 
     def get_fake_time(self):
         if self.device_time is not None:

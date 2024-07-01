@@ -91,7 +91,7 @@ class CameraController(threading.Thread):
         self.video_bitrate = 10000000
 
 # Define the font style for the timestamps
-        self.colour = (0, 255, 0) # text colour
+        self.colour = (255, 255, 255) # text colour
         self.bgcolour = (0, 0, 0) # background colour
         self.origin = (0, 28) # bottom left hand corner of text on hires images
         self.lores_origin = (0, 8) # bottom left hand corner of text on lores stream
@@ -118,13 +118,14 @@ class CameraController(threading.Thread):
         self.image = None
         self.hires_image = None
 
-        # Set CircularOutput buffer size. One buffer per frame so it's framerate x total number of seconds we wish to retain. 
-        # We add an extra 0.5s to ensure we get the full time expected as this was found to be necessary in testing
-        self.video_buffer_size = int(self.config["frame_rate"] * (self.config["video_duration_before_motion"] + self.config["video_duration_after_motion"] + 0.5))
+        # Set CircularOutput buffer size. One buffer per frame so it's framerate x total number of seconds we wish to retain before motion is detected. 
+        # We add an extra 1.1s to ensure we get the full time expected as this was found to be necessary in testing
+        self.video_buffer_size = int(self.config["frame_rate"] * (self.config["video_duration_before_motion"] + 1.1))
 
-        self.encoder = H264Encoder(repeat=True)
-        self.encoder.output = CircularOutput(buffersize=self.video_buffer_size, outputtofile=False)
+        self.encoder = H264Encoder(repeat=True, iperiod=15)
+        self.encoder.output = CircularOutput(buffersize=self.video_buffer_size)
         self.logger.debug('CameraController: Video buffer size allocated = {}'.format(self.video_buffer_size))
+        self.recording_active = False
         
     # Main routine
     def run(self):
@@ -141,7 +142,11 @@ class CameraController(threading.Thread):
                             cv2.putText(self.image, timestamp, self.lores_origin, self.lores_font, fontScale=self.lores_scale, thickness=self.lores_thickness, color=self.colour)
                         if self.image is None:
                             self.logger.warning("CameraController: got empty image.")
-                        time.sleep(0.01)
+                        # While recording we do not need to check for motion, so we only update this loop every 1s to update the web feed
+                        if self.recording_active is False:
+                            time.sleep(0.03)
+                        else:
+                            time.sleep(1)
                     except Exception as e:
                         self.logger.error("CameraController: picamera error.")
                         self.logger.exception(e)
@@ -215,13 +220,8 @@ class CameraController(threading.Thread):
     def get_hires_image(self):
         self.logger.debug("CameraController: hires image requested.")
         if picamera_exists:
-            # TODO: understand the decode. Is another more intuitive way possible?
-            self.picamera_photo_stream = io.BytesIO()
-            self.camera.capture_file(self.picamera_photo_stream, format='jpeg')
-            self.picamera_photo_stream.seek(0)
-            # "Decode" the image from the stream, preserving colour
-            s = cv2.imdecode(np.fromstring(self.picamera_photo_stream.getvalue(), dtype=np.uint8), 1)
-
+            self.hires_yuvimage = self.camera.capture_array("main")
+            s = cv2.cvtColor(self.hires_yuvimage, cv2.COLOR_YUV420p2RGB)
             if s is not None:
                 return s.copy()
             else:
@@ -246,7 +246,7 @@ class CameraController(threading.Thread):
         # Check for module revision
         # TODO: set maximum resolution based on module revision
         self.camera_model = self.camera.camera_properties['Model']
-        self.logger.debug('CameraController: camera module revision {} detected.'.format(self.camera_model))
+        self.logger.info('CameraController: camera module revision {} detected.'.format(self.camera_model))
 
         # Set LED state based on setting in config file
         if self.LED == "off":
@@ -271,7 +271,7 @@ class CameraController(threading.Thread):
         self.camera.lsize = (self.md_width, self.md_height)
         self.camera.mainsize = (self.width, self.height)
 
-        video_config = self.camera.create_video_configuration(main={"size": self.camera.mainsize, "format": "RGB888"}, lores={"size": self.camera.lsize, "format": "YUV420"}, raw={"size": self.camera.mainsize}, transform=Transform(hflip=self.rotated_camera, vflip=self.rotated_camera),controls={"FrameDurationLimits": (self.frame_duration, self.frame_duration)})
+        video_config = self.camera.create_video_configuration(main={"size": self.camera.mainsize, "format": "YUV420"}, lores={"size": self.camera.lsize, "format": "YUV420"}, raw={"size": self.camera.mainsize}, transform=Transform(hflip=self.rotated_camera, vflip=self.rotated_camera),controls={"FrameDurationLimits": (self.frame_duration, self.frame_duration)})
         self.camera.configure(video_config)
         self.camera.start()
 
@@ -286,7 +286,7 @@ class CameraController(threading.Thread):
             self.set_exposure(self.config["shutter_speed"], self.config["analogue_gain"])
 
         self.logger.info('CameraController: camera initialised with a resolution of {} and a framerate of {} fps'.format(self.camera.mainsize, int(1/(self.camera.capture_metadata()["FrameDuration"]/1000000))))
-        self.logger.info('CameraController: Note that frame rates above 20fps have been found to lock up the Pi Zero W and Pi Zero 2W')
+        self.logger.info('CameraController: Note that frame rates above 12fps lead to dropped frames on a Pi Zero and frame rates above 25fps can lock up the Pi Zero 2W')
 
         # Set up low res stream for motion detection
         self.picamera_md_output_yuv = self.camera.capture_array("lores")
@@ -329,7 +329,7 @@ class CameraController(threading.Thread):
                 if picamera_exists:
                     self.camera.rotation = 180
                     self.camera.stop()
-                    video_config = self.camera.create_video_configuration(main={"size": self.camera.mainsize, "format": "RGB888"}, lores={"size": self.camera.lsize, "format": "YUV420"}, transform=Transform(hflip=self.rotated_camera, vflip=self.rotated_camera))
+                    video_config = self.camera.create_video_configuration(main={"size": self.camera.mainsize, "format": "YUV420"}, lores={"size": self.camera.lsize, "format": "YUV420"}, raw={"size": self.camera.mainsize}, transform=Transform(hflip=self.rotated_camera, vflip=self.rotated_camera))
                     self.camera.configure(video_config)
                     self.camera.start()
                 new_config = self.config
@@ -341,7 +341,7 @@ class CameraController(threading.Thread):
                 if picamera_exists:
                     self.camera.rotation = 0
                     self.camera.stop()
-                    video_config = self.camera.create_video_configuration(main={"size": self.camera.mainsize, "format": "RGB888"}, lores={"size": self.camera.lsize, "format": "YUV420"}, transform=Transform(hflip=self.rotated_camera, vflip=self.rotated_camera))
+                    video_config = self.camera.create_video_configuration(main={"size": self.camera.mainsize, "format": "YUV420"}, lores={"size": self.camera.lsize, "format": "YUV420"}, raw={"size": self.camera.mainsize}, transform=Transform(hflip=self.rotated_camera, vflip=self.rotated_camera))
                     self.camera.configure(video_config)
                     self.camera.start()
                 new_config = self.config
