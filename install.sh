@@ -59,8 +59,8 @@ systemctl stop wifisetup.service >/dev/null 2>&1
 
 # Copy service files to /etc/systemd/system and replace ${path} with the installation path root
 TEMPLATES="${DIR}/helpers"
-sed -e "s|\${path}|${INSTALLATION_PATH}|" "${TEMPLATES}/python.naturewatch.service" > "/etc/systemd/system/python.naturewatch.service"
-sed -e "s|\${path}|${INSTALLATION_PATH}|" "${TEMPLATES}/wifisetup.service" > "/etc/systemd/system/wifisetup.service"
+sed -e "s|\${path}|${INSTALLATION_PATH}|g" "${TEMPLATES}/python.naturewatch.service" > "/etc/systemd/system/python.naturewatch.service"
+sed -e "s|\${path}|${INSTALLATION_PATH}|g" "${TEMPLATES}/wifisetup.service" > "/etc/systemd/system/wifisetup.service"
 
 
 popd
