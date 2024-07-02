@@ -135,11 +135,11 @@ class CameraController(threading.Thread):
                     try:
                         # Get image from Pi camera
                         self.yuvimage = self.camera.capture_array("lores")
-                        self.image = cv2.cvtColor(self.yuvimage, cv2.COLOR_YUV420p2RGB)
                         if self.timestamp == 1:
                             timestamp = time.strftime("%d/%m/%Y %H:%M:%S")
-                            cv2.rectangle(self.image, self.lores_bgstart, self.lores_bgend, self.bgcolour, -1)
-                            cv2.putText(self.image, timestamp, self.lores_origin, self.lores_font, fontScale=self.lores_scale, thickness=self.lores_thickness, color=self.colour)
+                            cv2.rectangle(self.yuvimage, self.lores_bgstart, self.lores_bgend, self.bgcolour, -1)
+                            cv2.putText(self.yuvimage, timestamp, self.lores_origin, self.lores_font, fontScale=self.lores_scale, thickness=self.lores_thickness, color=self.colour)
+                        self.image = cv2.cvtColor(self.yuvimage, cv2.COLOR_YUV420p2RGB)
                         if self.image is None:
                             self.logger.warning("CameraController: got empty image.")
                         # While recording we do not need to check for motion, so we only update this loop every 1s to update the web feed
