@@ -82,14 +82,6 @@ class CameraController(threading.Thread):
 # For photos
         self.picamera_photo_stream = None
 
-# For motion detection
-        self.picamera_md_output = None
-        self.picamera_md_stream = None
-
-# For video
-        self.picamera_video_stream = None
-        self.video_bitrate = 10000000
-
 # Define the font style for the timestamps
         self.colour = (255, 255, 255) # text colour
         self.bgcolour = (0, 0, 0) # background colour
@@ -228,7 +220,6 @@ class CameraController(threading.Thread):
                 return None
 
     # Initialise picamera. If already started, close and reinitialise.
-    # TODO - reset with manual exposure, if it was set before.
     def initialise_picamera(self):
         self.logger.debug('CameraController: initialising picamera ...')
 
@@ -287,10 +278,6 @@ class CameraController(threading.Thread):
 
         self.logger.info('CameraController: camera initialised with a resolution of {} and a framerate of {} fps'.format(self.camera.mainsize, int(1/(self.camera.capture_metadata()["FrameDuration"]/1000000))))
         self.logger.info('CameraController: Note that frame rates above 12fps lead to dropped frames on a Pi Zero and frame rates above 25fps can lock up the Pi Zero 2W')
-
-        # Set up low res stream for motion detection
-        self.picamera_md_output_yuv = self.camera.capture_array("lores")
-        self.picamera_md_output = cv2.cvtColor(self.picamera_md_output_yuv, cv2.COLOR_YUV420p2RGB)
         self.logger.debug('CameraController: Motion detection stream prepared with resolution {}x{}.'.format(self.md_width, self.md_height))
 
         # Check camera model to see if autofocus is supported and enable if configured in settings file
