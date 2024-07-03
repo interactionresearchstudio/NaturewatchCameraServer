@@ -25,6 +25,18 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 DIR="$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )"
 
+# Append to config file /boot/config.txt
+CONFIG_FILE="/boot/firmware/config.txt"
+# echo -e "\n" >> $CONFIG_FILE
+# echo -e "max_usb_current=1" >> $CONFIG_FILE # It's the default behaviour.
+echo -e "\n# Deactivate the activity LED\ndtparam=act_led_trigger=none" >> $CONFIG_FILE
+echo -e "dtparam=act_led_activelow=on" >> $CONFIG_FILE
+
+# I'm not sure about the config path, so let also modify the legacy one.
+CONFIG_FILE="/boot/config.txt"
+echo -e "\n# Deactivate the activity LED\ndtparam=act_led_trigger=none" >> $CONFIG_FILE
+echo -e "dtparam=act_led_activelow=on" >> $CONFIG_FILE
+
 # Copy to installation path
 mkdir -p $INSTALLATION_PATH/NaturewatchCameraServer >/dev/null 2>&1
 cp -r $DIR $INSTALLATION_PATH >/dev/null 2>&1
