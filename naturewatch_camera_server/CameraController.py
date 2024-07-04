@@ -458,9 +458,8 @@ class CameraController(threading.Thread):
     # Synchronise time with client
     def set_Time(self, clienttime):
         self.logger.info('CameraController: Synchronising time with client')
-        timesync_process = subprocess.Popen(['/bin/date', '-s', clienttime], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-        output, error = timesync_process.communicate()
-        if error == "":
+        timesync_process = subprocess.run(['/bin/date', '-s', clienttime], capture_output=True, text=True)
+        if timesync_process.stderr == "":
             self.logger.info('CameraController: Time successfully synchronised with client. New time is {}'.format(clienttime))
         else:
             self.logger.warning('CameraController: Failed to synchronise time with client.')

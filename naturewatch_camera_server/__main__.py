@@ -11,9 +11,8 @@ class CameraNotFoundException(Exception):
     pass
 
 def detect_camera():
-    camcheck_process = subprocess.Popen(['libcamera-hello', '--list-cameras'], stdout=subprocess.PIPE, text=True)
-    output, error = camcheck_process.communicate()
-    return output.strip()
+    camcheck_process = subprocess.run(['libcamera-hello', '--list-cameras'], capture_output=True, text=True)
+    return camcheck_process.stdout.strip()
 
 if __name__ == '__main__':
     try:

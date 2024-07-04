@@ -147,8 +147,8 @@ def construct_settings_object(camera_controller, change_detector):
     timestamp = current_app.user_config["timestamp"]
 
     # Get CPU temperature
-    temp = os.popen("vcgencmd measure_temp").readline()
-    CPUTemp = (temp.replace("temp=","").replace("'C",""))
+    temp = subprocess.run(["vcgencmd", "measure_temp"], capture_output=True, text=True)
+    CPUTemp = (temp.stdout.replace("temp=","").replace("'C",""))
 
     settings = {
         "rotation": camera_controller.rotated_camera,
