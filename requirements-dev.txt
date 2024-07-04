@@ -1,3 +1,0 @@
--r requirements.txt
-opencv-contrib-python>=4.1.0.25
-numpy>=1.16.3
