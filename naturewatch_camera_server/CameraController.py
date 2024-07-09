@@ -172,6 +172,11 @@ class CameraController(threading.Thread):
     def is_stopped(self):
         return self._stop_event.is_set()
 
+    # Get MD YUV image
+    def get_md_yuvimage(self):
+        if self.yuvimage is not None:
+            return self.yuvimage.copy()
+
     # Get MD image
     def get_md_image(self):
         if self.image is not None:

@@ -65,7 +65,7 @@ class ChangeDetector(Thread):
         :return: True if it's time to capture
         """
         # convert to gray
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(img, cv2.COLOR_YUV2GRAY_420)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
 
         if self.avg is None:
@@ -154,10 +154,10 @@ class ChangeDetector(Thread):
         # only check for motion while a session is active and a recording isn't already in progress
         if self.mode in ["photo", "video"] and self.camera_controller.recording_active is False:
             # get an md image
-            img = self.camera_controller.get_md_image()
+            yuvimg = self.camera_controller.get_md_yuvimage()
             # only proceed if there is an image
-            if img is not None:
-                if self.detect_change_contours(img) is True:
+            if yuvimg is not None:
+                if self.detect_change_contours(yuvimg) is True:
                     self.logger.info('ChangeDetector: detected motion. Saving...')
                     timestamp = self.get_formatted_time()
                     self.camera_controller.recording_active = True
@@ -168,6 +168,7 @@ class ChangeDetector(Thread):
                         self.lastPhotoTime = self.get_fake_time()
                         self.logger.info('ChangeDetector: photo capture completed')
                     elif self.mode == "video":
+                        img = self.camera_controller.get_md_image()
                         self.file_saver.save_thumb(img, timestamp, self.mode)
                         filename, fullpath, filenameMp4 = self.file_saver.create_video_filename(timestamp)
                         self.camera_controller.start_saving_video(fullpath)
