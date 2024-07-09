@@ -252,4 +252,4 @@ yarn.lock
 *.zip
 
 # End user config file
-naturewatch_camera_server/static/data/config.json
+/naturewatch_camera_server/static/data/config.json
