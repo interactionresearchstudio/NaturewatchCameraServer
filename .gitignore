@@ -250,3 +250,6 @@ package-lock.json
 yarn-lock.json
 yarn.lock
 *.zip
+
+# End user config file
+naturewatch_camera_server/static/data/config.json
