@@ -16,6 +16,7 @@ class Settings extends React.Component {
         super(props, context);
 
         this.onSensitivityChange = this.onSensitivityChange.bind(this);
+        this.onSensitivityChangeEnd = this.onSensitivityChangeEnd.bind(this);
         this.onImageOrientationChange = this.onImageOrientationChange.bind(this);
         this.onShutterChange = this.onShutterChange.bind(this);
         this.onShutterChangeEnd = this.onShutterChangeEnd.bind(this);
@@ -41,7 +42,7 @@ class Settings extends React.Component {
                     analogue_gain: "",
                     shutter_speed: ""
                 },
-                sensitivity: "",
+                sensitivity: 5,
                 sharpness: {
                     sharpness_mode: "",
                     sharpness_val: 1
@@ -111,23 +112,21 @@ class Settings extends React.Component {
         else return null;
     }
 
-    onSensitivityChange(value) {
-        console.log("INFO: Received sensitivity value");
-        console.log(value);
+    onSensitivityChange(val) {
         let currentSettings = this.state.settings;
+        currentSettings.sensitivity = val;
+        this.setState({
+            settings: currentSettings
+        });
+    }
 
-        console.log("Current settings: ");
-        console.log(currentSettings);
-
-        currentSettings.sensitivity = value;
-
-        console.log("Changed settings: ");
-        console.log(currentSettings);
+    onSensitivityChangeEnd(val) {
+        let currentSettings = this.state.settings;
+        currentSettings.sensitivity = val;
         this.setState({
             settings: currentSettings
         }, () => {
             console.log("INFO: Changed sensitivity.");
-            console.log(this.state.settings);
             this.postSettings();
         });
     }
@@ -387,8 +386,9 @@ class Settings extends React.Component {
                             <Accordion.Collapse eventKey={1}>
                                 <Card.Body>
                                     <SensitivitySetting
-                                        onValueChange={this.onSensitivityChange}
-                                        value={this.state.settings.sensitivity}
+                                        sensitivityVal={this.state.settings.sensitivity}
+                                        onSensitivityChange={this.onSensitivityChange}
+                                        onSensitivityChangeEnd={this.onSensitivityChangeEnd}
                                     />
                                 </Card.Body>
                             </Accordion.Collapse>

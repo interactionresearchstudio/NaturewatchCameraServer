@@ -22,10 +22,7 @@ class ChangeDetector(Thread):
 
         self.file_saver = FileSaver(self.config, logger=self.logger)
 
-        self.minWidth = self.config["min_width"]
-        self.maxWidth = self.config["max_width"]
-        self.minHeight = self.config["min_height"]
-        self.maxHeight = self.config["max_height"]
+        self.sensitivity = self.config["sensitivity"]
 
         self.device_time = None
         self.device_time_start = None
@@ -40,6 +37,8 @@ class ChangeDetector(Thread):
         self.inactiveColour = (100, 100, 100)
         self.isMinActive = False
         self.currentImage = None
+
+        self.previmg = None
 
         self.timelapse_active = False
         self.timelapse        = self.config["default_timelapse"]
@@ -58,65 +57,31 @@ class ChangeDetector(Thread):
                 self.logger.exception(e)
                 continue
 
-    def detect_change_contours(self, img):
+    def detect_change(self, previmg, curimg):
         """
-        Detect changed contours in frame
-        :param img: current image
+        Detect changes in frame
+        :param previmg: previous image
+        :param curimg: current image
         :return: True if it's time to capture
         """
-        # convert to gray
-        gray = cv2.cvtColor(img, cv2.COLOR_YUV2GRAY_420)
-        gray = cv2.GaussianBlur(gray, (21, 21), 0)
+        if previmg is not None:
+            # Measure pixels differences between current and previous frame
+            mse = np.square(np.subtract(curimg, previmg)).mean()
+            if mse > self.sensitivity:
+                if self.get_fake_time() - self.lastPhotoTime >= self.config['min_photo_interval_s']:
+                    self.logger.info('ChangeDetector: Motion detected and capture triggered (mse={})'.format(mse))
+                    return True
+                else:
+                    return False
+            # This next line is useful for determining appropriate sensitivity levels
+            elif mse > 1:
+                    self.logger.info('ChangeDetector: Motion detected (mse={})'.format(mse))
+            else:
+                return False
 
-        if self.avg is None:
-            self.avg = gray.copy().astype("float")
-            return False
-
-        # add to accumulation model and find the change
-        cv2.accumulateWeighted(gray, self.avg, 0.5)
-        frame_delta = cv2.absdiff(gray, cv2.convertScaleAbs(self.avg))
-
-        # threshold, dilate and find contours
-        thresh = cv2.threshold(frame_delta, self.config["delta_threshold"], 255, cv2.THRESH_BINARY)[1]
-        thresh = cv2.dilate(thresh, None, iterations=2)
-        cnts, _ = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-        # find largest contour
-        largest_contour = self.get_largest_contour(cnts)
-
-        if largest_contour is None:
-            return False
-
-        (x, y, w, h) = cv2.boundingRect(largest_contour)
-
-        # if the contour is too small, return false
-        if w > self.maxWidth or w < self.minWidth or h > self.maxHeight or h < self.minHeight:
-            return False
-        else:
-            if self.get_fake_time() - self.lastPhotoTime >= self.config['min_photo_interval_s']:
-                return True
-
-        return False
-
-    @staticmethod
-    def get_largest_contour(contours):
-        """
-        Get the largest contour in a list of contours
-        :param contours: a list of contours
-        :return: the largest contour object
-        """
-        if not contours:
-            return None
-        else:
-            areas = [cv2.contourArea(c) for c in contours]
-            maxIndex = np.argmax(areas)
-            return contours[maxIndex]
-
-    def set_sensitivity(self, min_width, max_width):
-        self.minWidth = min_width
-        self.minHeight = min_width
-        self.maxWidth = max_width
-        self.maxHeight = max_width
+    def set_sensitivity(self, sensitivity):
+        self.sensitivity = sensitivity
+        self.logger.info('ChangeDetector: Sensitivity set to {}'.format(self.sensitivity))
 
     def start_photo_session(self):
         self.camera_controller.run_autofocus()
@@ -157,7 +122,7 @@ class ChangeDetector(Thread):
             yuvimg = self.camera_controller.get_md_yuvimage()
             # only proceed if there is an image
             if yuvimg is not None:
-                if self.detect_change_contours(yuvimg) is True:
+                if self.detect_change(self.previmg, yuvimg) is True:
                     self.logger.info('ChangeDetector: detected motion. Saving...')
                     timestamp = self.get_formatted_time()
                     self.camera_controller.recording_active = True
@@ -167,6 +132,7 @@ class ChangeDetector(Thread):
                         self.file_saver.save_thumb(imutils.resize(image, width=self.config["md_width"]), timestamp, self.mode)
                         self.lastPhotoTime = self.get_fake_time()
                         self.logger.info('ChangeDetector: photo capture completed')
+                        yuvimg = None
                     elif self.mode == "video":
                         img = self.camera_controller.get_md_image()
                         self.file_saver.save_thumb(img, timestamp, self.mode)
@@ -178,11 +144,13 @@ class ChangeDetector(Thread):
                         self.logger.info('ChangeDetector: video capture completed')
                         self.lastPhotoTime = self.get_fake_time()
                         self.logger.debug('ChangeDetector: video timer reset')
+                        yuvimg = None
                     else:
         # TODO: Add debug code that logs a line every x seconds so we can see the ChangeDetector is still alive
         #            self.logger.debug('ChangeDetector: idle')
                         pass
                     self.camera_controller.recording_active = False
+                self.previmg = yuvimg
             else:
                 self.logger.error('ChangeDetector: not receiving any images for motion detection!')
                 time.sleep(1)

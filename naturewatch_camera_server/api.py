@@ -80,15 +80,7 @@ def settings_handler():
         if "rotation" in settings:
             current_app.camera_controller.set_camera_rotation(settings["rotation"])
         if "sensitivity" in settings:
-            if settings["sensitivity"] == "less":
-                current_app.change_detector.set_sensitivity(current_app.user_config["less_sensitivity"],
-                                                            current_app.user_config["max_width"])
-            elif settings["sensitivity"] == "default":
-                current_app.change_detector.set_sensitivity(current_app.user_config["min_width"],
-                                                            current_app.user_config["max_width"])
-            elif settings["sensitivity"] == "more":
-                current_app.change_detector.set_sensitivity(current_app.user_config["more_sensitivity"],
-                                                            current_app.user_config["max_width"])
+            current_app.change_detector.set_sensitivity(settings["sensitivity"])
 
         #This section stores the new sensitivity setting in the config.json file
         new_config = current_app.camera_controller.config

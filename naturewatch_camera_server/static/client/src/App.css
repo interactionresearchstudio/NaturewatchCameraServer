@@ -147,7 +147,7 @@ button.startsession:disabled {
     border-radius: 0;
 }
 
-.settings #shutter-speed, .settings #sharpness-val, .settings #interval {
+.settings #shutter-speed, .settings #sharpness-val, .settings #sensitivity-val, .settings #interval {
     width: 100%;
 }
 
