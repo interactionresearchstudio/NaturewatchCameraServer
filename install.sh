@@ -31,11 +31,19 @@ CONFIG_FILE="/boot/firmware/config.txt"
 # echo -e "max_usb_current=1" >> $CONFIG_FILE # It's the default behaviour.
 echo -e "\n# Deactivate the activity LED\ndtparam=act_led_trigger=none" >> $CONFIG_FILE
 echo -e "dtparam=act_led_activelow=on" >> $CONFIG_FILE
+echo -e "# Set CPU speed to 600MHz - fixes unstable WiFi issue" >> $CONFIG_FILE
+echo -e "arm_freq=600" >> $CONFIG_FILE
+echo -e "# The following line seems to be required to prevent the encoder from hanging after extended periods" >> $CONFIG_FILE
+echo -e "start_debug=1" >> $CONFIG_FILE
 
 # I'm not sure about the config path, so let also modify the legacy one.
 CONFIG_FILE="/boot/config.txt"
 echo -e "\n# Deactivate the activity LED\ndtparam=act_led_trigger=none" >> $CONFIG_FILE
 echo -e "dtparam=act_led_activelow=on" >> $CONFIG_FILE
+echo -e "# Set CPU speed to 600MHz - fixes unstable WiFi issue" >> $CONFIG_FILE
+echo -e "arm_freq=600" >> $CONFIG_FILE
+echo -e "# The following line seems to be required to prevent the encoder from hanging after extended periods" >> $CONFIG_FILE
+echo -e "start_debug=1" >> $CONFIG_FILE
 
 # Copy to installation path
 mkdir -p $INSTALLATION_PATH/NaturewatchCameraServer >/dev/null 2>&1
