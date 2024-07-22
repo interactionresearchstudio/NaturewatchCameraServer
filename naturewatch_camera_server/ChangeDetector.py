@@ -58,8 +58,9 @@ class ChangeDetector(Thread):
                 else:
                     return False
             # This next line is useful for determining appropriate sensitivity levels
-            elif mse > 1:
+            elif mse > 1.5:
                     self.logger.info('ChangeDetector: Motion detected (mse={})'.format(mse))
+                    return False
             else:
                 return False
 
