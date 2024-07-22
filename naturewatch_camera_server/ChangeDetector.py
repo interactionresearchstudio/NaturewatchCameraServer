@@ -15,34 +15,18 @@ class ChangeDetector(Thread):
         self.config = config
         self.daemon = True
         self.cancelled = False
-
         self.camera_controller = camera_controller
-
         self.logger = logger
-
         self.file_saver = FileSaver(self.config, logger=self.logger)
-
         self.sensitivity = self.config["sensitivity"]
-
         self.device_time = None
         self.device_time_start = None
-
         self.mode = "inactive"
         self.session_start_time = None
-        self.avg = None
         self.lastPhotoTime = self.get_fake_time()
-        self.numOfPhotos = 0
-
-        self.activeColour = (255, 255, 0)
-        self.inactiveColour = (100, 100, 100)
-        self.isMinActive = False
-        self.currentImage = None
-
         self.previmg = None
-
         self.timelapse_active = False
         self.timelapse        = self.config["default_timelapse"]
-
         self.logger.info("ChangeDetector: initialised")
 
     def run(self):
