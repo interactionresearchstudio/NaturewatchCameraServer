@@ -80,13 +80,15 @@ def settings_handler():
         if "rotation" in settings:
             current_app.camera_controller.set_camera_rotation(settings["rotation"])
         if "sensitivity" in settings:
-            current_app.change_detector.set_sensitivity(settings["sensitivity"])
-
-        #This section stores the new sensitivity setting in the config.json file
-        new_config = current_app.camera_controller.config
-        new_config["sensitivity"] = settings["sensitivity"]
-        module_path = os.path.abspath(os.path.dirname(__file__))
-        current_app.camera_controller.config = current_app.camera_controller.update_config(new_config, os.path.join(module_path, current_app.camera_controller.config["data_path"], 'config.json'))
+            if settings["sensitivity"] == "less":
+                current_app.change_detector.set_sensitivity(current_app.user_config["less_sensitivity"],
+                                                            current_app.user_config["max_width"])
+            elif settings["sensitivity"] == "default":
+                current_app.change_detector.set_sensitivity(current_app.user_config["min_width"],
+                                                            current_app.user_config["max_width"])
+            elif settings["sensitivity"] == "more":
+                current_app.change_detector.set_sensitivity(current_app.user_config["more_sensitivity"],
+                                                            current_app.user_config["max_width"])
 
         if "resolution" in settings:
             current_app.camera_controller.set_resolution(settings["resolution"])
@@ -119,6 +121,14 @@ def settings_handler():
             current_app.logger.info("Changing timelapse settings to " + str(settings["timelapse"]))
             current_app.change_detector.timelapse_active = settings["timelapse"]["active"]
             current_app.change_detector.timelapse = settings["timelapse"]["interval"]
+
+        #This section stores the timelapse and sensitivty settings in the config.json file
+        new_config = current_app.camera_controller.config
+        new_config["timelapse_active"] = settings["timelapse"]["active"]
+        new_config["timelapse_interval"] = settings["timelapse"]["interval"]
+        new_config["sensitivity"] = settings["sensitivity"]
+        module_path = os.path.abspath(os.path.dirname(__file__))
+        current_app.camera_controller.config = current_app.camera_controller.update_config(new_config, os.path.join(module_path, current_app.camera_controller.config["data_path"], 'config.json'))
         
         new_settings = construct_settings_object(current_app.camera_controller, current_app.change_detector)
         return Response(json.dumps(new_settings), mimetype='application/json')
@@ -158,6 +168,7 @@ def construct_settings_object(camera_controller, change_detector):
             "sharpness_mode": current_app.user_config["sharpness_mode"],
         },
         "CPUTemp": CPUTemp,
+        "capture_mode": current_app.change_detector.mode, 
         "timelapse": {
             "active": current_app.change_detector.timelapse_active,
             "interval": current_app.change_detector.timelapse,

@@ -25,8 +25,8 @@ class ChangeDetector(Thread):
         self.session_start_time = None
         self.lastPhotoTime = self.get_fake_time()
         self.previmg = None
-        self.timelapse_active = False
-        self.timelapse        = self.config["default_timelapse"]
+        self.timelapse_active = self.config["timelapse_active"]
+        self.timelapse        = self.config["timelapse_interval"]
         self.logger.info("ChangeDetector: initialised")
 
     def run(self):

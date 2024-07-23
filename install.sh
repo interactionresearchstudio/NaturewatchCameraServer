@@ -78,7 +78,6 @@ TEMPLATES="${DIR}/helpers"
 sed -e "s|\${path}|${INSTALLATION_PATH}|g" "${TEMPLATES}/python.naturewatch.service" > "/etc/systemd/system/python.naturewatch.service"
 sed -e "s|\${path}|${INSTALLATION_PATH}|g" "${TEMPLATES}/wifisetup.service" > "/etc/systemd/system/wifisetup.service"
 
-
 popd
 popd
 
@@ -90,3 +89,8 @@ systemctl enable python.naturewatch.service
 systemctl enable wifisetup.service
 systemctl start python.naturewatch.service
 systemctl start wifisetup.service
+
+# Add Watchdog script to crontab
+(crontab -l 2>/dev/null; echo "# Start watchdog script at boot time") | crontab -
+(crontab -l 2>/dev/null; echo "@reboot ${TEMPLATES}/watchdog.sh > /dev/null 2>&1") | crontab -
+
