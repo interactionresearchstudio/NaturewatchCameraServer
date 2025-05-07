@@ -4,6 +4,14 @@
 
 # NaturewatchCameraServer
 
+> [!NOTE]
+> Please note that this repository is archived. We have decided to leave the
+> original software for the My Naturewatch Camera intact here. If you would like
+> an easy plug-and-play experience, please use this version as it aligns with the
+> instructions on the main website. If you'd like to play around with the software,
+> develop new features, or use specific combinations of Pis and cameras, head over
+> to the [Community Developer Edition](https://github.com/interactionresearchstudio/NaturewatchCameraServer-CommunityDevelopmentEdition).
+
 This is the main software for the My Naturewatch Camera. It is a Python server 
 script that captures a video stream from a Pi Camera and serves it as a .mjpg 
 through a control website to another device. The website can be used to start 
